@@ -1,0 +1,3 @@
+{
+  "extends": ["@ks/eslint-config-game/typescript", "prettier"]
+}
