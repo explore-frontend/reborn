@@ -35,9 +35,8 @@ export default class Store {
                 }
             }
 
-            return false;
+            return Promise.resolve(undefined);
         });
-        // @ts-ignore
         return Promise.all(promiseList);
     }
 
@@ -75,14 +74,12 @@ export default class Store {
         });
 
         return models.reduce((map, name, index) => {
-            // @ts-ignore
             map[name] = instances[index];
             return map;
-        }, {});
+        }, {} as any);
     }
 
-    // @ts-ignore
-    replaceState(initState) {
+    replaceState(initState: any) {
         // @ts-ignore
         if (this.hasInited) {
             return;

@@ -23,7 +23,6 @@ export function transformQuery(item: FieldNode) {
 
 export function getInitialStateFromQuery(apolloDefine: VueApolloModelQueryOptions) {
     const initialState = {};
-
     const queryDefine = apolloDefine.query;
     if (!queryDefine) {
         throw new Error('Query 里面没有 Query 么');

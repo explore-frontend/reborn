@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import xstream, {Stream} from 'xstream';
+import xstream, {Stream, Subscription} from 'xstream';
 
 import Store from './store';
 import Query from './query';
@@ -9,11 +9,13 @@ import {defineReactive} from './install';
 
 const skipProperty = ['models', 'subscriptions'];
 
-export class BaseModel {
+export abstract class BaseModel {
     protected readonly $vm: Vue;
     private readonly $store: Store;
 
     readonly $client: apolloClient;
+
+    private subs: Subscription[] = [];
 
     $apollo: {
         [key: string]: Query;
@@ -22,12 +24,16 @@ export class BaseModel {
     // 依赖的其他 model
     models: string[] = [];
 
-    subscriptions?: () => StreamsObj | StreamsObj;
+    abstract subscriptions?: () => StreamsObj | StreamsObj;
 
     private $streamsFromApollo: StreamsObj = {};
     private $streamsFromSubscriptions: StreamsObj = {};
     $streamsFromState: StreamsObj = {};
     $models: {[key: string]: any} = {};
+
+    // 因为根组件在SSR时候会优先触发created，路由上的不会，所以需要判断一下避免重复初始化
+    // 后续考虑改一下设计
+    private inited = false;
 
     [key: string]: any;
 
@@ -46,12 +52,16 @@ export class BaseModel {
     }
 
     init() {
+        if (this.inited) {
+            return;
+        }
         this.initState();
         this.initDependencyModel();
         this.initApolloQuery();
         this.initSubscriptions();
 
         this.vm = this.$vm;
+        this.inited = true;
     }
 
     private initState() {
@@ -132,37 +142,32 @@ export class BaseModel {
             if (!(rKey in this)) {
                 defineReactive(this, rKey, null);
             }
-            this.$streamsFromSubscriptions[key].addListener({
+            const sub = this.$streamsFromSubscriptions[key].subscribe({
                 next: val => {
                     this[rKey] = val;
                 },
             });
+            this.subs.push(sub);
         });
     }
 
     startSubscriptions() {
         // TODO: 后面再看怎么样订阅是合理的，目前为了保证顺序……先上面搞副作用去了
         Object.keys(this.$streamsFromApollo).forEach(key => {
-            const rKey = key.lastIndexOf('$') === key.length - 1 ? key.slice(0, -1) : key;
-            this.$streamsFromApollo[key].addListener({});
+            const sub = this.$streamsFromApollo[key].subscribe({});
+            this.subs.push(sub);
         });
     }
 
     prefetch() {
-        return Promise.all(Object.values(this.$apollo).map(query => query.prefetch()));
+        const prefetchList = Object.keys(this.$apollo)
+            .map(key => this.$apollo[key].prefetch());
+        return Promise.all(prefetchList);
     }
 
     destroy() {
         Object.keys(this.$streams).forEach(key => {
-            const stream: Stream<any> = this.$streams[key];
-            // TODO 关于注销相关的事情，这里看看后续是不是需要extension一下Stream……
-            // 因为没有直接removeListener/unsubscribe方法，所以只能先这么弄一下
-            // @ts-ignore
-            stream._ils.forEach(listener => {
-                // TODO 同上
-                // @ts-ignore
-                stream.removeListener(listener);
-            });
+            this.subs.forEach(sub => sub.unsubscribe());
         });
 
         Object.keys(this.$apollo).forEach(key => {
@@ -213,6 +218,7 @@ function makeObservable(model: BaseModel, key: string) {
 
 export function apolloQuery(queryDefine: VueApolloModelQueryOptions) {
     return function createObservable(constructor: BaseModel, key: string) {
+        // TODO这货不应该这么处理，queryDefine后续也许还有用，应该单独找一个地方存起来……
         constructor[key] = {
             _type: 'apolloQuery',
             detail: queryDefine,

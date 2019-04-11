@@ -35,7 +35,6 @@ export default function install(VueLibrary: VueConstructor) {
                     } else {
                         instance = new VueLibrary({
                             ...modelConstructorMap[name],
-                            // @ts-ignore
                             store: this.$root.$options.store,
                         });
                     }

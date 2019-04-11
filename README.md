@@ -1,4 +1,4 @@
-# @ks/vue-apollo-model
+# vue-apollo-model
 
 ## Install
 
