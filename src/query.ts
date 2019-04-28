@@ -23,6 +23,7 @@ export default class Query {
     private model: BaseModel;
     private vm: Vue;
     private name: string;
+    private hasPrefetched = false;
 
     loading: boolean = false;
 
@@ -39,7 +40,7 @@ export default class Query {
     }
 
     // TODO后面应该要把fetchMore，refetch什么的都干掉才行……否则这块就是乱的= =
-    // 我这里干的事情其实跟ObservableQuery干的事情有非常大的重合度……
+    // 这里干的事情其实跟ObservableQuery干的事情有非常大的重合度……
     currentResult() {
         if (this.observer) {
             return this.observer.currentResult();
@@ -54,11 +55,12 @@ export default class Query {
         const canPrefetch = typeof this.option.prefetch === 'function'
             ? this.option.prefetch.call(this.model, this.vm.$route) : this.option.prefetch;
 
-        if (!canPrefetch) {
+        if (!canPrefetch || this.hasPrefetched) {
             return;
         }
 
-        const {data} = await this.client.query(this.queryOptions);
+        const { data } = await this.client.query(this.queryOptions);
+        this.hasPrefetched = true;
         this.model[this.name] = data;
         return {
             [this.name]: data,

@@ -13,11 +13,19 @@ import {ApolloClient, QueryOptions} from 'apollo-client';
 import Store from './store';
 import {BaseModel} from './model';
 
-export type apolloClient = ApolloClient<{}>;
+export type apolloClient = ApolloClient<any>;
+
+export interface storeModelInstance<T> {
+    constructor: T;
+    instance: T | null;
+    count: number;
+}
+
 
 declare module 'vue/types/options' {
     interface ComponentOptions<V extends Vue> {
-        models?: string[];
+        // TODO这个类型不对，后面改一下
+        models?: any;
         store?: Store;
     }
 }
@@ -29,9 +37,6 @@ declare module 'vue/types/vue' {
         $client: apolloClient;
         apollo: any;
         $store?: Store;
-        $models: {
-            [key: string]: any;
-        };
     }
 
     interface VueConstructor {
@@ -48,10 +53,7 @@ declare module 'vue/types/vue' {
     }
 }
 
-export interface BaseModelConstructor {
-    namespace: string;
-    new (client: apolloClient, vm: Vue, store: Store): BaseModel;
-}
+export type BaseModelConstructor = typeof BaseModel
 
 export interface ModelMap {
     [key: string]: {
@@ -59,10 +61,6 @@ export interface ModelMap {
         instance: BaseModel | Vue;
         count: number;
     };
-}
-
-export interface ModelConstructorMap {
-    [key: string]: BaseModelConstructor;
 }
 
 // TODO貌似这个类型定义是不对的，后面看看any是否可被替换

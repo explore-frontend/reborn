@@ -1,5 +1,4 @@
 import Vue, {VueConstructor} from 'vue';
-import {modelConstructorMap} from './consts';
 import {BaseModel} from './model';
 
 let _Vue: VueConstructor;
@@ -15,51 +14,57 @@ export function createOldVueModel(options: object) {
 export default function install(VueLibrary: VueConstructor) {
     _Vue = VueLibrary;
     VueLibrary.mixin({
-        beforeCreate() {
+        async beforeCreate() {
             const store = this.$root.$options.store;
             const models = this.$options.models;
             if (!models || !store) {
                 return;
             }
 
-            this.$client = store.graphqlClient;
-            models.forEach(async name => {
-                this.$models = this.$models || {};
+            // TODO后面看看要不要给塞到Vue的prototype上去
+            Object.defineProperty(this, '$client', {
+                get: () => store.graphqlClient,
+                configurable: true
+            });
 
-                if (!store.modelMap[name]) {
-                    // TODO后面这块重新弄一下……
-                    let instance;
-                    if (typeof modelConstructorMap[name] === 'function') {
-                        instance = new modelConstructorMap[name](store.graphqlClient, this.$root, store);
-                        instance.init();
-                    } else {
-                        instance = new VueLibrary({
-                            ...modelConstructorMap[name],
-                            store: this.$root.$options.store,
-                        });
-                    }
-
-                    // TODO就是这里往上
-                    store.modelMap[name] = {
-                        constructor: modelConstructorMap[name],
-                        instance,
-                        count: 1,
-                    };
-                } else {
-                    store.modelMap[name].count++;
+            Object.keys(models).forEach((key) => {
+                const modelCtor = models[key];
+                const storeModelInstance = store.registerModel(modelCtor);
+                if (!storeModelInstance.count) {
+                    const instance = new storeModelInstance.constructor(store.graphqlClient, this.$root, store);
+                    instance.init();
+                    storeModelInstance.instance = instance
+                }
+                storeModelInstance.count++;
+                if (key in this) {
+                    throw new Error(`There has a duplex name ${key} on ${this.$vnode.tag}`)
                 }
 
-                this.$models[name] = store.modelMap[name].instance;
-                await this.$nextTick();
-                // TODO后面这块重新弄一下……
-                if (typeof modelConstructorMap[name] !== 'function') {
-                    return;
-                }
-                // TODO就是这里往上
+                Object.defineProperty(this, key, {
+                    get: () => storeModelInstance.instance,
+                    configurable: true,
+                });
+            });
+            await this.$nextTick();
+
+            Object.keys(models).forEach((key) => {
                 if (!this.$isServer) {
-                    (this.$models[name] as BaseModel).startSubscriptions();
+                    // @ts-ignore
+                    this[key].startSubscriptions();
                 }
             });
+        },
+        async serverPrefetch() {
+            if (!this.$options.models) {
+                return;
+            }
+            const promiseList = Object.keys(this.$options.models).map(key => {
+                const store = this.$root.$options.store;
+                // @ts-ignore
+                const model = store.getModelInstance(this.$options.models[key]);
+                return model.instance.prefetch();
+            });
+            await Promise.all(promiseList);
         },
         beforeDestroy(this: Vue) {
             const store = this.$root.$options.store;
@@ -67,18 +72,21 @@ export default function install(VueLibrary: VueConstructor) {
             if (!models || !store) {
                 return;
             }
-            models.forEach(async name => {
-                store.modelMap[name].count--;
-                if (store.modelMap[name].count === 0) {
-                    // TODO后面这块整体重构
-                    if (store.modelMap[name].instance.$data) {
-                        store.modelMap[name].instance.$destroy();
-                    } else {
-                        (store.modelMap[name].instance as BaseModel).destroy();
-                    }
-                    // TODO从这里往上
-                    delete store.modelMap[name];
+            Object.defineProperty(this, '$client', {
+                get: () => null,
+            });
+            Object.keys(models).forEach((key) => {
+                const modelCtor = models[key];
+                const storeModelInstance = store.getModelInstance(modelCtor);
+                storeModelInstance.count--;
+                if (storeModelInstance.count === 0) {
+                    storeModelInstance.instance.destroy();
+                    storeModelInstance.instance = null;
                 }
+                Object.defineProperty(this, key, {
+                    get: () => null,
+                    configurable: true,
+                });
             });
         },
     });

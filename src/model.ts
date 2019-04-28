@@ -1,15 +1,15 @@
 import Vue from 'vue';
-import xstream, {Stream, Subscription} from 'xstream';
+import xstream, { Subscription } from 'xstream';
 
 import Store from './store';
 import Query from './query';
-import {StreamsObj, VueApolloModelQueryOptions, apolloClient} from './types';
-import {getInitialStateFromQuery} from './utils/graphql';
-import {defineReactive} from './install';
+import { StreamsObj, VueApolloModelQueryOptions, apolloClient } from './types';
+import { getInitialStateFromQuery } from './utils/graphql';
+import { defineReactive } from './install';
 
 const skipProperty = ['models', 'subscriptions'];
 
-export abstract class BaseModel {
+export class BaseModel {
     protected readonly $vm: Vue;
     private readonly $store: Store;
 
@@ -21,15 +21,11 @@ export abstract class BaseModel {
         [key: string]: Query;
     } = {};
 
-    // 依赖的其他 model
-    models: string[] = [];
-
-    abstract subscriptions?: () => StreamsObj | StreamsObj;
+    subscriptions?: () => StreamsObj | StreamsObj;
 
     private $streamsFromApollo: StreamsObj = {};
     private $streamsFromSubscriptions: StreamsObj = {};
     $streamsFromState: StreamsObj = {};
-    $models: {[key: string]: any} = {};
 
     // 因为根组件在SSR时候会优先触发created，路由上的不会，所以需要判断一下避免重复初始化
     // 后续考虑改一下设计
@@ -73,11 +69,11 @@ export abstract class BaseModel {
             return;
         }
 
-        this.models.forEach(modelName => {
-            Object.defineProperty(this.$models, modelName, {
-                get: () => {
-                    return this.$store.modelMap[modelName].instance;
-                },
+        Object.keys(this.models).forEach((key) => {
+            Object.defineProperty(this, key, {
+                // TODO这里可能获取不到
+                get: () => this.$store.getModelInstance(this.models[key]).instance,
+                configurable: true,
             });
         });
     }
@@ -166,13 +162,17 @@ export abstract class BaseModel {
     }
 
     destroy() {
-        Object.keys(this.$streams).forEach(key => {
-            this.subs.forEach(sub => sub.unsubscribe());
-        });
+        this.subs.forEach(sub => sub.unsubscribe());
 
         Object.keys(this.$apollo).forEach(key => {
             this.$apollo[key].destroy();
         });
+        // Object.keys(this.models).forEach((key) => {
+        //     Object.defineProperty(this, key, {
+        //         get: () => null,
+        //         configurable: true,
+        //     });
+        // });
     }
 }
 

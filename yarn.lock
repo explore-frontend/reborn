@@ -1500,10 +1500,10 @@ vue-router@^3.0.2:
   resolved "https://npm.corp.kuaishou.com/vue-router/-/vue-router-3.0.2.tgz#dedc67afe6c4e2bc25682c8b1c2a8c0d7c7e56be"
   integrity sha1-3txnr+bE4rwlaCyLHCqMDXx+Vr4=
 
-vue@^2.5.21:
-  version "2.5.21"
-  resolved "https://npm.corp.kuaishou.com/vue/-/vue-2.5.21.tgz#3d33dcd03bb813912ce894a8303ab553699c4a85"
-  integrity sha1-PTPc0Du4E5Es6JSoMDq1U2mcSoU=
+vue@^2.6.0:
+  version "2.6.10"
+  resolved "https://npm.corp.kuaishou.com/vue/-/vue-2.6.10.tgz#a72b1a42a4d82a721ea438d1b6bf55e66195c637"
+  integrity sha1-pysaQqTYKnIepDjRtr9V5mGVxjc=
 
 which@^1.2.9:
   version "1.3.1"
