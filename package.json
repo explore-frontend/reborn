@@ -8,7 +8,9 @@
     "license": "UNLICENSED",
     "scripts": {
         "build": "rollup -c",
-        "watch": "rollup -c -w"
+        "watch": "rollup -c -w",
+        "docs:dev": "vuepress dev docs",
+        "docs:build": "vuepress build docs"
     },
     "files": [
         "dist",
@@ -33,6 +35,7 @@
         "typescript": "^3.2.2",
         "vue": "^2.6.0",
         "vue-router": "^3.0.2",
+        "vuepress": "1.0.0-alpha.47",
         "xstream": "^11.7.0"
     },
     "peerDependencies": {

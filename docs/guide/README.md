@@ -1,7 +1,9 @@
-# vue-apollo-model
-一个基于Apollo的Vue.js状态管理方案
+# 简介
 
-> 注意，项目目前还处于探索期，标记为`beta`的功能请谨慎使用
+::: danger
+注意，项目目前还处于探索期，标记为`beta`的功能请谨慎使用
+:::
+
 
 ## 为什么不采用vue-apollo
 vue-apollo是Akryum所编写的出色框架，能够将GraphQL无缝集成进Vue.js。

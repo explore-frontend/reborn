@@ -1,5 +1,4 @@
 import Vue, {VueConstructor} from 'vue';
-import {BaseModel} from './model';
 
 let _Vue: VueConstructor;
 
