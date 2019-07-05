@@ -56,7 +56,6 @@ export class BaseModel {
         this.initApolloQuery();
         this.initSubscriptions();
 
-        this.vm = this.$vm;
         this.inited = true;
     }
 
