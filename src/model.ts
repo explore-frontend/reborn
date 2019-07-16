@@ -3,35 +3,47 @@ import xstream, { Subscription } from 'xstream';
 
 import Store from './store';
 import Query from './query';
-import { StreamsObj, VueApolloModelQueryOptions, apolloClient } from './types';
+import { StreamsObj, VueApolloModelQueryOptions, apolloClient, VueApolloModelMutationOptions } from './types';
 import { getInitialStateFromQuery } from './utils/graphql';
 import { defineReactive } from './install';
+import 'reflect-metadata';
 
-const skipProperty = ['models', 'subscriptions'];
+const skipProperty = [
+    'userProperties',
+    'models',
+    'addProperty',
+    'collectProperties',
+    'subscriptions',
+    'subs',
+    'autoBind',
+    'init',
+    'initState',
+    'initDependencyModel',
+    'initApolloDesc',
+    'initSubscriptions',
+    'startSubscriptions',
+    'prefetch',
+    'destroy',
+];
+
+function isSkipProperty(key: string) {
+    return key.startsWith('$')
+        || key.startsWith('_')
+        || key.endsWith('$')
+        || skipProperty.includes(key);
+}
 
 export class BaseModel {
     protected readonly $vm: Vue;
     private readonly $store: Store;
-
     readonly $client: apolloClient;
-
     private subs: Subscription[] = [];
+    private userProperties: Array<keyof this> = [];
 
-    $apollo: {
-        [key: string]: Query;
-    } = {};
-
-    subscriptions?: () => StreamsObj | StreamsObj;
-
+    $apollo: {[key: string]: Query;} = {};
     private $streamsFromApollo: StreamsObj = {};
     private $streamsFromSubscriptions: StreamsObj = {};
     $streamsFromState: StreamsObj = {};
-
-    // 因为根组件在SSR时候会优先触发created，路由上的不会，所以需要判断一下避免重复初始化
-    // 后续考虑改一下设计
-    private inited = false;
-
-    [key: string]: any;
 
     get $streams() {
         return {
@@ -47,86 +59,113 @@ export class BaseModel {
         this.$client = client;
     }
 
-    init() {
-        if (this.inited) {
-            return;
+    private autoBind() {
+        for (const key of this.userProperties) {
+            if (typeof this[key] === 'function') {
+                debugger;
+                // @ts-ignore
+                this[key] = this[key].bind(this);
+            }
         }
+    }
+
+    init() {
+        this.collectProperties();
         this.initState();
         this.initDependencyModel();
-        this.initApolloQuery();
+        this.initApolloDesc();
         this.initSubscriptions();
+        this.autoBind();
+    }
 
-        this.inited = true;
+    private addProperty(keys: Array<keyof this>) {
+        for (const key of keys) {
+            if (!isSkipProperty(key as string)) {
+                this.userProperties.push(key);
+            }
+        }
+    }
+
+    private collectProperties() {
+        // 处理自身属性
+        this.addProperty(Object.keys(this) as Array<keyof this>)
+        // 处理原型链
+        let proto = Object.getPrototypeOf(this);
+        while (proto && proto !== Object.prototype) {
+            this.addProperty(Object.keys(proto) as Array<keyof this>)
+            proto = Object.getPrototypeOf(proto);
+        }
     }
 
     private initState() {
-        makeModelReactive(this);
+        for (const key of this.userProperties) {
+            if (typeof this[key] !== 'function') {
+                makeObservable(this, key);
+            }
+        }
     }
 
     private initDependencyModel() {
+        // @ts-ignore
         if (!this.models) {
             return;
         }
-
+        // @ts-ignore
         Object.keys(this.models).forEach((key) => {
             Object.defineProperty(this, key, {
                 // TODO这里可能获取不到
+                // @ts-ignore
                 get: () => this.$store.getModelInstance(this.models[key]).instance,
                 configurable: true,
             });
         });
     }
 
-    private initApolloQuery() {
-        const apolloQuery: string[] = [];
-        let proto = Object.getPrototypeOf(this);
-        while (proto !== Object.prototype) {
-            const keys = Object.keys(proto).filter(
-                key => proto[key] && proto[key]._type === 'apolloQuery'
-            )
-            apolloQuery.push(...keys);
-            proto = Object.getPrototypeOf(proto);
-        }
-        if (!apolloQuery.length) {
+    private initApolloDesc() {
+        const decoratorKeys = Reflect.getMetadata('decoratorKeys', this, 'decoratorKeys');
+        if (!decoratorKeys.length) {
             return;
         }
-
-        apolloQuery.forEach(queryKey => {
+        for (const key of decoratorKeys) {
+            const info = Reflect.getMetadata('vueApolloModel', this, key);
             const query = new Query(
-                queryKey,
-                this[queryKey].detail,
+                key,
+                info.detail,
                 this.$client,
                 // TODO 这块貌似产生了循环依赖……后面再看怎么弄吧
                 this,
                 this.$vm,
             );
-            this.$apollo[queryKey] = query;
+            this.$apollo[key] = query;
 
-            const initialQueryState = getInitialStateFromQuery(this[queryKey].detail);
-            defineReactive(this, queryKey, initialQueryState);
+            const initialQueryState = getInitialStateFromQuery(info.detail);
+            defineReactive(this, key, initialQueryState);
 
-            if (typeof window === 'undefined') {
-                return;
+            if (this.$vm.$isServer) {
+                continue;
             }
 
             const initialData = query.currentResult();
             if (!initialData.loading) {
-                this[queryKey] = initialData.data;
+                // @ts-ignore
+                this[key] = initialData.data;
             }
 
             // TODO后面再改
-            this.$streamsFromApollo[queryKey + '$'] = query.observable.debug(({data}: {data: any}) => {
-                this[queryKey] = data;
+            this.$streamsFromApollo[key + '$'] = query.observable.debug(({data}: {data: any}) => {
+                // @ts-ignore
+                this[key] = data;
             });
-        });
+        }
     }
 
-    // 好像还没有开始用？？？
     private initSubscriptions() {
+        // @ts-ignore
         if (!this.subscriptions) {
             return;
         }
         // TODO 这里需要判断一下uniq
+        // @ts-ignore
         const $streams = typeof this.subscriptions === 'function' ? this.subscriptions() : this.subscriptions;
 
         Object.assign(this.$streamsFromSubscriptions, $streams);
@@ -139,6 +178,7 @@ export class BaseModel {
             }
             const sub = this.$streamsFromSubscriptions[key].subscribe({
                 next: val => {
+                    // @ts-ignore
                     this[rKey] = val;
                 },
             });
@@ -166,33 +206,10 @@ export class BaseModel {
         Object.keys(this.$apollo).forEach(key => {
             this.$apollo[key].destroy();
         });
-        // Object.keys(this.models).forEach((key) => {
-        //     Object.defineProperty(this, key, {
-        //         get: () => null,
-        //         configurable: true,
-        //     });
-        // });
     }
 }
 
-function makeModelReactive(model: BaseModel) {
-    Object.keys(model).forEach(key => {
-        // 以 $ 或者 _ 开头的为私有属性，不进行处理
-        if (key.startsWith('$') || key.startsWith('_') || key.endsWith('$') || skipProperty.includes(key)) {
-            return;
-        }
-        const descriptor = Object.getOwnPropertyDescriptor(model, key) || {};
-
-        // 方法也不进行处理
-        if (typeof descriptor.value === 'function') {
-            return;
-        }
-
-        makeObservable(model, key);
-    });
-}
-
-function makeObservable(model: BaseModel, key: string) {
+function makeObservable<T extends BaseModel>(model: T, key: keyof T) {
     let observerListener: any;
     const initialValue = model[key];
 
@@ -206,7 +223,7 @@ function makeObservable(model: BaseModel, key: string) {
         },
     });
 
-    defineReactive(model, key, initialValue, () => {
+    defineReactive(model, key as string, initialValue, () => {
         Promise.resolve().then(() => {
             if (observerListener) {
                 observerListener.next(model[key]);
@@ -216,11 +233,53 @@ function makeObservable(model: BaseModel, key: string) {
 }
 
 export function apolloQuery(queryDefine: VueApolloModelQueryOptions) {
-    return function createObservable(constructor: BaseModel, key: string) {
-        // TODO这货不应该这么处理，queryDefine后续也许还有用，应该单独找一个地方存起来……
-        constructor[key] = {
+    // TODO推导类型写不出来了= =
+    return function createApolloQuery(constructor: any, key: string) {
+        const descriptor = {
             _type: 'apolloQuery',
             detail: queryDefine,
         };
+        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
+        decoratorKeys.push(key);
+        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
+        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
     };
+}
+
+export function apolloMutation(mutationDefine: VueApolloModelMutationOptions) {
+    return function createApolloMutation(constructor: any, key: string) {
+        const descriptor = {
+            _type: 'apolloMutation',
+            detail: mutationDefine,
+        };
+        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
+        decoratorKeys.push(key);
+        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
+        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
+    }
+}
+
+export function restQuery(restQueryDefine: any) {
+    return function createRestQuery(constructor: any, key: string) {
+        const descriptor = {
+            _type: 'restQuery',
+            detail: restQueryDefine,
+        };
+        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
+        decoratorKeys.push(key);
+        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
+        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
+    }
+}
+export function restMutation(restMutationDefine: any) {
+    return function createRestQuery(constructor: any, key: string) {
+        const descriptor = {
+            _type: 'restQuery',
+            detail: restMutationDefine,
+        };
+        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
+        decoratorKeys.push(key);
+        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
+        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
+    }
 }

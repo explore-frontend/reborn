@@ -12,6 +12,7 @@ import {ApolloClient, QueryOptions} from 'apollo-client';
 
 import Store from './store';
 import {BaseModel} from './model';
+import { DocumentNode } from 'graphql';
 
 export type apolloClient = ApolloClient<any>;
 
@@ -82,4 +83,10 @@ export interface VueApolloModelQueryOptions extends QueryOptions {
     initState?: {
         [key: string]: any;
     };
+}
+
+export interface VueApolloModelMutationOptions {
+    mutation: DocumentNode;
+    // TODO类型后面再想
+    update: any;
 }

@@ -36,7 +36,7 @@ export default entires.map(entryConfig => ({
         }),
     ],
     input: entryConfig.input,
-    external: [...Object.keys(PKG_JSON.dependencies || {}), ...Object.keys(PKG_JSON.peerDependencies || {})],
+    external: [...Object.keys(PKG_JSON.peerDependencies || {})],
     output: [
         {
             file: join(OUTPUT_DIR, entryConfig.format.name),

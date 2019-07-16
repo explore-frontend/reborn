@@ -1,7 +1,40 @@
 import {FieldNode} from 'graphql';
-import merge from 'lodash/merge';
-
 import {VueApolloModelQueryOptions} from '@/types';
+
+function is(target: any, type: string) {
+    return Object.prototype.toString.call(target) === `[object ${type}]`;
+}
+
+function merge(source: any, ...args: any[]) {
+    for (const target of args) {
+        if (!is(target, 'Object') && !is(target, 'Array')) {
+            return source;
+        }
+        const keys = is(target, 'Object')
+            ? Object.keys({
+                ...source,
+                ...target,
+            })
+            : new Array(target.length).fill(1).map((val, index) => index);
+        for (const key of keys) {
+            if (target[key] === 'undefined') {
+                continue;
+            }
+            if (is(target[key], 'Object')) {
+                source[key] = is(source[key], 'Object') ? source[key] : {};
+                merge(source[key], target[key]);
+            } else if (is(target[key], 'Array')) {
+                source[key] = is(source[key], 'Array') ? source[key] : [];
+                merge(source[key], target[key]);
+            } else if (!is(target[key], 'Undefined')){
+                source[key] = target[key];
+            } else {
+                source[key] = source[key] || target[key];
+            }
+        }
+    }
+    return source;
+}
 
 export function transformQuery(item: FieldNode) {
     const result: {[key: string]: any} = {};
@@ -25,7 +58,7 @@ export function getInitialStateFromQuery(apolloDefine: VueApolloModelQueryOption
     const initialState = {};
     const queryDefine = apolloDefine.query;
     if (!queryDefine) {
-        throw new Error('Query 里面没有 Query 么');
+        throw new Error('No query found.');
     }
 
     const {definitions} = queryDefine;
@@ -39,6 +72,5 @@ export function getInitialStateFromQuery(apolloDefine: VueApolloModelQueryOption
             });
         }
     });
-
     return merge({}, initialState, apolloDefine.initState || {});
 }

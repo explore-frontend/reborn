@@ -61,6 +61,7 @@ export default class Query {
 
         const { data } = await this.client.query(this.queryOptions);
         this.hasPrefetched = true;
+        // @ts-ignore
         this.model[this.name] = data;
         return {
             [this.name]: data,
