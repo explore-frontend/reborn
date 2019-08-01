@@ -6,12 +6,12 @@
  */
 
 import Vue from 'vue';
-import {Route} from 'vue-router';
-import {Stream} from 'xstream';
-import {ApolloClient, QueryOptions} from 'apollo-client';
+import { Route } from 'vue-router';
+import { Stream } from 'xstream';
+import { ApolloClient, QueryOptions } from 'apollo-client';
 
 import Store from './store';
-import {BaseModel} from './model';
+import { BaseModel } from './model';
 import { DocumentNode } from 'graphql';
 
 export type apolloClient = ApolloClient<any>;
@@ -74,7 +74,7 @@ interface JSONObj {
 }
 
 export type VariablesFn = (route: Route) => JSONObj
-export type MutationVariablesFn<T> = (params: any, route: Route) => JSONObj
+export type MutationVariablesFn = (params: any, route: Route) => JSONObj
 export type BooleanFn = (route: Route) => boolean;
 export type NumberFn = (route: Route) => number;
 
@@ -94,4 +94,17 @@ export interface VueApolloModelMutationOptions {
     initState?: {
         [key: string]: any;
     };
+}
+
+export interface QueryResult<T> {
+    refetch(): Promise<void>;
+    data: T;
+    loading: boolean;
+    fetchMore(): Promise<void>;
+}
+
+export interface MutationResult<T> {
+    loading: boolean;
+    data: T;
+    mutate(params: any): void;
 }

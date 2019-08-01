@@ -14,9 +14,9 @@ import xstream, {Stream} from 'xstream';
 import {defineReactive} from '@/install';
 import { getInitialStateFromQuery } from '@/utils/graphql';
 
-export default class Query {
-    observer!: ObservableQuery;
-    observable: Stream<any> = xstream.create();
+export default class Query<T> {
+    observer!: ObservableQuery<T>;
+    observable: Stream<{loading: boolean, data: T}> = xstream.create();
 
     private option: VueApolloModelQueryOptions;
     private client: apolloClient;
@@ -38,8 +38,14 @@ export default class Query {
         const initialQueryState = getInitialStateFromQuery(option);
         defineReactive(this.model, name, initialQueryState);
 
-        if (typeof window !== 'undefined') {
+        if (!this.vm.$isServer) {
             this.init();
+        }
+
+        const initialData = this.currentResult();
+        if (!initialData.loading) {
+            // @ts-ignore
+            this.model[name] = initialData.data;
         }
     }
 
@@ -96,8 +102,9 @@ export default class Query {
         // 后面看一下apollo-client内部的实现
         this.loading = true;
         this.observer.subscribe({
-            next: ({data, loading}: {data: any, loading: boolean}) => {
-                this.loading = loading;
+            next: ({data, loading}) => {
+                // @ts-ignore
+                this.model[this.name] = data;
                 this.observable.shamefullySendNext({data, loading});
             },
             error: err => {
@@ -162,6 +169,9 @@ export default class Query {
     }
 
     fetchMore(fetchMoreOptions: any) {
+        if (!this.observer) {
+            return;
+        }
         // TODO这里需要手动改变一下loading
         // 后面看一下apollo-client内部的实现
         this.loading = true;
@@ -171,6 +181,9 @@ export default class Query {
     // refetch 只会手动调用
     // refetch 调用的时候不需要管！
     refetch() {
+        if (!this.observer) {
+            return;
+        }
         // TODO这里需要手动改变一下loading
         // 后面看一下apollo-client内部的实现
         this.loading = true;

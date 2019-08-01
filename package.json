@@ -3,7 +3,7 @@
     "version": "0.3.0",
     "main": "dist/index.js",
     "module": "dist/index.es.js",
-    "typings": "dist/index.d.ts",
+    "typings": "dist/module.d.ts",
     "sideEffects": true,
     "license": "UNLICENSED",
     "scripts": {

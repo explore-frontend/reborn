@@ -10,7 +10,6 @@ import {
     apolloClient,
     VueApolloModelMutationOptions,
 } from './types';
-import { getInitialStateFromQuery } from './utils/graphql';
 import { defineReactive } from './install';
 import 'reflect-metadata';
 
@@ -56,7 +55,7 @@ export class BaseModel {
     private subs: Subscription[] = [];
     private userProperties: Array<keyof this> = [];
 
-    $apollo: {[key: string]: Query;} = {};
+    $apollo: {[key: string]: Query<any>;} = {};
     private $streamsFromApollo: StreamsObj = {};
     private $streamsFromSubscriptions: StreamsObj = {};
     $streamsFromState: StreamsObj = {};
@@ -147,7 +146,9 @@ export class BaseModel {
         const mutate = mutation.mutate.bind(mutation);
         Object.defineProperty(this, key, {
             value: {
-                data: null,
+                get data() {
+                    return mutation.data;
+                },
                 get loading() {
                     return mutation.loading;
                 },
@@ -159,8 +160,6 @@ export class BaseModel {
             configurable: false,
             enumerable: true,
         });
-        const initialQueryState = getInitialStateFromQuery(info.detail);
-        defineReactive(this[key] as any, 'data', initialQueryState);
     }
 
     private initApolloQuery(key: string, info: VueApolloModelMetadata) {
@@ -168,27 +167,12 @@ export class BaseModel {
             key,
             info.detail,
             this.$client,
-            // TODO 这块貌似产生了循环依赖……后面再看怎么弄吧
             this,
             this.$vm,
         );
         this.$apollo[key] = query;
-
-        if (this.$vm.$isServer) {
-            return;
-        }
-
-        const initialData = query.currentResult();
-        if (!initialData.loading) {
-            // @ts-ignore
-            this[key] = initialData.data;
-        }
-
         // TODO后面再改
-        this.$streamsFromApollo[key + '$'] = query.observable.debug(({data}: {data: any}) => {
-            // @ts-ignore
-            this[key] = data;
-        });
+        this.$streamsFromApollo[key + '$'] = query.observable;
     }
 
     private initApolloDesc() {

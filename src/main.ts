@@ -16,9 +16,6 @@ import {
 
 export default {
     install,
-};
-
-export {
     Store,
     apolloQuery,
     BaseModel,
