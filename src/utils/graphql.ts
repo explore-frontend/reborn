@@ -1,5 +1,5 @@
 import {FieldNode} from 'graphql';
-import {VueApolloModelQueryOptions} from '@/types';
+import {VueApolloModelQueryOptions, VueApolloModelMutationOptions} from '@/types';
 
 function is(target: any, type: string) {
     return Object.prototype.toString.call(target) === `[object ${type}]`;
@@ -54,9 +54,12 @@ export function transformQuery(item: FieldNode) {
     return result;
 }
 
-export function getInitialStateFromQuery(apolloDefine: VueApolloModelQueryOptions) {
+export function getInitialStateFromQuery(apolloDefine: VueApolloModelQueryOptions | VueApolloModelMutationOptions) {
     const initialState = {};
-    const queryDefine = apolloDefine.query;
+    const queryDefine = 'query' in apolloDefine
+        ? apolloDefine.query
+        : apolloDefine.mutation;
+
     if (!queryDefine) {
         throw new Error('No query found.');
     }

@@ -6,10 +6,23 @@
  */
 import install from './install';
 import Store from './store';
-import { BaseModel, apolloQuery } from './model';
+import {
+    BaseModel,
+    apolloQuery,
+    apolloMutation,
+    restQuery,
+    restMutation,
+} from './model';
 
 export default {
     install,
 };
 
-export { Store, apolloQuery, BaseModel };
+export {
+    Store,
+    apolloQuery,
+    BaseModel,
+    apolloMutation,
+    restQuery,
+    restMutation,
+};

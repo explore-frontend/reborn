@@ -74,12 +74,15 @@ interface JSONObj {
 }
 
 export type VariablesFn = (route: Route) => JSONObj
+export type MutationVariablesFn<T> = (params: any, route: Route) => JSONObj
 export type BooleanFn = (route: Route) => boolean;
+export type NumberFn = (route: Route) => number;
 
 export interface VueApolloModelQueryOptions extends QueryOptions {
     variables?: VariablesFn | JSONObj;
     prefetch?: BooleanFn | boolean;
     skip?: BooleanFn | boolean;
+    pollInterval?: NumberFn | number;
     initState?: {
         [key: string]: any;
     };
@@ -87,6 +90,8 @@ export interface VueApolloModelQueryOptions extends QueryOptions {
 
 export interface VueApolloModelMutationOptions {
     mutation: DocumentNode;
-    // TODO类型后面再想
-    update: any;
+    variables: MutationVariablesFn | JSONObj,
+    initState?: {
+        [key: string]: any;
+    };
 }
