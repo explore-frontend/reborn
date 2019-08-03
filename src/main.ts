@@ -23,3 +23,5 @@ export default {
     restQuery,
     restMutation,
 };
+
+export * from './types';

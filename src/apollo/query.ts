@@ -27,6 +27,7 @@ export default class Query<T> {
     private hasPrefetched = false;
 
     loading: boolean = false;
+    data!: T;
 
     constructor(name: string, option: VueApolloModelQueryOptions, client: apolloClient, model: BaseModel, vm: Vue) {
         this.name = name;
@@ -36,7 +37,7 @@ export default class Query<T> {
         this.vm = vm;
 
         const initialQueryState = getInitialStateFromQuery(option);
-        defineReactive(this.model, name, initialQueryState);
+        defineReactive(this, 'data', initialQueryState);
 
         if (!this.vm.$isServer) {
             this.init();
@@ -44,8 +45,7 @@ export default class Query<T> {
 
         const initialData = this.currentResult();
         if (!initialData.loading) {
-            // @ts-ignore
-            this.model[name] = initialData.data;
+            this.data = initialData.data as T;
         }
     }
 
@@ -70,10 +70,9 @@ export default class Query<T> {
             return;
         }
 
-        const { data } = await this.client.query(this.queryOptions);
+        const { data } = await this.client.query<T>(this.queryOptions);
         this.hasPrefetched = true;
-        // @ts-ignore
-        this.model[this.name] = data;
+        this.data = data;
         return {
             [this.name]: data,
         };
@@ -103,8 +102,7 @@ export default class Query<T> {
         this.loading = true;
         this.observer.subscribe({
             next: ({data, loading}) => {
-                // @ts-ignore
-                this.model[this.name] = data;
+                this.data = data;
                 this.observable.shamefullySendNext({data, loading});
             },
             error: err => {

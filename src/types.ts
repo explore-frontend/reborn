@@ -100,11 +100,11 @@ export interface QueryResult<T> {
     refetch(): Promise<void>;
     data: T;
     loading: boolean;
-    fetchMore(): Promise<void>;
+    fetchMore(options: VueApolloModelMutationOptions): Promise<void>;
 }
 
-export interface MutationResult<T> {
+export interface MutationResult<T, P> {
     loading: boolean;
-    data: T;
-    mutate(params: any): void;
+    data: P;
+    mutate(args0: T): void;
 }

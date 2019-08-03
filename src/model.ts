@@ -170,6 +170,25 @@ export class BaseModel {
             this,
             this.$vm,
         );
+        Object.defineProperty(this, key, {
+            value: {
+                get data() {
+                    return query.data;
+                },
+                get loading() {
+                    return query.loading;
+                },
+                get refetch() {
+                    return query.refetch;
+                },
+                get fetchMore() {
+                    return query.fetchMore;
+                },
+            },
+            writable: false,
+            configurable: false,
+            enumerable: true,
+        });
         this.$apollo[key] = query;
         // TODO后面再改
         this.$streamsFromApollo[key + '$'] = query.observable;
