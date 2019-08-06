@@ -7,11 +7,11 @@ import Mutation from './apollo/mutation';
 import {
     StreamsObj,
     VueApolloModelQueryOptions,
-    apolloClient,
     VueApolloModelMutationOptions,
 } from './types';
 import { defineReactive } from './install';
 import 'reflect-metadata';
+import ApolloClient from 'apollo-client';
 
 const skipProperty = [
     'userProperties',
@@ -51,7 +51,7 @@ interface VueApolloModelMetadata {
 export class BaseModel {
     protected readonly $vm: Vue;
     private readonly $store: Store;
-    readonly $client: apolloClient;
+    readonly $client: ApolloClient<any>;
     private subs: Subscription[] = [];
     private userProperties: Array<keyof this> = [];
 
@@ -68,7 +68,7 @@ export class BaseModel {
         };
     }
 
-    constructor(client: apolloClient, vm: Vue, store: Store) {
+    constructor(client: ApolloClient<any>, vm: Vue, store: Store) {
         this.$vm = vm;
         this.$store = store;
         this.$client = client;
@@ -170,6 +170,8 @@ export class BaseModel {
             this,
             this.$vm,
         );
+        const refetch = query.refetch.bind(query);
+        const fetchMore = query.fetchMore.bind(query);
         Object.defineProperty(this, key, {
             value: {
                 get data() {
@@ -179,10 +181,10 @@ export class BaseModel {
                     return query.loading;
                 },
                 get refetch() {
-                    return query.refetch;
+                    return refetch;
                 },
                 get fetchMore() {
-                    return query.fetchMore;
+                    return fetchMore;
                 },
             },
             writable: false,

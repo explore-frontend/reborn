@@ -14,8 +14,6 @@ import Store from './store';
 import { BaseModel } from './model';
 import { DocumentNode } from 'graphql';
 
-export type apolloClient = ApolloClient<any>;
-
 export interface storeModelInstance<T> {
     constructor: T;
     instance: T | null;
@@ -35,7 +33,7 @@ declare module 'vue/types/options' {
 declare module 'vue/types/vue' {
     interface Vue {
         $apollo: object;
-        $client: apolloClient;
+        $client: ApolloClient<any>;
         apollo: any;
         $store?: Store;
     }
