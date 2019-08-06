@@ -6,9 +6,9 @@
  */
 
 import Vue from 'vue';
-import {ObservableQuery} from 'apollo-client';
+import ApolloClient, {ObservableQuery} from 'apollo-client';
 
-import {VueApolloModelQueryOptions, apolloClient, VariablesFn} from '../types';
+import {VueApolloModelQueryOptions, VariablesFn} from '../types';
 import {BaseModel} from '../model';
 import xstream, {Stream} from 'xstream';
 import {defineReactive} from '@/install';
@@ -19,7 +19,7 @@ export default class Query<T> {
     observable: Stream<{loading: boolean, data: T}> = xstream.create();
 
     private option: VueApolloModelQueryOptions;
-    private client: apolloClient;
+    private client: ApolloClient<any>;
     private listeners: Array<() => void> = [];
     private model: BaseModel;
     private vm: Vue;
@@ -29,7 +29,7 @@ export default class Query<T> {
     loading: boolean = false;
     data!: T;
 
-    constructor(name: string, option: VueApolloModelQueryOptions, client: apolloClient, model: BaseModel, vm: Vue) {
+    constructor(name: string, option: VueApolloModelQueryOptions, client: ApolloClient<any>, model: BaseModel, vm: Vue) {
         this.name = name;
         this.option = option;
         this.client = client;
@@ -97,12 +97,11 @@ export default class Query<T> {
     // TODO后续桥接应该也给干掉，不过需要吃透一遍apollo-alient的代码
     private initObserver() {
         this.observer = this.client.watchQuery(this.queryOptions);
-        // TODO这里需要手动改变一下loading，watchQuery以后才需要根据后续状态获取一下loading态
-        // 后面看一下apollo-client内部的实现
         this.loading = true;
         this.observer.subscribe({
             next: ({data, loading}) => {
                 this.data = data;
+                this.loading = loading;
                 this.observable.shamefullySendNext({data, loading});
             },
             error: err => {
