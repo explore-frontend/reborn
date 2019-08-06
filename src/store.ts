@@ -1,16 +1,18 @@
 import Vue from 'vue';
 
-import { apolloClient, storeModelInstance } from './types';
+import { storeModelInstance } from './types';
 import { BaseModel } from './model';
+import ApolloClient from 'apollo-client';
 
-
-
+interface StoreConstructor {
+    defaultApolloClient: ApolloClient<any>
+}
 
 export default class Store {
     private modelMap = new Map<BaseModel, storeModelInstance<BaseModel>>();
-    graphqlClient: apolloClient;
+    graphqlClient: ApolloClient<any>;
 
-    constructor(graphqlClient: apolloClient) {
+    constructor(graphqlClient: ApolloClient<any>) {
         this.graphqlClient = graphqlClient;
     }
 
