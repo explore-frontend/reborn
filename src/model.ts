@@ -203,6 +203,10 @@ export class BaseModel {
         }
         for (const key of decoratorKeys) {
             const info: VueApolloModelMetadata = Reflect.getMetadata('vueApolloModel', this, key);
+            // TODO临时修复某个bug
+            if (!info) {
+                continue;
+            }
             switch (info.type) {
                 case 'apolloQuery':
                     this.initApolloQuery(key, info);
