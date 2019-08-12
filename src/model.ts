@@ -29,6 +29,7 @@ const skipProperty = [
     'startSubscriptions',
     'prefetch',
     'destroy',
+    'apolloQueries',
 ];
 
 function isSkipProperty(key: string) {
@@ -54,8 +55,8 @@ export class BaseModel {
     readonly $client: ApolloClient<any>;
     private subs: Subscription[] = [];
     private userProperties: Array<keyof this> = [];
+    private apolloQueries: Array<Query<any>> = []
 
-    $apollo: {[key: string]: Query<any>;} = {};
     private $streamsFromApollo: StreamsObj = {};
     private $streamsFromSubscriptions: StreamsObj = {};
     $streamsFromState: StreamsObj = {};
@@ -191,7 +192,7 @@ export class BaseModel {
             configurable: false,
             enumerable: true,
         });
-        this.$apollo[key] = query;
+        this.apolloQueries.push(query);
         // TODO后面再改
         this.$streamsFromApollo[key + '$'] = query.observable;
     }
@@ -217,6 +218,11 @@ export class BaseModel {
                 // case 'restQuery':
                 // case 'restMutation':
             }
+        }
+
+        // 延迟初始化，保证query间依赖
+        if (this.apolloQueries.length && !this.$vm.$isServer) {
+            this.apolloQueries.forEach(query => query.init());
         }
     }
 
@@ -256,17 +262,13 @@ export class BaseModel {
     }
 
     prefetch() {
-        const prefetchList = Object.keys(this.$apollo)
-            .map(key => this.$apollo[key].prefetch());
+        const prefetchList = this.apolloQueries.map(query => query.prefetch());
         return Promise.all(prefetchList);
     }
 
     destroy() {
         this.subs.forEach(sub => sub.unsubscribe());
-
-        Object.keys(this.$apollo).forEach(key => {
-            this.$apollo[key].destroy();
-        });
+        this.apolloQueries.forEach(query => query.destroy());
     }
 }
 

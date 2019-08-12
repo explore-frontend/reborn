@@ -38,11 +38,7 @@ export default class Query<T> {
 
         const initialQueryState = getInitialStateFromQuery(option);
         defineReactive(this, 'data', initialQueryState);
-
-        if (!this.vm.$isServer) {
-            this.init();
-        }
-
+        defineReactive(this, 'loading', false);
         const initialData = this.currentResult();
         if (!initialData.loading) {
             this.data = initialData.data as T;
@@ -113,8 +109,7 @@ export default class Query<T> {
         });
     }
 
-    private init() {
-        defineReactive(this, 'loading', false);
+    init() {
         if (!this.skip) {
             this.initObserver();
         }

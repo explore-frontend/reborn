@@ -32,7 +32,6 @@ declare module 'vue/types/options' {
 
 declare module 'vue/types/vue' {
     interface Vue {
-        $apollo: object;
         $client: ApolloClient<any>;
         apollo: any;
         $store?: Store;
