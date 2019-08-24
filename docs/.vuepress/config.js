@@ -25,6 +25,7 @@ module.exports = {
                             collapsable: false,
                             children: [
                                 'installation',
+                                'store',
                                 'model',
                                 'component',
                                 'server-side-render'

@@ -1,8 +1,11 @@
 # apolloQuery
 
-在Model上定义一个查询Query
+在Model上定义一个Query
 
 ## 选项
+
+### client
+client string，当前query所使用的client，具体参考[multi clients配置](../guide/store.md#multi-client)
 
 ### query
 GraphQL文档，定义一个graphql query查询
@@ -55,6 +58,26 @@ GraphQL文档，定义一个graphql query查询
 }
 ```
 
+### pollInterval
+数字或者返回数字的响应式函数，query的查询间隔，默认值为0，即不使用轮询
+例如：
+```javascript
+{
+    pollInterval: 200
+}
+```
+或
+```javascript
+{
+    pollInterval($route) {
+        return !this.id && !$route.params.id
+            ? 0
+            : 100
+    }
+}
+```
+如果使用的是pollInterval函数，则函数中第一个函数为当前vue-router的$route，this指向为当前model。
+
 ### skip
 布尔值或者返回布尔值的响应式函数，是否忽略当前查询，默认值为false。
 例如：
@@ -94,7 +117,12 @@ query缓存模式，具体请参考[ApolloClient watchQuery](https://www.apollog
     }
 }
 ```
+## 属性
+### data
+返回当前query的查询结果，其结果为响应式数据
 
+### loading
+布尔值，当前query是否处于请求状态
 
 ## 方法
 
