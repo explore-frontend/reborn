@@ -2,8 +2,14 @@
 
 ## 定义Model
 
-```javascript
-import { BaseModel, apolloQuery } from '@ks/vue-apollo-model';
+```typescript
+import {
+    BaseModel,
+    apolloQuery,
+    QueryResult,
+    apolloMutation,
+    MutationResult,
+} from 'vue-apollo-model';
 import gql from 'graphql-tag';
 
 export default class ProfileModel extends BaseModel {
@@ -35,10 +41,41 @@ export default class ProfileModel extends BaseModel {
             };
         },
     })
-    userInfoQuery;
+    userInfoQuery!: QueryResult<{
+        userInfo: {
+            name: string;
+            description: string;
+            sex: 'male' | 'female' | '';
+        }
+    }>;
 
     get userInfo() {
-        return this.userInfoQuery.userInfo;
+        return this.userInfoQuery.data.userInfo;
+    }
+
+    @apolloMutation({
+        mutation: gql`
+            mutation commit($data: String) {
+                commit(data: $data) {
+                    result
+                }
+            }
+        `,
+        variables({ data }: CommitParams) {
+            return {
+                data,
+            };
+        },
+    })
+
+    feedbackMutation!: MutationResult<CommitParams, {
+        sendFeedback: {
+            result: number;
+        };
+    }>;
+
+    async sendFeedback(commitParams: CommitParams) {
+        await this.feedbackMutation.mutate(commitParams);
     }
 }
 ```
@@ -48,3 +85,6 @@ export default class ProfileModel extends BaseModel {
 
 ## apolloQuery
 定义一个query查询，具体参见[apolloQuery](../api/apollo-query.md)
+
+## apolloMutation
+定义一个query查询，具体参见[apolloMutation](../api/apollo-mutation.md)

@@ -2,16 +2,16 @@ import Vue from 'vue';
 import xstream, { Subscription } from 'xstream';
 
 import Store from './store';
-import Query from './apollo/query';
-import Mutation from './apollo/mutation';
+import ApolloQuery from './apollo/query';
+import ApolloMutation from './apollo/mutation';
 import {
     StreamsObj,
     VueApolloModelQueryOptions,
     VueApolloModelMutationOptions,
+    GraphqlClients,
 } from './types';
 import { defineReactive } from './install';
 import 'reflect-metadata';
-import ApolloClient from 'apollo-client';
 
 const skipProperty = [
     'userProperties',
@@ -29,6 +29,7 @@ const skipProperty = [
     'startSubscriptions',
     'prefetch',
     'destroy',
+    'apolloQueries',
 ];
 
 function isSkipProperty(key: string) {
@@ -40,22 +41,18 @@ function isSkipProperty(key: string) {
 
 interface VueApolloModelMetadata {
     type: 'apolloQuery' | 'apolloMutation' | 'restQuery' | 'restMutation';
-    detail: any;
-}
-
-interface VueApolloModelMetadata {
-    type: 'apolloQuery' | 'apolloMutation' | 'restQuery' | 'restMutation';
-    detail: any;
+    detail: VueApolloModelQueryOptions | VueApolloModelMutationOptions;
 }
 
 export class BaseModel {
     protected readonly $vm: Vue;
     private readonly $store: Store;
-    readonly $client: ApolloClient<any>;
+    readonly $clients: GraphqlClients;
     private subs: Subscription[] = [];
     private userProperties: Array<keyof this> = [];
+    private apolloQueries: Array<ApolloQuery<any>> = [];
+    hasSubscribed = false;
 
-    $apollo: {[key: string]: Query<any>;} = {};
     private $streamsFromApollo: StreamsObj = {};
     private $streamsFromSubscriptions: StreamsObj = {};
     $streamsFromState: StreamsObj = {};
@@ -68,10 +65,10 @@ export class BaseModel {
         };
     }
 
-    constructor(client: ApolloClient<any>, vm: Vue, store: Store) {
+    constructor(clients: GraphqlClients, vm: Vue, store: Store) {
         this.$vm = vm;
         this.$store = store;
-        this.$client = client;
+        this.$clients = clients;
     }
 
     private autoBind() {
@@ -135,11 +132,14 @@ export class BaseModel {
         });
     }
 
-    private initApolloMutation(key: keyof this, info: VueApolloModelMetadata) {
-        const mutation = new Mutation(
+    private initApolloMutation(key: keyof this, options: VueApolloModelMutationOptions) {
+        const client = options.client && options.client in this.$clients.clients
+            ? this.$clients.clients[options.client]
+            : this.$clients.defaultClient;
+        const mutation = new ApolloMutation(
             key as string,
-            info.detail,
-            this.$client,
+            options,
+            client,
             this,
             this.$vm,
         );
@@ -162,14 +162,21 @@ export class BaseModel {
         });
     }
 
-    private initApolloQuery(key: string, info: VueApolloModelMetadata) {
-        const query = new Query(
+    private initApolloQuery(key: string, options: VueApolloModelQueryOptions) {
+        const client = options.client && options.client in this.$clients.clients
+            ? this.$clients.clients[options.client]
+            : this.$clients.defaultClient;
+        const query = new ApolloQuery(
             key,
-            info.detail,
-            this.$client,
+            options,
+            client,
             this,
             this.$vm,
         );
+        if (options.client && !this.$vm.$isServer) {
+            // @ts-ignore
+            window.aaa = query;
+        }
         const refetch = query.refetch.bind(query);
         const fetchMore = query.fetchMore.bind(query);
         Object.defineProperty(this, key, {
@@ -191,7 +198,7 @@ export class BaseModel {
             configurable: false,
             enumerable: true,
         });
-        this.$apollo[key] = query;
+        this.apolloQueries.push(query);
         // TODO后面再改
         this.$streamsFromApollo[key + '$'] = query.observable;
     }
@@ -203,20 +210,22 @@ export class BaseModel {
         }
         for (const key of decoratorKeys) {
             const info: VueApolloModelMetadata = Reflect.getMetadata('vueApolloModel', this, key);
-            // TODO临时修复某个bug
             if (!info) {
                 continue;
             }
             switch (info.type) {
                 case 'apolloQuery':
-                    this.initApolloQuery(key, info);
+                    this.initApolloQuery(key, info.detail as VueApolloModelQueryOptions);
                     break;
                 case 'apolloMutation':
-                    this.initApolloMutation(key, info);
+                    this.initApolloMutation(key, info.detail as VueApolloModelMutationOptions);
                     break;
-                // case 'restQuery':
-                // case 'restMutation':
             }
+        }
+
+        // 延迟初始化，保证query间依赖
+        if (this.apolloQueries.length && !this.$vm.$isServer) {
+            this.apolloQueries.forEach(query => query.init());
         }
     }
 
@@ -253,20 +262,17 @@ export class BaseModel {
             const sub = this.$streamsFromApollo[key].subscribe({});
             this.subs.push(sub);
         });
+        this.hasSubscribed = true;
     }
 
     prefetch() {
-        const prefetchList = Object.keys(this.$apollo)
-            .map(key => this.$apollo[key].prefetch());
+        const prefetchList = this.apolloQueries.map(query => query.prefetch());
         return Promise.all(prefetchList);
     }
 
     destroy() {
         this.subs.forEach(sub => sub.unsubscribe());
-
-        Object.keys(this.$apollo).forEach(key => {
-            this.$apollo[key].destroy();
-        });
+        this.apolloQueries.forEach(query => query.destroy());
     }
 }
 

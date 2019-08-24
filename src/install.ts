@@ -20,24 +20,19 @@ export default function install(VueLibrary: VueConstructor) {
                 return;
             }
 
-            // TODO后面看看要不要给塞到Vue的prototype上去
-            Object.defineProperty(this, '$client', {
-                get: () => store.graphqlClient,
-                configurable: true
-            });
-
             Object.keys(models).forEach((key) => {
                 const modelCtor = models[key];
                 const storeModelInstance = store.registerModel(modelCtor);
                 if (!storeModelInstance.count) {
-                    const instance = new storeModelInstance.constructor(store.graphqlClient, this.$root, store);
+                    const instance = new storeModelInstance.constructor(
+                        store.graphqlClients,
+                        this.$root,
+                        store,
+                    );
                     instance.init();
                     storeModelInstance.instance = instance
                 }
                 storeModelInstance.count++;
-                if (key in this) {
-                    throw new Error(`There has a duplex name ${key} on ${this.$vnode.tag}`)
-                }
 
                 Object.defineProperty(this, key, {
                     get: () => storeModelInstance.instance,
@@ -47,7 +42,10 @@ export default function install(VueLibrary: VueConstructor) {
             await this.$nextTick();
 
             Object.keys(models).forEach((key) => {
-                if (!this.$isServer) {
+                // TODO这里可能涉及多次订阅导致性能问题，后面把subscription相关逻辑干了也许就解了……
+                // 先临时通过hasSubscribed来判断
+                // @ts-ignore
+                if (!this.$isServer && this[key] && !this[key].hasSubscribed) {
                     // @ts-ignore
                     this[key].startSubscriptions();
                 }
