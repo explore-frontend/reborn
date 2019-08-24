@@ -6,7 +6,7 @@
  */
 
 import Vue from 'vue';
-import ApolloClient, {ObservableQuery} from 'apollo-client';
+import ApolloClient, {ObservableQuery, WatchQueryOptions} from 'apollo-client';
 
 import {VueApolloModelQueryOptions, VariablesFn} from '../types';
 import {BaseModel} from '../model';
@@ -29,7 +29,13 @@ export default class Query<T> {
     loading: boolean = false;
     data!: T;
 
-    constructor(name: string, option: VueApolloModelQueryOptions, client: ApolloClient<any>, model: BaseModel, vm: Vue) {
+    constructor(
+        name: string,
+        option: VueApolloModelQueryOptions,
+        client: ApolloClient<any>,
+        model: BaseModel,
+        vm: Vue,
+    ) {
         this.name = name;
         this.option = option;
         this.client = client;
@@ -39,10 +45,6 @@ export default class Query<T> {
         const initialQueryState = getInitialStateFromQuery(option);
         defineReactive(this, 'data', initialQueryState);
         defineReactive(this, 'loading', false);
-        const initialData = this.currentResult();
-        if (!initialData.loading) {
-            this.data = initialData.data as T;
-        }
     }
 
     // TODO后面应该要把fetchMore，refetch什么的都干掉才行……否则这块就是乱的= =
@@ -62,10 +64,12 @@ export default class Query<T> {
             ? this.option.prefetch.call(this.model, this.vm.$route)
             : this.option.prefetch;
 
+        if (this.hasPrefetched) {
+            console.log('啦啦啦啦啦啦啦啦啦', this.name);
+        }
         if (!canPrefetch || this.hasPrefetched) {
             return;
         }
-
         const { data } = await this.client.query<T>(this.queryOptions);
         this.hasPrefetched = true;
         this.data = data;
@@ -89,14 +93,19 @@ export default class Query<T> {
         return this.option.pollInterval;
     }
 
-
-    // TODO后续桥接应该也给干掉，不过需要吃透一遍apollo-alient的代码
     private initObserver() {
         this.observer = this.client.watchQuery(this.queryOptions);
+        // 需要初始化watchQuery以后，currentResult才能拿到结果
+        const initialData = this.currentResult();
+        if (!initialData.loading) {
+            this.data = initialData.data as T;
+        }
         this.loading = true;
         this.observer.subscribe({
             next: ({data, loading}) => {
-                this.data = data;
+                if (!loading) {
+                    this.data = data;
+                }
                 this.loading = loading;
                 this.observable.shamefullySendNext({data, loading});
             },
@@ -123,10 +132,12 @@ export default class Query<T> {
         }
         if (typeof this.option.pollInterval === 'function') {
             const watcher = this.vm.$watch(() => this.pollInterval, () => {
-                this.observer.setOptions({
-                    ...this.queryOptions,
-                    pollInterval: this.pollInterval,
-                });
+                if (this.observer) {
+                    this.observer.setOptions({
+                        ...this.queryOptions,
+                        pollInterval: this.pollInterval,
+                    });
+                }
             });
             this.listeners.push(watcher);
         }
@@ -164,8 +175,6 @@ export default class Query<T> {
         if (!this.observer) {
             return;
         }
-        // TODO这里需要手动改变一下loading
-        // 后面看一下apollo-client内部的实现
         this.loading = true;
         return this.observer.fetchMore(fetchMoreOptions);
     }
@@ -176,9 +185,7 @@ export default class Query<T> {
         if (!this.observer) {
             return;
         }
-        // TODO这里需要手动改变一下loading
-        // 后面看一下apollo-client内部的实现
         this.loading = true;
-        return this.observer.refetch();
+        return this.observer.refetch(this.variables);
     }
 }

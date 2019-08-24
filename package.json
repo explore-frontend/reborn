@@ -1,6 +1,6 @@
 {
     "name": "vue-apollo-model",
-    "version": "0.3.2",
+    "version": "0.4.0",
     "main": "dist/index.js",
     "module": "dist/index.es.js",
     "typings": "dist/module.d.ts",
@@ -38,5 +38,8 @@
         "reflect-metadata": "^0.1.13",
         "vue": "^2.6.0",
         "xstream": "^11.0.0"
+    },
+    "dependencies": {
+        "utility-types": "^3.7.0"
     }
 }

@@ -9,6 +9,7 @@ import Vue from 'vue';
 import { Route } from 'vue-router';
 import { Stream } from 'xstream';
 import { ApolloClient, QueryOptions } from 'apollo-client';
+import { DeepPartial } from 'utility-types';
 
 import Store from './store';
 import { BaseModel } from './model';
@@ -76,6 +77,7 @@ export type BooleanFn = (route: Route) => boolean;
 export type NumberFn = (route: Route) => number;
 
 export interface VueApolloModelQueryOptions extends QueryOptions {
+    client?: string;
     variables?: VariablesFn | JSONObj;
     prefetch?: BooleanFn | boolean;
     skip?: BooleanFn | boolean;
@@ -86,6 +88,7 @@ export interface VueApolloModelQueryOptions extends QueryOptions {
 }
 
 export interface VueApolloModelMutationOptions {
+    client?: string;
     mutation: DocumentNode;
     variables: MutationVariablesFn | JSONObj,
     initState?: {
@@ -93,7 +96,7 @@ export interface VueApolloModelMutationOptions {
     };
 }
 
-export interface QueryResult<T> {
+export interface QueryResult<T = any> {
     refetch(): Promise<void>;
     data: T;
     loading: boolean;
@@ -104,4 +107,11 @@ export interface MutationResult<T, P> {
     loading: boolean;
     data: P;
     mutate(args0: T): void;
+}
+
+export interface GraphqlClients {
+    defaultClient: ApolloClient<any>;
+    clients: {
+        [key: string]: ApolloClient<any>
+    }
 }

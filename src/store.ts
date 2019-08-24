@@ -1,19 +1,23 @@
-import Vue from 'vue';
-
-import { storeModelInstance } from './types';
+import { storeModelInstance, GraphqlClients } from './types';
 import { BaseModel } from './model';
 import ApolloClient from 'apollo-client';
 
-interface StoreConstructor {
-    defaultApolloClient: ApolloClient<any>
+interface StoreConstructorOptions {
+    defaultClient: ApolloClient<any>
+    clients?: {
+        [key: string]: ApolloClient<any>
+    }
 }
 
 export default class Store {
     private modelMap = new Map<BaseModel, storeModelInstance<BaseModel>>();
-    graphqlClient: ApolloClient<any>;
+    graphqlClients: GraphqlClients;
 
-    constructor(graphqlClient: ApolloClient<any>) {
-        this.graphqlClient = graphqlClient;
+    constructor(options: StoreConstructorOptions) {
+        this.graphqlClients = {
+            defaultClient: options.defaultClient,
+            clients: options.clients || {}
+        };
     }
 
     getModelInstance<T extends BaseModel>(constructor: T) {
@@ -34,8 +38,15 @@ export default class Store {
     }
 
     exportStates() {
+        const clientsExtracts: any = {};
+        for (const key in this.graphqlClients.clients) {
+            clientsExtracts[key] = this.graphqlClients.clients[key].cache.extract();
+        }
         return {
-            defaultClient: this.graphqlClient.cache.extract(),
+            defaultClient: this.graphqlClients.defaultClient.cache.extract(),
+            clients: {
+                ...clientsExtracts
+            },
         };
     }
 }
