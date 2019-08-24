@@ -1,26 +1,11 @@
 # BaseModel
 
-## $client
-VueApolloModel初始化时所注入的ApolloClient实例。
-
-## $apollo
-:::tip
-`beta`功能，后续可能会有改动
-:::
-
-每一个使用apolloQuery定义的属性，都会在this.$apollo上产生同名属性的query，用于query的重新获取等，比如上述示例中可以定义类似的方法用于重新获取数据
-```javascript
-this.$apollo.userInfoQuery.refetch();
-```
-
-详情参考[apolloQuery方法](./apollo-query)
-
 ## $streams
 :::tip
 `beta`功能，后续可能会有改动
 :::
 
-每一个在model上定义的属性，都会在this.$streams产生一个结尾增加**$**的Stream（基于xstream），用于流式编程组合拼装。
+每一个在model上定义的属性，都会在this.$streams产生一个结尾增加`$`的Stream（基于xstream），用于流式编程组合拼装。
 
 比如
 ```javascript

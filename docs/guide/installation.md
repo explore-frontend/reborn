@@ -41,12 +41,17 @@ Vue.use(VueModel);
 ### 3. 定义全局Store
 ```javascript
 import { Store } from 'vue-apollo-model';
-export default function createApp({
-    graphqlClient = createApolloClient()
-}) {
+import { defaultClient, aClient, bClient } from './clients';
+export default function createApp() {
     const app = new Vue({
         render: (h) => h(mainApp),
-        store: new Store(graphqlClient),
+        store: new Store({
+            defaultClient,
+            clients: {
+                aClient,
+                bClient,
+            }
+        }),
         router,
     });
     return {
