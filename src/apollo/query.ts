@@ -6,34 +6,35 @@
  */
 
 import Vue from 'vue';
-import ApolloClient, {ObservableQuery, WatchQueryOptions} from 'apollo-client';
+import ApolloClient, { ObservableQuery } from 'apollo-client';
 
-import {VueApolloModelQueryOptions, VariablesFn} from '../types';
-import {BaseModel} from '../model';
-import xstream, {Stream} from 'xstream';
-import {defineReactive} from '@/install';
+import { VueApolloModelQueryOptions, VariablesFn } from '../types';
+import { BaseModel } from '../model';
+import xstream, { Stream } from 'xstream';
+import { defineReactive } from '@/install';
 import { getInitialStateFromQuery } from '@/utils/graphql';
 
-export default class Query<T> {
-    observer!: ObservableQuery<T>;
-    observable: Stream<{loading: boolean, data: T}> = xstream.create();
+export class Query<DataType, ModelType extends BaseModel> {
+    observer!: ObservableQuery<DataType>;
+    observable: Stream<{loading: boolean, data: DataType}> = xstream.create();
 
-    private option: VueApolloModelQueryOptions;
+    private option: VueApolloModelQueryOptions<ModelType>;
     private client: ApolloClient<any>;
     private listeners: Array<() => void> = [];
-    private model: BaseModel;
+    private model: ModelType;
     private vm: Vue;
     private name: string;
     private hasPrefetched = false;
 
     loading: boolean = false;
-    data!: T;
+    data!: DataType;
+    error: any;
 
     constructor(
         name: string,
-        option: VueApolloModelQueryOptions,
+        option: VueApolloModelQueryOptions<ModelType>,
         client: ApolloClient<any>,
-        model: BaseModel,
+        model: ModelType,
         vm: Vue,
     ) {
         this.name = name;
@@ -45,6 +46,7 @@ export default class Query<T> {
         const initialQueryState = getInitialStateFromQuery(option);
         defineReactive(this, 'data', initialQueryState);
         defineReactive(this, 'loading', false);
+        defineReactive(this, 'error', null);
     }
 
     // TODO后面应该要把fetchMore，refetch什么的都干掉才行……否则这块就是乱的= =
@@ -59,23 +61,20 @@ export default class Query<T> {
         };
     }
 
-    async prefetch() {
+    prefetch() {
         const canPrefetch = typeof this.option.prefetch === 'function'
             ? this.option.prefetch.call(this.model, this.vm.$route)
             : this.option.prefetch;
 
-        if (this.hasPrefetched) {
-            console.log('啦啦啦啦啦啦啦啦啦', this.name);
-        }
         if (!canPrefetch || this.hasPrefetched) {
             return;
         }
-        const { data } = await this.client.query<T>(this.queryOptions);
-        this.hasPrefetched = true;
-        this.data = data;
-        return {
-            [this.name]: data,
-        };
+        return this.client.query<DataType>(this.queryOptions)
+            .then(({ data }) => {
+                this.hasPrefetched = true;
+                this.data = data;
+                return data;
+            });
     }
     private get queryOptions() {
         return {
@@ -98,7 +97,7 @@ export default class Query<T> {
         // 需要初始化watchQuery以后，currentResult才能拿到结果
         const initialData = this.currentResult();
         if (!initialData.loading) {
-            this.data = initialData.data as T;
+            this.data = initialData.data as DataType;
         }
         this.loading = true;
         this.observer.subscribe({
@@ -110,9 +109,12 @@ export default class Query<T> {
                 this.observable.shamefullySendNext({data, loading});
             },
             error: err => {
+                this.loading = false;
+                this.error = err;
                 this.observable.shamefullySendError(err);
             },
             complete: () => {
+                this.loading = false;
                 this.observable.shamefullySendComplete();
             },
         });
@@ -150,7 +152,7 @@ export default class Query<T> {
     }
     private get variables() {
         if (this.option.variables && typeof this.option.variables === 'function') {
-            return (this.option.variables as VariablesFn).call(this.model, this.vm.$route);
+            return (this.option.variables as VariablesFn<ModelType>).call(this.model, this.vm.$route);
         }
         return this.option.variables;
     }
@@ -162,7 +164,7 @@ export default class Query<T> {
         if (!this.observer) {
             this.initObserver();
         } else {
-            this.observer.refetch(this.variables);
+            this.observer.setVariables(this.variables || {});
         }
     }
 

@@ -4,7 +4,7 @@
  * @author 天翔Skyline(skyline0705@gmail.com)
  * Oct 24, 2018
  */
-import install from './install';
+import install, { useApolloModel } from './install';
 import Store from './store';
 import {
     BaseModel,
@@ -25,6 +25,7 @@ export {
     apolloMutation,
     restQuery,
     restMutation,
+    useApolloModel,
 };
 
 export * from './types';

@@ -1,4 +1,4 @@
-import { storeModelInstance, GraphqlClients } from './types';
+import { storeModelInstance, GraphqlClients, Constructor } from './types';
 import { BaseModel } from './model';
 import ApolloClient from 'apollo-client';
 
@@ -10,7 +10,7 @@ interface StoreConstructorOptions {
 }
 
 export default class Store {
-    private modelMap = new Map<BaseModel, storeModelInstance<BaseModel>>();
+    private modelMap = new Map<Constructor<BaseModel>, storeModelInstance<BaseModel>>();
     graphqlClients: GraphqlClients;
 
     constructor(options: StoreConstructorOptions) {
@@ -20,13 +20,13 @@ export default class Store {
         };
     }
 
-    getModelInstance<T extends BaseModel>(constructor: T) {
-        return this.modelMap.get(constructor) as storeModelInstance<T>;
+    getModelInstance<T extends BaseModel>(constructor: Constructor<T>) {
+        return this.modelMap.get(constructor);
     }
 
-    registerModel<T extends BaseModel>(constructor: T) {
+    registerModel<T extends BaseModel>(constructor: Constructor<T>) {
         if (this.modelMap.has(constructor)) {
-            return this.modelMap.get(constructor) as storeModelInstance<T>;
+            return this.modelMap.get(constructor)! as storeModelInstance<T>;
         }
         const storeModelInstance: storeModelInstance<T> = {
             constructor,
@@ -34,7 +34,7 @@ export default class Store {
             count: 0,
         };
         this.modelMap.set(constructor, storeModelInstance);
-        return storeModelInstance;
+        return storeModelInstance as storeModelInstance<T>;
     }
 
     exportStates() {
