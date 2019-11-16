@@ -102,6 +102,7 @@ export class Query<DataType, ModelType extends BaseModel> {
         this.loading = true;
         this.observer.subscribe({
             next: ({data, loading}) => {
+                this.error = null;
                 if (!loading) {
                     this.data = data;
                 }
@@ -114,6 +115,7 @@ export class Query<DataType, ModelType extends BaseModel> {
                 this.observable.shamefullySendError(err);
             },
             complete: () => {
+                this.error = null;
                 this.loading = false;
                 this.observable.shamefullySendComplete();
             },

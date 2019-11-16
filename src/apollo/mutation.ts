@@ -38,6 +38,7 @@ export class Mutation<T, P extends BaseModel> {
     }
     async mutate(params: any) {
         this.loading = true;
+        this.error = null;
         try {
             const { data } = await this.client.mutate<T>({
                 mutation: this.option.mutation,
