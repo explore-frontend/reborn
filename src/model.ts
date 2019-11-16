@@ -2,8 +2,8 @@ import Vue from 'vue';
 import xstream, { Subscription } from 'xstream';
 
 import Store from './store';
-import ApolloQuery from './apollo/query';
-import ApolloMutation from './apollo/mutation';
+import { Query } from './apollo/query';
+import { Mutation } from './apollo/mutation';
 import {
     StreamsObj,
     VueApolloModelQueryOptions,
@@ -39,18 +39,18 @@ function isSkipProperty(key: string) {
         || skipProperty.includes(key);
 }
 
-interface VueApolloModelMetadata {
+interface VueApolloModelMetadata<T> {
     type: 'apolloQuery' | 'apolloMutation' | 'restQuery' | 'restMutation';
-    detail: VueApolloModelQueryOptions | VueApolloModelMutationOptions;
+    detail: VueApolloModelQueryOptions<T> | VueApolloModelMutationOptions<T>;
 }
 
 export class BaseModel {
     protected readonly $vm: Vue;
     private readonly $store: Store;
-    readonly $clients: GraphqlClients;
+    private readonly $clients: GraphqlClients;
     private subs: Subscription[] = [];
     private userProperties: Array<keyof this> = [];
-    private apolloQueries: Array<ApolloQuery<any>> = [];
+    private apolloQueries: Array<Query<any, any>> = [];
     hasSubscribed = false;
 
     private $streamsFromApollo: StreamsObj = {};
@@ -74,19 +74,20 @@ export class BaseModel {
     private autoBind() {
         for (const key of this.userProperties) {
             if (typeof this[key] === 'function') {
-                // @ts-ignore
-                this[key] = this[key].bind(this);
+                this[key] = (this[key] as unknown as Function).bind(this);
             }
         }
     }
 
-    init() {
+    init<ModelType extends BaseModel>() {
         this.collectProperties();
         this.initState();
         this.initDependencyModel();
-        this.initApolloDesc();
+        this.initApolloDesc<ModelType>();
         this.initSubscriptions();
         this.autoBind();
+        // TODO因为apollo的缓存有点迷，临时性还是先把$clients放出来了，但是不推荐使用……
+        defineReactive(this, '$clients', this.$clients)
     }
 
     private addProperty(keys: Array<keyof this>) {
@@ -117,26 +118,34 @@ export class BaseModel {
     }
 
     private initDependencyModel() {
+        // TODO还没搞model的依赖使用
         // @ts-ignore
         if (!this.models) {
             return;
         }
+        // 同上
         // @ts-ignore
         Object.keys(this.models).forEach((key) => {
             Object.defineProperty(this, key, {
-                // TODO这里可能获取不到
-                // @ts-ignore
-                get: () => this.$store.getModelInstance(this.models[key]).instance,
+                get: () => {
+                    // TODO这里可能获取不到
+                    // @ts-ignore
+                    const storeModelInstance = this.$store.getModelInstance(this.models[key]);
+                    if (storeModelInstance) {
+                        return storeModelInstance.instance;
+                    }
+                    return null;
+                },
                 configurable: true,
             });
         });
     }
 
-    private initApolloMutation(key: keyof this, options: VueApolloModelMutationOptions) {
+    private initApolloMutation<ModelType>(key: keyof this, options: VueApolloModelMutationOptions<ModelType>) {
         const client = options.client && options.client in this.$clients.clients
             ? this.$clients.clients[options.client]
             : this.$clients.defaultClient;
-        const mutation = new ApolloMutation(
+        const mutation = new Mutation(
             key as string,
             options,
             client,
@@ -155,6 +164,9 @@ export class BaseModel {
                 get mutate() {
                     return mutate;
                 },
+                get error() {
+                    return mutation.error;
+                },
             },
             writable: false,
             configurable: false,
@@ -162,21 +174,18 @@ export class BaseModel {
         });
     }
 
-    private initApolloQuery(key: string, options: VueApolloModelQueryOptions) {
+    private initApolloQuery<ModelType extends BaseModel>(key: string, options: VueApolloModelQueryOptions<ModelType>) {
         const client = options.client && options.client in this.$clients.clients
             ? this.$clients.clients[options.client]
             : this.$clients.defaultClient;
-        const query = new ApolloQuery(
+        const query = new Query<any, ModelType>(
             key,
             options,
             client,
+            // @ts-ignore
             this,
             this.$vm,
         );
-        if (options.client && !this.$vm.$isServer) {
-            // @ts-ignore
-            window.aaa = query;
-        }
         const refetch = query.refetch.bind(query);
         const fetchMore = query.fetchMore.bind(query);
         Object.defineProperty(this, key, {
@@ -193,6 +202,9 @@ export class BaseModel {
                 get fetchMore() {
                     return fetchMore;
                 },
+                get error() {
+                    return query.error;
+                },
             },
             writable: false,
             configurable: false,
@@ -203,22 +215,22 @@ export class BaseModel {
         this.$streamsFromApollo[key + '$'] = query.observable;
     }
 
-    private initApolloDesc() {
+    private initApolloDesc<ModelType extends BaseModel>() {
         const decoratorKeys = Reflect.getMetadata('decoratorKeys', this, 'decoratorKeys') || [];
         if (!decoratorKeys.length) {
             return;
         }
         for (const key of decoratorKeys) {
-            const info: VueApolloModelMetadata = Reflect.getMetadata('vueApolloModel', this, key);
+            const info: VueApolloModelMetadata<ModelType> = Reflect.getMetadata('vueApolloModel', this, key);
             if (!info) {
                 continue;
             }
             switch (info.type) {
                 case 'apolloQuery':
-                    this.initApolloQuery(key, info.detail as VueApolloModelQueryOptions);
+                    this.initApolloQuery<ModelType>(key, info.detail as VueApolloModelQueryOptions<ModelType>);
                     break;
                 case 'apolloMutation':
-                    this.initApolloMutation(key, info.detail as VueApolloModelMutationOptions);
+                    this.initApolloMutation<ModelType>(key, info.detail as VueApolloModelMutationOptions<ModelType>);
                     break;
             }
         }
@@ -230,11 +242,13 @@ export class BaseModel {
     }
 
     private initSubscriptions() {
+        // TODO subscriptions的形式后面还需要改变
         // @ts-ignore
         if (!this.subscriptions) {
             return;
         }
         // TODO 这里需要判断一下uniq
+        // TODO subscriptions的形式后面还需要改变
         // @ts-ignore
         const $streams = typeof this.subscriptions === 'function' ? this.subscriptions() : this.subscriptions;
 
@@ -248,6 +262,7 @@ export class BaseModel {
             }
             const sub = this.$streamsFromSubscriptions[key].subscribe({
                 next: val => {
+                    // TODO subscriptions的形式后面还需要改变
                     // @ts-ignore
                     this[rKey] = val;
                 },
@@ -299,10 +314,10 @@ function makeObservable<T extends BaseModel>(model: T, key: keyof T) {
     });
 }
 
-export function apolloQuery(queryDefine: VueApolloModelQueryOptions) {
+export function apolloQuery<T extends BaseModel>(queryDefine: VueApolloModelQueryOptions<T>) {
     // TODO推导类型写不出来了= =
     return function createApolloQuery(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata = {
+        const descriptor: VueApolloModelMetadata<T> = {
             type: 'apolloQuery',
             detail: queryDefine,
         };
@@ -312,9 +327,9 @@ export function apolloQuery(queryDefine: VueApolloModelQueryOptions) {
         Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
     };
 }
-export function apolloMutation(mutationDefine: VueApolloModelMutationOptions) {
+export function apolloMutation<T extends BaseModel>(mutationDefine: VueApolloModelMutationOptions<T>) {
     return function createApolloMutation(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata = {
+        const descriptor: VueApolloModelMetadata<T> = {
             type: 'apolloMutation',
             detail: mutationDefine,
         };
@@ -325,9 +340,9 @@ export function apolloMutation(mutationDefine: VueApolloModelMutationOptions) {
     }
 }
 
-export function restQuery(restQueryDefine: any) {
+export function restQuery<T extends BaseModel>(restQueryDefine: any) {
     return function createRestQuery(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata = {
+        const descriptor: VueApolloModelMetadata<T> = {
             type: 'restQuery',
             detail: restQueryDefine,
         };
@@ -337,9 +352,9 @@ export function restQuery(restQueryDefine: any) {
         Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
     }
 }
-export function restMutation(restMutationDefine: any) {
+export function restMutation<T extends BaseModel>(restMutationDefine: any) {
     return function createRestQuery(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata = {
+        const descriptor: VueApolloModelMetadata<T> = {
             type: 'restMutation',
             detail: restMutationDefine,
         };

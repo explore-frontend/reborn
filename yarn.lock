@@ -837,6 +837,13 @@
     source-map "~0.6.1"
     vue-template-es2015-compiler "^1.9.0"
 
+"@vue/composition-api@^0.3.2":
+  version "0.3.2"
+  resolved "https://npm.corp.kuaishou.com/@vue%2fcomposition-api/-/composition-api-0.3.2.tgz#2d797028e489bf7812f08c7bb33ffd03ef23c617"
+  integrity sha1-LXlwKOSJv3gS8Ix7sz/9A+8jxhc=
+  dependencies:
+    tslib "^1.9.3"
+
 "@vuepress/core@^1.0.2":
   version "1.0.2"
   resolved "https://npm.corp.kuaishou.com/@vuepress%2fcore/-/core-1.0.2.tgz#75d0c6ccb4be92c6674c3bbfbe25639c8239921b"
