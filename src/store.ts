@@ -4,9 +4,7 @@ import ApolloClient from 'apollo-client';
 
 interface StoreConstructorOptions {
     defaultClient: ApolloClient<any>
-    clients?: {
-        [key: string]: ApolloClient<any>
-    }
+    clients?: Record<string, ApolloClient<any>>
 }
 
 export default class Store {
@@ -21,7 +19,7 @@ export default class Store {
     }
 
     getModelInstance<T extends BaseModel>(constructor: Constructor<T>) {
-        return this.modelMap.get(constructor);
+        return this.modelMap.get(constructor) as storeModelInstance<T> | undefined;
     }
 
     registerModel<T extends BaseModel>(constructor: Constructor<T>) {

@@ -38,7 +38,7 @@ function merge(source: any, ...args: any[]) {
 }
 
 export function transformQuery(item: FieldNode) {
-    const result: {[key: string]: any} = {};
+    const result: Record<string, any> = {};
     const key = item.name.value;
 
     if (!item.selectionSet) {

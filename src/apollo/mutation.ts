@@ -1,4 +1,4 @@
-import { VueApolloModelMutationOptions } from '@/types';
+import { VueApolloModelMutationOptions, MutationVariablesFn } from '@/types';
 import { BaseModel } from '@/module';
 import Vue from 'vue';
 import { defineReactive } from '@/install';
@@ -28,30 +28,27 @@ export class Mutation<T, P extends BaseModel> {
     }
     private variables<T>(params: T) {
         if (this.option.variables && typeof this.option.variables === 'function') {
-            return (this.option.variables as Function).call(
+            return (this.option.variables as MutationVariablesFn<P>).call(
+                // @ts-ignore
                 this.model,
                 params,
                 this.vm.$route,
             );
         }
-        return this.variables;
+        return this.option.variables;
     }
-    async mutate(params: any) {
+    mutate(params: any) {
         this.loading = true;
         this.error = null;
-        try {
-            const { data } = await this.client.mutate<T>({
-                mutation: this.option.mutation,
-                variables: this.variables(params),
-            });
+        this.client.mutate<T>({
+            mutation: this.option.mutation,
+            variables: this.variables(params),
+        }).then(({ data }) => {
             if (data) {
                 this.data = data;
             }
-        } catch (e) {
-            this.error = e;
-            throw e;
-        } finally {
-            this.loading = false;
-        }
+        }).catch(e => {
+            this.error = e
+        }).finally(() => this.loading = false);
     }
 }

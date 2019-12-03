@@ -1,5 +1,5 @@
 import Vue, {VueConstructor} from 'vue';
-import { onBeforeUnmount, SetupContext } from '@vue/composition-api';
+import { onBeforeUnmount, SetupContext, onServerPrefetch } from '@vue/composition-api';
 import { Constructor } from './types';
 import { BaseModel } from './model';
 let _Vue: VueConstructor;
@@ -8,15 +8,10 @@ export function defineReactive(obj: object, key: string, val?: any, customSetter
     return _Vue.util.defineReactive(obj, key, val, customSetter, shallow);
 }
 
-export function createOldVueModel(options: object) {
-    return new _Vue(options);
-}
-
 export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, context: SetupContext) {
     const root = context.root;
     // 为了适配小程序，$store去原型上找一下
-    const store = root.$options.apolloStore
-        || root.apolloStore;
+    const store = root.$options.apolloStore || root.apolloStore;
     if (!store) {
         throw new Error('There is no vue-apollo-model store in your root vm!!');
     }
@@ -42,19 +37,15 @@ export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, contex
     });
 
     onBeforeUnmount(() => {
-        // TODO registerModel的参数后面需要改一下……
-        const storeModelInstance = store.getModelInstance(ctor);
-        if (!storeModelInstance) {
-            return;
-        }
         storeModelInstance.count--;
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
         }
     });
-
-    // TODO差serverPrefetch，所以暂时不可以在SSR模式使用
+    onServerPrefetch(() => {
+        return storeModelInstance.instance?.prefetch();
+    });
 
     return storeModelInstance.instance as T;
 }
@@ -62,7 +53,7 @@ export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, contex
 export default function install(VueLibrary: VueConstructor) {
     _Vue = VueLibrary;
     VueLibrary.mixin({
-        async created(this: Vue) {
+        created(this: Vue) {
             // 为了适配小程序，$store去原型上找一下
             const store = this.$root.$options.apolloStore
                 || this.$root.$options.apolloStore
@@ -91,21 +82,21 @@ export default function install(VueLibrary: VueConstructor) {
                     configurable: true,
                 });
             });
-            await this.$nextTick();
-
-            Object.keys(models).forEach(key => {
-                // TODO这里可能涉及多次订阅导致性能问题，后面把subscription相关逻辑干了也许就解了……
-                // 先临时通过hasSubscribed来判断
-                // @ts-ignore
-                if (!this.$isServer && this[key] && !this[key].hasSubscribed) {
+            this.$nextTick(() => {
+                Object.keys(models).forEach(key => {
+                    // TODO这里可能涉及多次订阅导致性能问题，后面把subscription相关逻辑干了也许就解了……
+                    // 先临时通过hasSubscribed来判断
                     // @ts-ignore
-                    this[key].startSubscriptions();
-                }
+                    if (!this.$isServer && this[key] && !this[key].hasSubscribed) {
+                        // @ts-ignore
+                        this[key].startSubscriptions();
+                    }
+                });
             });
         },
-        async serverPrefetch() {
+        serverPrefetch() {
             if (!this.$options.models) {
-                return;
+                return Promise.resolve();
             }
             const promiseList = Object.keys(this.$options.models).map(key => {
                 const store = this.$root.$options.apolloStore
@@ -120,7 +111,7 @@ export default function install(VueLibrary: VueConstructor) {
                 }
                 return model.instance.prefetch();
             }).filter(t => typeof t !== 'undefined') as Promise<any>[];
-            await Promise.all(promiseList);
+            return Promise.all(promiseList).then();
         },
         beforeDestroy(this: Vue) {
             const store = this.$root.$options.apolloStore

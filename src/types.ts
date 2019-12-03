@@ -47,40 +47,36 @@ declare module 'vue/types/vue' {
     }
 }
 
-export interface ModelMap<T extends typeof BaseModel> {
-    [key: string]: {
-        constructor: T;
-        instance: BaseModel | Vue;
-        count: number;
-    };
+interface ModelInfo<T> {
+    constructor: Constructor<T>;
+    instance: T;
+    count: number;
 }
+
+export type ModelMap<T extends typeof BaseModel> = Record<string, ModelInfo<T>>
 
 // TODO貌似这个类型定义是不对的，后面看看any是否可被替换
 export type StreamsObj = Record<string, Stream<any>>;
 
 export type VariablesFn<T> = (this: T, route: Route) => Record<string, any>
 export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Record<string, any>
-export type BooleanFn = (route: Route) => boolean;
-export type NumberFn = (route: Route) => number;
+export type BooleanFn<T> = (this: T, route: Route) => boolean;
+export type NumberFn<T> = (this: T, route: Route) => number;
 
 export interface VueApolloModelQueryOptions<T> extends QueryOptions {
     client?: string;
     variables?: VariablesFn<T> | Record<string, any>;
-    prefetch?: BooleanFn | boolean;
-    skip?: BooleanFn | boolean;
-    pollInterval?: NumberFn | number;
-    initState?: {
-        [key: string]: any;
-    };
+    prefetch?: BooleanFn<T> | boolean;
+    skip?: BooleanFn<T> | boolean;
+    pollInterval?: NumberFn<T> | number;
+    initState?: Record<string, any>;
 }
 
 export interface VueApolloModelMutationOptions<T> {
     client?: string;
     mutation: DocumentNode;
     variables: MutationVariablesFn<T> | Record<string, any>,
-    initState?: {
-        [key: string]: any;
-    };
+    initState?: Record<string, any>;
 }
 
 export interface QueryResult<T = any, P = any> {
@@ -100,8 +96,6 @@ export interface MutationResult<T, P> {
 
 export interface GraphqlClients {
     defaultClient: ApolloClient<any>;
-    clients: {
-        [key: string]: ApolloClient<any>
-    }
+    clients: Record<string, ApolloClient<any>>;
 }
 export type Constructor<T> = new (...args: any[]) => T;

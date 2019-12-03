@@ -158,16 +158,17 @@ export class Query<DataType, ModelType extends BaseModel> {
         }
         return this.option.variables;
     }
-    private changeVariables = async () => {
-        await this.vm.$nextTick();
-        if (this.skip) {
-            return;
-        }
-        if (!this.observer) {
-            this.initObserver();
-        } else {
-            this.observer.setVariables(this.variables || {});
-        }
+    private changeVariables = () => {
+        this.vm.$nextTick(() => {
+            if (this.skip) {
+                return;
+            }
+            if (!this.observer) {
+                this.initObserver();
+            } else {
+                this.observer.setVariables(this.variables || {});
+            }
+        });
     }
 
     destroy() {

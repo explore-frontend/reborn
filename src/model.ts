@@ -9,6 +9,7 @@ import {
     VueApolloModelQueryOptions,
     VueApolloModelMutationOptions,
     GraphqlClients,
+    Constructor,
 } from './types';
 import { defineReactive } from './install';
 import 'reflect-metadata';
@@ -23,7 +24,6 @@ const skipProperty = [
     'autoBind',
     'init',
     'initState',
-    'initDependencyModel',
     'initApolloDesc',
     'initSubscriptions',
     'startSubscriptions',
@@ -65,7 +65,11 @@ export class BaseModel {
         };
     }
 
-    constructor(clients: GraphqlClients, vm: Vue, store: Store) {
+    constructor(
+        clients: GraphqlClients,
+        vm: Vue,
+        store: Store,
+    ) {
         this.$vm = vm;
         this.$store = store;
         this.$clients = clients;
@@ -82,7 +86,6 @@ export class BaseModel {
     init<ModelType extends BaseModel>() {
         this.collectProperties();
         this.initState();
-        this.initDependencyModel();
         this.initApolloDesc<ModelType>();
         this.initSubscriptions();
         this.autoBind();
@@ -117,28 +120,9 @@ export class BaseModel {
         }
     }
 
-    private initDependencyModel() {
-        // TODO还没搞model的依赖使用
-        // @ts-ignore
-        if (!this.models) {
-            return;
-        }
-        // 同上
-        // @ts-ignore
-        Object.keys(this.models).forEach((key) => {
-            Object.defineProperty(this, key, {
-                get: () => {
-                    // TODO这里可能获取不到
-                    // @ts-ignore
-                    const storeModelInstance = this.$store.getModelInstance(this.models[key]);
-                    if (storeModelInstance) {
-                        return storeModelInstance.instance;
-                    }
-                    return null;
-                },
-                configurable: true,
-            });
-        });
+    getDependencyModelFromStore<T extends BaseModel>(Ctor: Constructor<T>) {
+        const storeModelInstance = this.$store.getModelInstance(Ctor);
+        return storeModelInstance?.instance;
     }
 
     private initApolloMutation<ModelType>(key: keyof this, options: VueApolloModelMutationOptions<ModelType>) {
@@ -174,7 +158,10 @@ export class BaseModel {
         });
     }
 
-    private initApolloQuery<ModelType extends BaseModel>(key: string, options: VueApolloModelQueryOptions<ModelType>) {
+    private initApolloQuery<ModelType extends BaseModel>(
+        key: string,
+        options: VueApolloModelQueryOptions<ModelType>,
+    ) {
         const client = options.client && options.client in this.$clients.clients
             ? this.$clients.clients[options.client]
             : this.$clients.defaultClient;
@@ -352,6 +339,7 @@ export function restQuery<T extends BaseModel>(restQueryDefine: any) {
         Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
     }
 }
+
 export function restMutation<T extends BaseModel>(restMutationDefine: any) {
     return function createRestQuery(constructor: any, key: string) {
         const descriptor: VueApolloModelMetadata<T> = {
