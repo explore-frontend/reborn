@@ -4,15 +4,15 @@
  * @author 天翔Skyline(skyline0705@gmail.com)
  * Oct 24, 2018
  */
-import install, { useApolloModel } from './install';
+import { useApolloModel, install } from './install';
 import Store from './store';
-import {
-    BaseModel,
+export { BaseModel } from './model';
+export {
     apolloQuery,
     apolloMutation,
     restQuery,
     restMutation,
-} from './model';
+} from './decorators';
 
 export default {
     install,
@@ -20,11 +20,6 @@ export default {
 
 export {
     Store,
-    apolloQuery,
-    BaseModel,
-    apolloMutation,
-    restQuery,
-    restMutation,
     useApolloModel,
 };
 

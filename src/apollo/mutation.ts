@@ -1,23 +1,26 @@
-import { VueApolloModelMutationOptions, MutationVariablesFn } from '@/types';
+import { ApolloMutationOptions, MutationVariablesFn } from '@/types';
 import { BaseModel } from '@/module';
 import Vue from 'vue';
-import { defineReactive } from '@/install';
+import { defineReactive } from '../install';
 import { getInitialStateFromQuery } from '@/utils/graphql';
-import ApolloClient from 'apollo-client';
+import { ApolloClient } from 'apollo-client';
 
-export class Mutation<T, P extends BaseModel> {
-    private option: VueApolloModelMutationOptions<P>;
-    private model: BaseModel;
+export class ApolloMutation<P extends BaseModel, T = any> {
+    private option: ApolloMutationOptions<P>;
+    private model: P;
     private vm: Vue;
     private client: ApolloClient<any>
-    private name: string;
     data!: T;
     loading = false;
     error: any;
 
-    constructor(name: string, option: VueApolloModelMutationOptions<P>, client: ApolloClient<any>, model: BaseModel, vm: Vue) {
+    constructor(
+        option: ApolloMutationOptions<P>,
+        model: P,
+        vm: Vue,
+        client: ApolloClient<any>,
+    ) {
         defineReactive(this, 'loading', false);
-        this.name = name;
         this.option = option;
         this.client = client;
         this.model = model;

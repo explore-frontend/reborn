@@ -2,55 +2,56 @@ import Vue from 'vue';
 import xstream, { Subscription } from 'xstream';
 
 import Store from './store';
-import { Query } from './apollo/query';
-import { Mutation } from './apollo/mutation';
+import { ApolloQuery } from './apollo/query';
+import { ApolloMutation } from './apollo/mutation';
+import { RestQuery } from './rest/query';
+import { RestMutation } from './rest/mutation';
 import {
     StreamsObj,
-    VueApolloModelQueryOptions,
-    VueApolloModelMutationOptions,
     GraphqlClients,
     Constructor,
+    VueApolloModelMetadata,
 } from './types';
 import { defineReactive } from './install';
 import 'reflect-metadata';
 
 const skipProperty = [
-    'userProperties',
-    'models',
-    'addProperty',
-    'collectProperties',
     'subscriptions',
     'subs',
-    'autoBind',
     'init',
-    'initState',
-    'initApolloDesc',
-    'initSubscriptions',
     'startSubscriptions',
     'prefetch',
     'destroy',
-    'apolloQueries',
 ];
 
 function isSkipProperty(key: string) {
     return key.startsWith('$')
-        || key.startsWith('_')
+        || key.startsWith('$$')
         || key.endsWith('$')
         || skipProperty.includes(key);
 }
 
-interface VueApolloModelMetadata<T> {
-    type: 'apolloQuery' | 'apolloMutation' | 'restQuery' | 'restMutation';
-    detail: VueApolloModelQueryOptions<T> | VueApolloModelMutationOptions<T>;
+function getClient(clients: GraphqlClients, clientName?: string) {
+    return clientName && clientName in clients.clients
+        ? clients.clients[clientName]
+        : clients.defaultClient;
+}
+
+function registerProperty(obj: any, key: string, value: any) {
+    Object.defineProperty(obj, key, {
+        value,
+        writable: false,
+        configurable: false,
+        enumerable: true,
+    });
 }
 
 export class BaseModel {
     protected readonly $vm: Vue;
     private readonly $store: Store;
-    private readonly $clients: GraphqlClients;
     private subs: Subscription[] = [];
-    private userProperties: Array<keyof this> = [];
-    private apolloQueries: Array<Query<any, any>> = [];
+    private $$userProperties: Array<keyof this> = [];
+    private $$apolloQueries: Array<ApolloQuery<any> | RestQuery<any>> = [];
     hasSubscribed = false;
 
     private $streamsFromApollo: StreamsObj = {};
@@ -66,17 +67,15 @@ export class BaseModel {
     }
 
     constructor(
-        clients: GraphqlClients,
         vm: Vue,
         store: Store,
     ) {
         this.$vm = vm;
         this.$store = store;
-        this.$clients = clients;
     }
 
-    private autoBind() {
-        for (const key of this.userProperties) {
+    private $$autoBind() {
+        for (const key of this.$$userProperties) {
             if (typeof this[key] === 'function') {
                 this[key] = (this[key] as unknown as Function).bind(this);
             }
@@ -84,61 +83,69 @@ export class BaseModel {
     }
 
     init<ModelType extends BaseModel>() {
-        this.collectProperties();
-        this.initState();
-        this.initApolloDesc<ModelType>();
-        this.initSubscriptions();
-        this.autoBind();
+        this.$$collectProperties();
+        this.$$initState();
+        this.$$initApolloDesc<ModelType>();
+        this.$$initSubscriptions();
+        this.$$autoBind();
         // TODO因为apollo的缓存有点迷，临时性还是先把$clients放出来了，但是不推荐使用……
-        defineReactive(this, '$clients', this.$clients)
+        defineReactive(this, '$clients', this.$store.graphqlClients)
     }
 
-    private addProperty(keys: Array<keyof this>) {
+    private $$addProperty(keys: Array<keyof this>) {
         for (const key of keys) {
             if (!isSkipProperty(key as string)) {
-                this.userProperties.push(key);
+                this.$$userProperties.push(key);
             }
         }
     }
 
-    private collectProperties() {
+    private $$collectProperties() {
         // 处理自身属性
-        this.addProperty(Object.keys(this) as Array<keyof this>)
+        this.$$addProperty(Object.keys(this) as Array<keyof this>)
         // 处理原型链
         let proto = Object.getPrototypeOf(this);
         while (proto && proto !== Object.prototype) {
-            this.addProperty(Object.keys(proto) as Array<keyof this>)
+            this.$$addProperty(Object.keys(proto) as Array<keyof this>)
             proto = Object.getPrototypeOf(proto);
         }
     }
 
-    private initState() {
-        for (const key of this.userProperties) {
+    private $$initState() {
+        for (const key of this.$$userProperties) {
             if (typeof this[key] !== 'function') {
                 makeObservable(this, key);
             }
         }
     }
 
-    getDependencyModelFromStore<T extends BaseModel>(Ctor: Constructor<T>) {
+    getModelInstanceFromStore<T extends BaseModel>(Ctor: Constructor<T>) {
         const storeModelInstance = this.$store.getModelInstance(Ctor);
         return storeModelInstance?.instance;
     }
 
-    private initApolloMutation<ModelType>(key: keyof this, options: VueApolloModelMutationOptions<ModelType>) {
-        const client = options.client && options.client in this.$clients.clients
-            ? this.$clients.clients[options.client]
-            : this.$clients.defaultClient;
-        const mutation = new Mutation(
-            key as string,
-            options,
-            client,
-            this,
-            this.$vm,
-        );
-        const mutate = mutation.mutate.bind(mutation);
-        Object.defineProperty(this, key, {
-            value: {
+    private initFromMetaData<T extends BaseModel>(
+        key: string,
+        options: VueApolloModelMetadata<T>,
+    ) {
+        if (options.type.endsWith('Mutation')) {
+            let mutation: ApolloMutation<T> | RestMutation<T>;
+            if (options.type === 'apolloMutation') {
+                mutation = new ApolloMutation<T>(
+                    options.detail,
+                    this as unknown as T,
+                    this.$vm,
+                    getClient(this.$store.graphqlClients, options.detail.client),
+                );
+            } else if (options.type === 'restMutation') {
+                mutation = new RestMutation<T>(
+                    options.detail,
+                    this as unknown as T,
+                    this.$vm,
+                    this.$store.request
+                )
+            }
+            const value = {
                 get data() {
                     return mutation.data;
                 },
@@ -146,37 +153,31 @@ export class BaseModel {
                     return mutation.loading;
                 },
                 get mutate() {
-                    return mutate;
+                    return mutation.mutate.bind(mutation);
                 },
                 get error() {
                     return mutation.error;
                 },
-            },
-            writable: false,
-            configurable: false,
-            enumerable: true,
-        });
-    }
-
-    private initApolloQuery<ModelType extends BaseModel>(
-        key: string,
-        options: VueApolloModelQueryOptions<ModelType>,
-    ) {
-        const client = options.client && options.client in this.$clients.clients
-            ? this.$clients.clients[options.client]
-            : this.$clients.defaultClient;
-        const query = new Query<any, ModelType>(
-            key,
-            options,
-            client,
-            // @ts-ignore
-            this,
-            this.$vm,
-        );
-        const refetch = query.refetch.bind(query);
-        const fetchMore = query.fetchMore.bind(query);
-        Object.defineProperty(this, key, {
-            value: {
+            };
+            registerProperty(this, key, value);
+        } else {
+            let query!: ApolloQuery<T> | RestQuery<T>;
+            if (options.type === 'apolloQuery') {
+                query = new ApolloQuery<T>(
+                    options.detail,
+                    this as unknown as T,
+                    this.$vm,
+                    getClient(this.$store.graphqlClients, options.detail.client),
+                );
+            } else if (options.type === 'restQuery') {
+                query = new RestQuery<T>(
+                    options.detail,
+                    this as unknown as T,
+                    this.$vm,
+                    this.$store.request,
+                )
+            }
+            const value = {
                 get data() {
                     return query.data;
                 },
@@ -184,25 +185,23 @@ export class BaseModel {
                     return query.loading;
                 },
                 get refetch() {
-                    return refetch;
+                    return query.refetch.bind(query);
                 },
                 get fetchMore() {
-                    return fetchMore;
+                    return query.fetchMore.bind(query);
                 },
                 get error() {
                     return query.error;
                 },
-            },
-            writable: false,
-            configurable: false,
-            enumerable: true,
-        });
-        this.apolloQueries.push(query);
-        // TODO后面再改
-        this.$streamsFromApollo[key + '$'] = query.observable;
+            };
+            this.$$apolloQueries.push(query);
+            // TODO后面再改
+            this.$streamsFromApollo[key + '$'] = query.observable;
+            registerProperty(this, key, value);
+        }
     }
 
-    private initApolloDesc<ModelType extends BaseModel>() {
+    private $$initApolloDesc<ModelType extends BaseModel>() {
         const decoratorKeys = Reflect.getMetadata('decoratorKeys', this, 'decoratorKeys') || [];
         if (!decoratorKeys.length) {
             return;
@@ -212,23 +211,16 @@ export class BaseModel {
             if (!info) {
                 continue;
             }
-            switch (info.type) {
-                case 'apolloQuery':
-                    this.initApolloQuery<ModelType>(key, info.detail as VueApolloModelQueryOptions<ModelType>);
-                    break;
-                case 'apolloMutation':
-                    this.initApolloMutation<ModelType>(key, info.detail as VueApolloModelMutationOptions<ModelType>);
-                    break;
-            }
+            this.initFromMetaData(key, info);
         }
 
         // 延迟初始化，保证query间依赖
-        if (this.apolloQueries.length && !this.$vm.$isServer) {
-            this.apolloQueries.forEach(query => query.init());
+        if (this.$$apolloQueries.length && !this.$vm.$isServer) {
+            this.$$apolloQueries.forEach(query => query.init());
         }
     }
 
-    private initSubscriptions() {
+    private $$initSubscriptions() {
         // TODO subscriptions的形式后面还需要改变
         // @ts-ignore
         if (!this.subscriptions) {
@@ -268,13 +260,13 @@ export class BaseModel {
     }
 
     prefetch() {
-        const prefetchList = this.apolloQueries.map(query => query.prefetch());
+        const prefetchList = this.$$apolloQueries.map(query => query.prefetch());
         return Promise.all(prefetchList);
     }
 
     destroy() {
         this.subs.forEach(sub => sub.unsubscribe());
-        this.apolloQueries.forEach(query => query.destroy());
+        this.$$apolloQueries.forEach(query => query.destroy());
     }
 }
 
@@ -299,56 +291,4 @@ function makeObservable<T extends BaseModel>(model: T, key: keyof T) {
             }
         });
     });
-}
-
-export function apolloQuery<T extends BaseModel>(queryDefine: VueApolloModelQueryOptions<T>) {
-    // TODO推导类型写不出来了= =
-    return function createApolloQuery(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata<T> = {
-            type: 'apolloQuery',
-            detail: queryDefine,
-        };
-        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
-        decoratorKeys.push(key);
-        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
-        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
-    };
-}
-export function apolloMutation<T extends BaseModel>(mutationDefine: VueApolloModelMutationOptions<T>) {
-    return function createApolloMutation(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata<T> = {
-            type: 'apolloMutation',
-            detail: mutationDefine,
-        };
-        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
-        decoratorKeys.push(key);
-        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
-        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
-    }
-}
-
-export function restQuery<T extends BaseModel>(restQueryDefine: any) {
-    return function createRestQuery(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata<T> = {
-            type: 'restQuery',
-            detail: restQueryDefine,
-        };
-        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
-        decoratorKeys.push(key);
-        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
-        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
-    }
-}
-
-export function restMutation<T extends BaseModel>(restMutationDefine: any) {
-    return function createRestQuery(constructor: any, key: string) {
-        const descriptor: VueApolloModelMetadata<T> = {
-            type: 'restMutation',
-            detail: restMutationDefine,
-        };
-        const decoratorKeys = Reflect.getMetadata('decoratorKeys', constructor, 'decoratorKeys') || [];
-        decoratorKeys.push(key);
-        Reflect.defineMetadata('decoratorKeys', decoratorKeys, constructor, 'decoratorKeys');
-        Reflect.defineMetadata('vueApolloModel', descriptor, constructor, key);
-    }
 }

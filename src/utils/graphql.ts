@@ -1,5 +1,5 @@
-import {FieldNode} from 'graphql';
-import {VueApolloModelQueryOptions, VueApolloModelMutationOptions} from '@/types';
+import { FieldNode}  from 'graphql';
+import { ApolloQueryOptions, ApolloMutationOptions } from '../types';
 import { BaseModel } from '../model';
 
 function is(target: any, type: string) {
@@ -56,7 +56,7 @@ export function transformQuery(item: FieldNode) {
 }
 
 export function getInitialStateFromQuery<T extends BaseModel>(
-    apolloDefine: VueApolloModelQueryOptions<T> | VueApolloModelMutationOptions<T>
+    apolloDefine: ApolloQueryOptions<T> | ApolloMutationOptions<T>
 ) {
     const initialState = {};
     const queryDefine = 'query' in apolloDefine

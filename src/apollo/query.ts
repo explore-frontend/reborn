@@ -6,24 +6,23 @@
  */
 
 import Vue from 'vue';
-import ApolloClient, { ObservableQuery } from 'apollo-client';
+import { ObservableQuery, ApolloClient } from 'apollo-client';
 
-import { VueApolloModelQueryOptions, VariablesFn } from '../types';
+import { ApolloQueryOptions, VariablesFn } from '../types';
 import { BaseModel } from '../model';
 import xstream, { Stream } from 'xstream';
 import { defineReactive } from '@/install';
 import { getInitialStateFromQuery } from '@/utils/graphql';
 
-export class Query<DataType, ModelType extends BaseModel> {
+export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
     observer!: ObservableQuery<DataType>;
     observable: Stream<{loading: boolean, data: DataType}> = xstream.create();
 
-    private option: VueApolloModelQueryOptions<ModelType>;
+    private option: ApolloQueryOptions<ModelType>;
     private client: ApolloClient<any>;
     private listeners: Array<() => void> = [];
     private model: ModelType;
     private vm: Vue;
-    private name: string;
     private hasPrefetched = false;
 
     loading: boolean = false;
@@ -31,13 +30,11 @@ export class Query<DataType, ModelType extends BaseModel> {
     error: any;
 
     constructor(
-        name: string,
-        option: VueApolloModelQueryOptions<ModelType>,
-        client: ApolloClient<any>,
+        option: ApolloQueryOptions<ModelType>,
         model: ModelType,
         vm: Vue,
+        client: ApolloClient<any>,
     ) {
-        this.name = name;
         this.option = option;
         this.client = client;
         this.model = model;
@@ -51,7 +48,7 @@ export class Query<DataType, ModelType extends BaseModel> {
 
     // TODO后面应该要把fetchMore，refetch什么的都干掉才行……否则这块就是乱的= =
     // 这里干的事情其实跟ObservableQuery干的事情有非常大的重合度……
-    currentResult() {
+    private currentResult() {
         if (this.observer) {
             return this.observer.currentResult();
         }

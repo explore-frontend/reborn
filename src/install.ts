@@ -1,11 +1,10 @@
-import Vue, {VueConstructor} from 'vue';
+import Vue, { VueConstructor } from 'vue';
 import { onBeforeUnmount, SetupContext, onServerPrefetch } from '@vue/composition-api';
 import { Constructor } from './types';
 import { BaseModel } from './model';
-let _Vue: VueConstructor;
 
 export function defineReactive(obj: object, key: string, val?: any, customSetter?: (val?: any) => void, shallow?: boolean) {
-    return _Vue.util.defineReactive(obj, key, val, customSetter, shallow);
+    return Vue.util.defineReactive(obj, key, val, customSetter, shallow);
 }
 
 export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, context: SetupContext) {
@@ -18,8 +17,7 @@ export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, contex
     // TODO registerModel的参数后面需要改一下……
     const storeModelInstance = store.registerModel<T>(ctor);
     if (!storeModelInstance.count) {
-        const instance = new storeModelInstance.constructor(
-            store.graphqlClients,
+        const instance = new ctor(
             root,
             store,
         );
@@ -28,7 +26,7 @@ export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, contex
     }
     storeModelInstance.count++;
 
-    _Vue.nextTick(() => {
+    Vue.nextTick(() => {
         // TODO这里可能涉及多次订阅导致性能问题，后面把subscription相关逻辑干了也许就解了……
         // 先临时通过hasSubscribed来判断
         if (!root.$isServer && storeModelInstance.instance && !storeModelInstance.instance.hasSubscribed) {
@@ -50,8 +48,7 @@ export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, contex
     return storeModelInstance.instance as T;
 }
 
-export default function install(VueLibrary: VueConstructor) {
-    _Vue = VueLibrary;
+export function install(VueLibrary: VueConstructor) {
     VueLibrary.mixin({
         created(this: Vue) {
             // 为了适配小程序，$store去原型上找一下
@@ -68,7 +65,6 @@ export default function install(VueLibrary: VueConstructor) {
                 const storeModelInstance = store.registerModel(modelCtor);
                 if (!storeModelInstance.count) {
                     const instance = new storeModelInstance.constructor(
-                        store.graphqlClients,
                         this.$root,
                         store,
                     );
