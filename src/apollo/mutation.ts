@@ -43,7 +43,7 @@ export class ApolloMutation<P extends BaseModel, T = any> {
     mutate(params: any) {
         this.loading = true;
         this.error = null;
-        this.client.mutate<T>({
+        return this.client.mutate<T>({
             mutation: this.option.mutation,
             variables: this.variables(params),
         }).then(({ data }) => {

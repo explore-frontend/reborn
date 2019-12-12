@@ -61,8 +61,10 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
             if (data) {
                 this.data = data;
             }
+            this.loading = false;
         }).catch(e => {
-            this.error = e
-        }).finally(() => this.loading = false);
+            this.error = e;
+            this.loading = false;
+        });
     }
 }

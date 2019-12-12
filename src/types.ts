@@ -111,7 +111,7 @@ export interface QueryResult<T = any, P extends BaseModel = any> {
 export interface MutationResult<T, P> {
     loading: boolean;
     data: P;
-    mutate(args0: T): void;
+    mutate(args0: T): Promise<void>;
     error: any;
 }
 
