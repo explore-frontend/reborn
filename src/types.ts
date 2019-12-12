@@ -96,7 +96,7 @@ export interface RestMutationOptions<T extends BaseModel> {
     headers?: {
         contentType?: 'applicaton/json' | 'multipart/form-data';
     }
-    variables: MutationVariablesFn<T> | Record<string, any>,
+    variables?: MutationVariablesFn<T> | Record<string, any>,
     initState?: Record<string, any>;
 }
 
