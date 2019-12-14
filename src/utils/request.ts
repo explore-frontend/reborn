@@ -5,7 +5,7 @@ export interface RequestParams {
     method: 'get' | 'post' | 'delete' | 'put';
     data?: Record<string, any>;
     headers?: {
-        'content-type'?: 'applicaton/json' | 'multipart/form-data';
+        'content-type'?: 'application/json' | 'multipart/form-data';
     } & Record<string, any>;
 }
 export interface RestOptions {
@@ -20,7 +20,7 @@ export function createRequest({
     responseTransformer
 }: RestOptions = {}) {
     const defaultHeaders = Object.assign({
-        'content-type': 'applicaton/json'
+        'content-type': 'application/json'
     }, headers);
     return function request(params: RequestParams) {
         const data = params.data ?? {};

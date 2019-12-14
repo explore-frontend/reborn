@@ -76,7 +76,7 @@ export interface RestQueryOptions<T extends BaseModel> {
     url: string;
     method?: 'get' | 'post' | 'delete' | 'put';
     headers?: {
-        'content-type'?: 'applicaton/json' | 'multipart/form-data';
+        'content-type'?: 'application/json' | 'multipart/form-data';
     }
     variables?: VariablesFn<T> | Record<string, any>;
     skip?: BooleanFn<T> | boolean;
@@ -94,7 +94,7 @@ export interface RestMutationOptions<T extends BaseModel> {
     url: string;
     method?: 'get' | 'post' | 'delete' | 'put';
     headers?: {
-        'content-type'?: 'applicaton/json' | 'multipart/form-data';
+        'content-type'?: 'application/json' | 'multipart/form-data';
     }
     variables?: MutationVariablesFn<T> | Record<string, any>,
     initState?: Record<string, any>;
