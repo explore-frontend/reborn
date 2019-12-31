@@ -32,10 +32,9 @@ export function createRequest({
             method,
             credentials: 'include',
             headers: Object.assign({}, defaultHeaders, params.headers),
-            body: method !== 'get'
-                ? JSON.stringify(data)
-                : undefined
-        }).then(res => res.json())
-        .then(responseTransformer, responseTransformer);
+            body: method !== 'get' ? JSON.stringify(data) : undefined
+        })
+        .then(res => res.ok ? res.json() : Promise.reject(res))
+        .then(responseTransformer);
     }
 }
