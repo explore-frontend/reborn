@@ -52,6 +52,8 @@ export class BaseModel {
     private subs: Subscription[] = [];
     private $$userProperties: Array<keyof this> = [];
     private $$apolloQueries: Array<ApolloQuery<any> | RestQuery<any>> = [];
+    // TODO临时放出来
+    $clients!: GraphqlClients;
     hasSubscribed = false;
 
     private $streamsFromApollo: StreamsObj = {};
