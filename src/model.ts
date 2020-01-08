@@ -14,6 +14,7 @@ import {
 } from './types';
 import { defineReactive } from './install';
 import 'reflect-metadata';
+import { Route } from 'vue-router';
 
 const skipProperty = [
     'subscriptions',
@@ -47,7 +48,8 @@ function registerProperty(obj: any, key: string, value: any) {
 }
 
 export class BaseModel {
-    protected readonly $vm: Vue;
+    private readonly $vm: Vue;
+    protected readonly $route: Route;
     private readonly $store: Store;
     private subs: Subscription[] = [];
     private $$userProperties: Array<keyof this> = [];
@@ -73,6 +75,7 @@ export class BaseModel {
         store: Store,
     ) {
         this.$vm = vm;
+        this.$route = vm.$route;
         this.$store = store;
     }
 
