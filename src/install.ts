@@ -50,7 +50,7 @@ export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, contex
 
 export function install(VueLibrary: VueConstructor) {
     VueLibrary.mixin({
-        created(this: Vue) {
+        beforeCreate() {
             // 为了适配小程序，$store去原型上找一下
             const store = this.$root.$options.apolloStore
                 || this.$root.$options.apolloStore
