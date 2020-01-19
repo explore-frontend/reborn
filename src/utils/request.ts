@@ -23,16 +23,16 @@ export function createRequest({
         'content-type': 'application/json'
     }, headers);
     return function request(params: RequestParams) {
-        const data = params.data ?? {};
+        const data = params.data;
         const method = params.method || 'get';
-        const url = method === 'get'
+        const url = method === 'get' && data
             ? `${uri}${params.url}?${shimStringify(data)}`
             : `${uri}${params.url}`;
         return fetch(url, {
             method,
             credentials: 'include',
             headers: Object.assign({}, defaultHeaders, params.headers),
-            body: method !== 'get' ? JSON.stringify(data) : undefined
+            body: method !== 'get' ? JSON.stringify(data ?? {}) : undefined
         })
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(responseTransformer);
