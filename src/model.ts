@@ -49,7 +49,7 @@ function registerProperty(obj: any, key: string, value: any) {
 
 export class BaseModel {
     private readonly $vm: Vue;
-    protected readonly $route: Route;
+    protected readonly $route!: Route;
     private readonly $store: Store;
     private subs: Subscription[] = [];
     private $$userProperties: Array<keyof this> = [];
@@ -75,8 +75,13 @@ export class BaseModel {
         store: Store,
     ) {
         this.$vm = vm;
-        this.$route = vm.$route;
         this.$store = store;
+        // 保证每次获取都是响应式
+        Object.defineProperty(this, '$route', {
+            get() {
+                return vm.$route;
+            },
+        });
     }
 
     private $$autoBind() {

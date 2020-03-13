@@ -100,7 +100,7 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
         this.observer.subscribe({
             next: ({data, loading}) => {
                 this.error = null;
-                if (!loading) {
+                if (data) {
                     this.data = data;
                 }
                 this.loading = loading;
@@ -163,7 +163,19 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
             if (!this.observer) {
                 this.initObserver();
             } else {
-                this.observer.setVariables(this.variables || {});
+                this.observer.setVariables(this.variables || {}).then(result => {
+                    // TODO太二了……缓存是不会走到Observavle里的，所以需要手动处理
+                    if (!result || !result.data) {
+                        return;
+                    }
+
+                    this.data = result.data as DataType;
+                    this.loading = result.loading;
+                    this.observable.shamefullySendNext(result as {
+                        loading: boolean;
+                        data: DataType;
+                    });
+                });
             }
         });
     }
