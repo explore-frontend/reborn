@@ -67,7 +67,7 @@ export function getInitialStateFromQuery<T extends BaseModel>(
         throw new Error('No query found.');
     }
 
-    const {definitions} = queryDefine;
+    const { definitions } = queryDefine;
 
     definitions.forEach(item => {
         if ('selectionSet' in item) {
@@ -78,5 +78,8 @@ export function getInitialStateFromQuery<T extends BaseModel>(
             });
         }
     });
+    if (apolloDefine.initState) {
+        console.warn('"initState" field in query declare will no longer support!');
+    }
     return merge({}, initialState, apolloDefine.initState || {});
 }
