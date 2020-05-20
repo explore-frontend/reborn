@@ -81,6 +81,7 @@ export interface RestQueryOptions<T extends BaseModel> {
     variables?: VariablesFn<T> | Record<string, any>;
     skip?: BooleanFn<T> | boolean;
     initState?: Record<string, any>;
+    query?: Record<string, any>;
 }
 
 export interface ApolloMutationOptions<T extends BaseModel> {
@@ -98,6 +99,7 @@ export interface RestMutationOptions<T extends BaseModel> {
     }
     variables?: MutationVariablesFn<T> | Record<string, any>,
     initState?: Record<string, any>;
+    query?: Record<string, any>;
 }
 
 export interface QueryResult<T = any, P extends BaseModel = any> {

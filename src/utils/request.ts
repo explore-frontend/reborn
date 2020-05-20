@@ -24,6 +24,7 @@ export interface RequestParams {
     mode?: 'no-cors' | 'cors' | 'same-origin';
     data?: Record<string, any>;
     headers?: Headers;
+    query?: Record<string, any>
 }
 export interface RestOptions {
     uri?: string;
@@ -58,8 +59,8 @@ export function createRequest({
         const data = params.data;
         const method = params.method || 'get';
         const url = method === 'get' && data
-            ? `${uri}${params.url}?${shimStringify(data)}`
-            : `${uri}${params.url}`;
+            ? `${uri}${params.url}?${shimStringify(Object.assign(params.query, data))}`
+            : `${uri}${params.url}${ !!params.query ? '?' + shimStringify(params.query) : '' }`;
         const headers: Headers = {
             ...defaultHeaders,
             ...params.headers,

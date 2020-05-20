@@ -97,6 +97,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
             headers: this.option.headers,
             method: this.option.method || 'get',
             data: this.variables,
+            query: this.option.query
         }).then(data => {
             if (data) {
                 this.data = data;

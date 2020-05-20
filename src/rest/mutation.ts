@@ -49,7 +49,7 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
         return this.option.variables;
     }
 
-    mutate(params: any) {
+    mutate(params: any, query: any) {
         this.loading = true;
         this.error = null;
         return this.request({
@@ -57,6 +57,7 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
             headers: this.option.headers,
             method: this.option.method || 'get',
             data: this.variables(params),
+            query
         }).then(data => {
             if (data) {
                 this.data = data;
