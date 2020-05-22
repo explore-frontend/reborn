@@ -59,8 +59,8 @@ export function createRequest({
         const data = params.data;
         const method = params.method || 'get';
         const url = method === 'get' && data
-            ? `${uri}${params.url}?${shimStringify(Object.assign(params.query, data))}`
-            : `${uri}${params.url}${ !!params.query ? '?' + shimStringify(params.query) : '' }`;
+            ? `${uri}${params.url}?${shimStringify(data)}`
+            : `${uri}${params.url}`;
         const headers: Headers = {
             ...defaultHeaders,
             ...params.headers,
