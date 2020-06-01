@@ -45,7 +45,7 @@ import { defaultClient, aClient, bClient } from './clients';
 export default function createApp() {
     const app = new Vue({
         render: (h) => h(mainApp),
-        store: new Store({
+        apolloStore: new Store({
             defaultClient,
             clients: {
                 aClient,
