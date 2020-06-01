@@ -6,7 +6,7 @@
  */
 
 import Vue from 'vue';
-import { RestQueryOptions, VariablesFn } from '../types';
+import { RestQueryOptions, VariablesFn, UrlFn } from '../types';
 import { BaseModel } from '../model';
 import xstream from 'xstream';
 import { defineReactive } from '../install';
@@ -54,6 +54,12 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
         }
         return this.option.variables;
     }
+    private get url() {
+        if (typeof this.option.url === 'function') {
+            return (this.option.url as UrlFn<ModelType>).call(this.model, this.variables, this.vm.$route);
+        }
+        return this.option.url;
+    }
     prefetch() {
         // TODO
     }
@@ -65,6 +71,10 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
         }
         if (typeof this.option.skip === 'function') {
             const watcher = this.vm.$watch(() => this.skip, this.changeVariables);
+            this.listeners.push(watcher);
+        }
+        if (typeof this.option.url === 'function') {
+            const watcher = this.vm.$watch(() => this.url, this.changeVariables);
             this.listeners.push(watcher);
         }
         if (!this.skip) {
@@ -90,10 +100,11 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     }
 
     refetch() {
+        console.log(123123);
         this.loading = true;
         // TODO差缓存数据做SSR还原
         this.request({
-            url: this.option.url,
+            url: this.url,
             headers: this.option.headers,
             method: this.option.method || 'get',
             data: this.variables,

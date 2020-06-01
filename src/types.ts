@@ -62,7 +62,7 @@ export type VariablesFn<T> = (this: T, route: Route) => Record<string, any>
 export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Record<string, any>
 export type BooleanFn<T> = (this: T, route: Route) => boolean;
 export type NumberFn<T> = (this: T, route: Route) => number;
-
+export type UrlFn<T> = (this: T, params: any, route: Route) => string;
 export interface ApolloQueryOptions<T extends BaseModel> extends QueryOptions {
     client?: string;
     variables?: VariablesFn<T> | Record<string, any>;
@@ -73,7 +73,7 @@ export interface ApolloQueryOptions<T extends BaseModel> extends QueryOptions {
 }
 
 export interface RestQueryOptions<T extends BaseModel> {
-    url: string;
+    url: UrlFn<T> | string;
     method?: 'get' | 'post' | 'delete' | 'put';
     headers?: {
         'content-type'?: 'application/json' | 'multipart/form-data';
@@ -91,13 +91,19 @@ export interface ApolloMutationOptions<T extends BaseModel> {
 }
 
 export interface RestMutationOptions<T extends BaseModel> {
-    url: string;
+    url: UrlFn<T> | string;
     method?: 'get' | 'post' | 'delete' | 'put';
     headers?: {
         'content-type'?: 'application/json' | 'multipart/form-data';
     }
     variables?: MutationVariablesFn<T> | Record<string, any>,
     initState?: Record<string, any>;
+    query?: Record<string, any>;
+}
+
+export interface UrlParam {
+    variables?: Record<string, any>;
+    query?: Record<string, any>;
 }
 
 export interface QueryResult<T = any, P extends BaseModel = any> {
@@ -111,7 +117,7 @@ export interface QueryResult<T = any, P extends BaseModel = any> {
 export interface MutationResult<T, P> {
     loading: boolean;
     data: P;
-    mutate(args0: T): Promise<void>;
+    mutate(args0: T, args1?: any): Promise<void>;
     error: any;
 }
 

@@ -24,6 +24,7 @@ export interface RequestParams {
     mode?: 'no-cors' | 'cors' | 'same-origin';
     data?: Record<string, any>;
     headers?: Headers;
+    query?: Record<string, any>
 }
 export interface RestOptions {
     uri?: string;
