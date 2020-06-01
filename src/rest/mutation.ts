@@ -6,7 +6,7 @@
  */
 
 import Vue from 'vue';
-import { RestMutationOptions, MutationVariablesFn, UrlFn, UrlParam } from '../types';
+import { RestMutationOptions, MutationVariablesFn, UrlFn } from '../types';
 import { BaseModel } from '../model';
 import { defineReactive } from '../install';
 import { RequestParams } from '../utils/request';
@@ -40,7 +40,6 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
     private variables<T>(params: T) {
         if (this.option.variables && typeof this.option.variables === 'function') {
             return (this.option.variables as MutationVariablesFn<ModelType>).call(
-                // @ts-ignore
                 this.model,
                 params,
                 this.vm.$route,
@@ -48,22 +47,21 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
         }
         return this.option.variables;
     }
-    private url<T>(params: any) {
+    private url<T>(params: T) {
         if (this.option.url && typeof this.option.url === 'function') {
-            return (this.option.url as UrlFn<ModelType>).call(
-                // @ts-ignore
+            return this.option.url.call(
                 this.model,
-                params,
                 this.vm.$route,
+                params,
             );
         }
         return this.option.url;
     }
-    mutate(params: any, urlParams: any) {
+    mutate(params: any) {
         this.loading = true;
         this.error = null;
         return this.request({
-            url: this.url(urlParams),
+            url: this.url(this.variables(params)),
             headers: this.option.headers,
             method: this.option.method || 'get',
             data: this.variables(params),

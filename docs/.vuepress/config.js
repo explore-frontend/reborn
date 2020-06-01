@@ -38,14 +38,16 @@ module.exports = {
                         children: [
                             'base-model',
                             'apollo-query',
-                            'apollo-mutation'
+                            'apollo-mutation',
+                            'rest-query',
+                            'rest-mutation',
                         ]
                     }]
                 },
                 nav: [
                     { text: '主页', link: '/' },
                     { text: '指南', link: '/guide/' },
-                    { text: 'API参考', link: '/api/' }
+                    { text: 'API参考', link: '/api/' },
                 ]
             }
         },

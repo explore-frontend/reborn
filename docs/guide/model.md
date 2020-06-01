@@ -24,13 +24,6 @@ export default class ProfileModel extends BaseModel {
                 }
             }
         `,
-        initState: {
-            userInfo: {
-                name: '',
-                description: '',
-                sex: '',
-            },
-        },
         prefetch: true,
         skip() {
             return !this.id;

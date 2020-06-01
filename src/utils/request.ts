@@ -1,22 +1,5 @@
 import { shimStringify } from './qs';
-
-type ContentType = 'application/json'
-    | 'multipart/form-data'
-    | 'application/x-www-form-urlencoded';
-
-type Method = 'get'
-    | 'post'
-    | 'delete'
-    | 'put'
-    | 'patch'
-    | 'options'
-    | 'head'
-    | 'trace'
-    | 'connect';
-
-type Headers = {
-    'content-type'?: ContentType;
-} & Record<string, any>
+import { Method, ContentType, Headers } from '../types';
 
 export interface RequestParams {
     url: string;
@@ -28,7 +11,7 @@ export interface RequestParams {
 }
 export interface RestOptions {
     uri?: string;
-    headers?: any;
+    headers?: Headers;
     requestTransformer?: (data: any) => any;
     responseTransformer?: (data: any) => any;
 }
@@ -51,14 +34,14 @@ export function createRequest({
     responseTransformer,
     requestTransformer,
 }: RestOptions = {}) {
-    const defaultHeaders = {
+    const defaultHeaders: Headers = {
         'content-type': 'application/json',
         ...headers,
     };
     return function request(params: RequestParams) {
         const data = params.data;
-        const method = params.method || 'get';
-        const url = method === 'get' && data
+        const method = params.method || 'GET';
+        const url = method === 'GET' && data
             ? `${uri}${params.url}?${shimStringify(data)}`
             : `${uri}${params.url}`;
         const headers: Headers = {
@@ -67,7 +50,7 @@ export function createRequest({
         };
         const defaultRequestTransformer = requestTransformerMap[headers['content-type']!];
         let body;
-        if (method === 'get') {
+        if (method.toUpperCase() === 'GET') {
             body === undefined;
         } else if (requestTransformer) {
             body = requestTransformer(data);

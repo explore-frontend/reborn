@@ -78,8 +78,8 @@ export function getInitialStateFromQuery<T extends BaseModel>(
             });
         }
     });
-    if (apolloDefine.initState) {
+    if ('initState' in apolloDefine) {
         console.warn('"initState" field in query declare will no longer support!');
+        return merge({}, initialState, apolloDefine.initState || {});
     }
-    return merge({}, initialState, apolloDefine.initState || {});
 }

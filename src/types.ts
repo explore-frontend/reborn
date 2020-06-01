@@ -14,6 +14,35 @@ import Store from './store';
 import { BaseModel } from './model';
 import { DocumentNode } from 'graphql';
 
+
+export type ContentType = 'application/json'
+    | 'multipart/form-data'
+    | 'application/x-www-form-urlencoded';
+
+
+export type Headers = {
+    'content-type'?: ContentType;
+} & Record<string, any>
+
+export type Method = 'get'
+    | 'GET'
+    | 'post'
+    | 'POST'
+    | 'delete'
+    | 'DELETE'
+    | 'put'
+    | 'PUT'
+    | 'patch'
+    | 'PATCH'
+    | 'options'
+    | 'OPTIONS'
+    | 'head'
+    | 'HEAD'
+    | 'trace'
+    | 'TRACE'
+    | 'connect'
+    | 'CONNECT';
+
 export interface StoreModelInstance<T> {
     constructor: Constructor<T>;
     instance: T | null;
@@ -62,7 +91,7 @@ export type VariablesFn<T> = (this: T, route: Route) => Record<string, any>
 export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Record<string, any>
 export type BooleanFn<T> = (this: T, route: Route) => boolean;
 export type NumberFn<T> = (this: T, route: Route) => number;
-export type UrlFn<T> = (this: T, params: any, route: Route) => string;
+export type UrlFn<T> = (this: T, route: Route, variables: Record<string, any> | undefined) => string;
 export interface ApolloQueryOptions<T extends BaseModel> extends QueryOptions {
     client?: string;
     variables?: VariablesFn<T> | Record<string, any>;
@@ -74,36 +103,23 @@ export interface ApolloQueryOptions<T extends BaseModel> extends QueryOptions {
 
 export interface RestQueryOptions<T extends BaseModel> {
     url: UrlFn<T> | string;
-    method?: 'get' | 'post' | 'delete' | 'put';
-    headers?: {
-        'content-type'?: 'application/json' | 'multipart/form-data';
-    }
+    method?: Method;
+    headers?: Headers;
     variables?: VariablesFn<T> | Record<string, any>;
     skip?: BooleanFn<T> | boolean;
-    initState?: Record<string, any>;
 }
 
 export interface ApolloMutationOptions<T extends BaseModel> {
     client?: string;
     mutation: DocumentNode;
     variables: MutationVariablesFn<T> | Record<string, any>,
-    initState?: Record<string, any>;
 }
 
 export interface RestMutationOptions<T extends BaseModel> {
     url: UrlFn<T> | string;
-    method?: 'get' | 'post' | 'delete' | 'put';
-    headers?: {
-        'content-type'?: 'application/json' | 'multipart/form-data';
-    }
+    method?: Method;
+    headers?: Headers
     variables?: MutationVariablesFn<T> | Record<string, any>,
-    initState?: Record<string, any>;
-    query?: Record<string, any>;
-}
-
-export interface UrlParam {
-    variables?: Record<string, any>;
-    query?: Record<string, any>;
 }
 
 export interface QueryResult<T = any, P extends BaseModel = any> {

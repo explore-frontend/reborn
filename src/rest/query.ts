@@ -56,7 +56,11 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     }
     private get url() {
         if (typeof this.option.url === 'function') {
-            return (this.option.url as UrlFn<ModelType>).call(this.model, this.variables, this.vm.$route);
+            return this.option.url.call(
+                this.model,
+                this.vm.$route,
+                this.variables,
+            );
         }
         return this.option.url;
     }
@@ -100,10 +104,9 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     }
 
     refetch() {
-        console.log(123123);
         this.loading = true;
         // TODO差缓存数据做SSR还原
-        this.request({
+        return this.request({
             url: this.url,
             headers: this.option.headers,
             method: this.option.method || 'get',

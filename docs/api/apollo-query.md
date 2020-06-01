@@ -1,6 +1,6 @@
 # apolloQuery
 
-在Model上定义一个Query
+在Model上定义一个GraphQL Query
 
 ## 选项
 
@@ -99,24 +99,6 @@ GraphQL文档，定义一个graphql query查询
 ### fetchPolicy
 query缓存模式，具体请参考[ApolloClient watchQuery](https://www.apollographql.com/docs/react/api/apollo-client#ApolloClient.watchQuery)
 
-
-### initState
-初始状态定义。
-
-在query请求阶段，初始字段默认设定为null，如有特殊需求，比如需要制定默认值等，请使用initState进行定义，Model在初始化query的时候会自动进行assign操作。
-
-例如
-```javascript
-{
-    initState: {
-        userInfo: {
-            name: '',
-            description: '',
-            sex: '',
-        },
-    }
-}
-```
 ## 属性
 ### data
 返回当前query的查询结果，其结果为响应式数据
