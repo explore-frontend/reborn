@@ -40,7 +40,7 @@ export function createRequest({
     };
     return function request(params: RequestParams) {
         const data = params.data;
-        const method = params.method || 'GET';
+        const method = params.method.toUpperCase() || 'GET';
         const url = method === 'GET' && data
             ? `${uri}${params.url}?${shimStringify(data)}`
             : `${uri}${params.url}`;
@@ -49,13 +49,17 @@ export function createRequest({
             ...params.headers,
         };
         const defaultRequestTransformer = requestTransformerMap[headers['content-type']!];
-        let body;
-        if (method.toUpperCase() === 'GET') {
+        let body: string | FormData | undefined;
+        if (method === 'GET') {
             body === undefined;
         } else if (requestTransformer) {
             body = requestTransformer(data);
         } else {
             body = defaultRequestTransformer(data);
+        }
+        if (body instanceof FormData) {
+            // form-data的话header交由浏览器自己计算
+            delete headers['content-type'];
         }
         return fetch(url, {
             method,

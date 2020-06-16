@@ -82,4 +82,5 @@ export function getInitialStateFromQuery<T extends BaseModel>(
         console.warn('"initState" field in query declare will no longer support!');
         return merge({}, initialState, apolloDefine.initState || {});
     }
+    return initialState;
 }

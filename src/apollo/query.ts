@@ -66,12 +66,18 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
         if (!canPrefetch || this.hasPrefetched) {
             return;
         }
-        return this.client.query<DataType>(this.queryOptions)
-            .then(({ data }) => {
-                this.hasPrefetched = true;
-                this.data = data;
-                return data;
-            });
+        this.loading = true;
+        return this.client.query<DataType>({
+            ...this.queryOptions,
+            fetchPolicy: this.queryOptions.fetchPolicy === 'cache-and-network'
+                ? 'cache-first'
+                : this.queryOptions.fetchPolicy
+        }).then(({ data }) => {
+            this.loading = false;
+            this.hasPrefetched = true;
+            this.data = data;
+            return data;
+        });
     }
     private get queryOptions() {
         return {

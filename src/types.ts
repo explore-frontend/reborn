@@ -8,7 +8,7 @@
 import Vue from 'vue';
 import { Route } from 'vue-router';
 import { Stream } from 'xstream';
-import { ApolloClient, QueryOptions } from 'apollo-client';
+import { ApolloClient, WatchQueryOptions } from 'apollo-client';
 
 import Store from './store';
 import { BaseModel } from './model';
@@ -92,8 +92,10 @@ export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Rec
 export type BooleanFn<T> = (this: T, route: Route) => boolean;
 export type NumberFn<T> = (this: T, route: Route) => number;
 export type UrlFn<T> = (this: T, route: Route, variables: Record<string, any> | undefined) => string;
-export interface ApolloQueryOptions<T extends BaseModel> extends QueryOptions {
+export interface ApolloQueryOptions<T extends BaseModel> {
+    query: DocumentNode;
     client?: string;
+    fetchPolicy?: WatchQueryOptions['fetchPolicy'];
     variables?: VariablesFn<T> | Record<string, any>;
     prefetch?: BooleanFn<T> | boolean;
     skip?: BooleanFn<T> | boolean;

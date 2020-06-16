@@ -7,6 +7,7 @@
 import { useApolloModel, install } from './install';
 import Store from './store';
 import { BaseModel } from './model';
+import { useXStream } from './utils/stream';
 import {
     apolloQuery,
     apolloMutation,
@@ -23,6 +24,7 @@ export default {
     restQuery,
     restMutation,
     useApolloModel,
+    useXStream,
 };
 
 export * from './types';

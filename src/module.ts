@@ -7,6 +7,7 @@
 import { useApolloModel, install } from './install';
 import Store from './store';
 export { BaseModel } from './model';
+export { useXStream } from './utils/stream';
 export {
     apolloQuery,
     apolloMutation,

@@ -109,14 +109,17 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
         return this.request({
             url: this.url,
             headers: this.option.headers,
-            method: this.option.method || 'get',
+            method: this.option.method || 'GET',
             data: this.variables,
         }).then(data => {
+            this.error = null;
             if (data) {
                 this.data = data;
             }
+            this.loading = false;
         }).catch(e => {
-            this.error = e
-        }).finally(() => this.loading = false);;
+            this.error = e;
+            this.loading = false;
+        });
     }
 }

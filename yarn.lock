@@ -712,13 +712,6 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/graphql@^14.5.0":
-  version "14.5.0"
-  resolved "https://npm.corp.kuaishou.com/@types%2fgraphql/-/graphql-14.5.0.tgz#a545fb3bc8013a3547cf2f07f5e13a33642b75d6"
-  integrity sha1-pUX7O8gBOjVHzy8H9eE6M2QrddY=
-  dependencies:
-    graphql "*"
-
 "@types/minimatch@*":
   version "3.0.3"
   resolved "https://npm.corp.kuaishou.com/@types%2fminimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
@@ -3613,12 +3606,10 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6
   resolved "https://npm.corp.kuaishou.com/graceful-fs/-/graceful-fs-4.2.0.tgz#8d8fdc73977cb04104721cb53666c1ca64cd328b"
   integrity sha1-jY/cc5d8sEEEchy1NmbBymTNMos=
 
-graphql@*:
-  version "14.5.8"
-  resolved "https://npm.corp.kuaishou.com/graphql/-/graphql-14.5.8.tgz#504f3d3114cb9a0a3f359bbbcf38d9e5bf6a6b3c"
-  integrity sha1-UE89MRTLmgo/NZu7zzjZ5b9qazw=
-  dependencies:
-    iterall "^1.2.2"
+graphql@^15.0.0:
+  version "15.1.0"
+  resolved "https://npm.corp.kuaishou.com/graphql/-/graphql-15.1.0.tgz#b93e28de805294ec08e1630d901db550cb8960a1"
+  integrity sha1-uT4o3oBSlOwI4WMNkB21UMuJYKE=
 
 gray-matter@^4.0.1:
   version "4.0.2"
@@ -4362,11 +4353,6 @@ isstream@~0.1.2:
   version "0.1.2"
   resolved "https://npm.corp.kuaishou.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
-
-iterall@^1.2.2:
-  version "1.2.2"
-  resolved "https://npm.corp.kuaishou.com/iterall/-/iterall-1.2.2.tgz#92d70deb8028e0c39ff3164fdbf4d8b088130cd7"
-  integrity sha1-ktcN64Ao4MOf8xZP2/TYsIgTDNc=
 
 javascript-stringify@^1.6.0:
   version "1.6.0"

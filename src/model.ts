@@ -48,7 +48,7 @@ function registerProperty(obj: any, key: string, value: any) {
 }
 
 export class BaseModel {
-    private readonly $vm: Vue;
+    protected readonly $vm: Vue;
     protected readonly $route!: Route;
     private readonly $store: Store;
     private subs: Subscription[] = [];

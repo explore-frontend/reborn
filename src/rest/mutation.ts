@@ -66,6 +66,7 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
             method: this.option.method || 'get',
             data: this.variables(params),
         }).then(data => {
+            this.error = null;
             if (data) {
                 this.data = data;
             }
