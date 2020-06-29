@@ -6,7 +6,7 @@
  */
 
 import Vue from 'vue';
-import { RestQueryOptions, VariablesFn, UrlFn } from '../types';
+import { RestQueryOptions, VariablesFn } from '../types';
 import { BaseModel } from '../model';
 import xstream from 'xstream';
 import { defineReactive } from '../install';
@@ -20,7 +20,6 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     private request: (params: RequestParams) => Promise<any>;
     private model: ModelType;
     private vm: Vue;
-    private hasPrefetched = false;
 
     loading: boolean = false;
     data!: DataType;
@@ -69,21 +68,8 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     }
 
     init() {
-        if (typeof this.option.variables === 'function') {
-            const watcher = this.vm.$watch(() => this.variables, this.changeVariables);
-            this.listeners.push(watcher);
-        }
-        if (typeof this.option.skip === 'function') {
-            const watcher = this.vm.$watch(() => this.skip, this.changeVariables);
-            this.listeners.push(watcher);
-        }
-        if (typeof this.option.url === 'function') {
-            const watcher = this.vm.$watch(() => this.url, this.changeVariables);
-            this.listeners.push(watcher);
-        }
-        if (!this.skip) {
-            this.refetch();
-        }
+        const watcher = this.vm.$watch(() => [ this.variables, this.skip, this.url ], this.changeVariables);
+        this.listeners.push(watcher);
     }
     private changeVariables = () => {
         this.vm.$nextTick(() => {

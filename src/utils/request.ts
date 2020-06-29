@@ -44,11 +44,11 @@ export function createRequest({
         const url = method === 'GET' && data
             ? `${uri}${params.url}?${shimStringify(data)}`
             : `${uri}${params.url}`;
-        const headers: Headers = {
+        const headers: Record<string, any> = {
             ...defaultHeaders,
             ...params.headers,
         };
-        const defaultRequestTransformer = requestTransformerMap[headers['content-type']!];
+        const defaultRequestTransformer = requestTransformerMap[headers['content-type'] as Headers['content-type'] || 'application/json'];
         let body: string | FormData | undefined;
         if (method === 'GET') {
             body === undefined;
@@ -60,6 +60,8 @@ export function createRequest({
         if (body instanceof FormData) {
             // form-data的话header交由浏览器自己计算
             delete headers['content-type'];
+        } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
+            headers['content-type'] = headers['content-type'] + 'charset=UTF-8';
         }
         return fetch(url, {
             method,

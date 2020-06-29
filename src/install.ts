@@ -11,7 +11,7 @@ export function defineReactive(obj: object, key: string, val?: any, customSetter
     return Vue.util.defineReactive(obj, key, val, customSetter, shallow);
 }
 
-export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>) {
+export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>, context?: any) {
     const instance = getCurrentInstance();
     const root = instance?.$root;
     // 为了适配小程序，$store去原型上找一下

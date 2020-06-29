@@ -77,6 +77,9 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
             this.hasPrefetched = true;
             this.data = data;
             return data;
+        }).catch(err => {
+            this.loading = false;
+            this.error = err;
         });
     }
     private get queryOptions() {
@@ -129,14 +132,9 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
         if (!this.skip) {
             this.initObserver();
         }
-        if (typeof this.option.variables === 'function') {
-            const watcher = this.vm.$watch(() => this.variables, this.changeVariables);
-            this.listeners.push(watcher);
-        }
-        if (typeof this.option.skip === 'function') {
-            const watcher = this.vm.$watch(() => this.skip, this.changeVariables);
-            this.listeners.push(watcher);
-        }
+        const watcher = this.vm.$watch(() => [this.variables, this.skip], this.changeVariables);
+        this.listeners.push(watcher);
+
         if (typeof this.option.pollInterval === 'function') {
             const watcher = this.vm.$watch(() => this.pollInterval, () => {
                 if (this.observer) {
