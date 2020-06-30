@@ -70,6 +70,9 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     init() {
         const watcher = this.vm.$watch(() => [ this.variables, this.skip, this.url ], this.changeVariables);
         this.listeners.push(watcher);
+        if (!this.skip) {
+            this.refetch();
+        }
     }
     private changeVariables = () => {
         this.vm.$nextTick(() => {
