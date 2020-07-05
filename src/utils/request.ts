@@ -61,7 +61,7 @@ export function createRequest({
             // form-data的话header交由浏览器自己计算
             delete headers['content-type'];
         } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
-            headers['content-type'] = headers['content-type'] + 'charset=UTF-8';
+            headers['content-type'] = headers['content-type'] + ';charset=UTF-8';
         }
         return fetch(url, {
             method,
