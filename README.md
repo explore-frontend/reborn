@@ -1,5 +1,5 @@
 # vue-apollo-model
-一个基于Apollo的Vue.js状态管理方案
+一个基于Apollo的Vue.js状态管理方案，[文档](http://skyline0705.github.io/vue-apollo-model/)
 
 > 注意，项目目前还处于探索期，标记为`beta`的功能请谨慎使用
 
