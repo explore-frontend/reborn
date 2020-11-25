@@ -1,25 +1,20 @@
-import { StoreModelInstance, GraphqlClients, Constructor } from './types';
+import { StoreModelInstance, GraphqlClients, RestClients } from './types';
+import { Constructor } from './types';
 import { BaseModel } from './model';
-import { ApolloClient } from 'apollo-client';
-import { createRequest, RestOptions, RequestParams } from './utils/request';
 
-interface StoreConstructorOptions {
-    defaultClient: ApolloClient<any>;
-    clients?: Record<string, ApolloClient<any>>;
-    restOptions?: RestOptions;
+type StoreConstructorOptions = {
+    gql?: GraphqlClients;
+    rest?: RestClients;
 }
 
 export default class Store {
     private modelMap = new Map();
-    graphqlClients: GraphqlClients;
-    request: (params: RequestParams) => Promise<any>;
+    gqlClients?: GraphqlClients;
+    restClients?: RestClients;
 
     constructor(options: StoreConstructorOptions) {
-        this.graphqlClients = {
-            defaultClient: options.defaultClient,
-            clients: options.clients || {}
-        };
-        this.request = createRequest(options.restOptions);
+        this.gqlClients = options.gql;
+        this.restClients = options.rest;
     }
 
     getModelInstance<T extends BaseModel>(constructor: Constructor<T>) {
@@ -41,11 +36,14 @@ export default class Store {
 
     exportStates() {
         const clientsExtracts: any = {};
-        for (const key in this.graphqlClients.clients) {
-            clientsExtracts[key] = this.graphqlClients.clients[key].cache.extract();
+        if (!this.gqlClients) {
+            return {}
+        }
+        for (const key in this.gqlClients.clients) {
+            clientsExtracts[key] = this.gqlClients.clients[key].cache.extract();
         }
         return {
-            defaultClient: this.graphqlClients.defaultClient.cache.extract(),
+            defaultClient: this.gqlClients.defaultClient.cache.extract(),
             clients: {
                 ...clientsExtracts
             },

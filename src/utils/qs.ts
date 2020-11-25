@@ -21,10 +21,10 @@ export function shimStringify(obj: any) {
     if (typeof obj !== 'object') {
         throw new Error('Params stringify Error, only support object');
     }
-    return Object.keys(obj).sort().map(k => {
+    return Object.keys(obj).map(k => {
         const key = encode(k) + '=';
         if (Array.isArray(obj[k])) {
-          return obj[k].sort().map((v: any) => {
+          return obj[k].map((v: any) => {
             return key + encode(v);
           }).join('&');
         }

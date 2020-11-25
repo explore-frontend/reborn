@@ -2,17 +2,19 @@ import Vue from 'vue';
 import xstream, { Subscription } from 'xstream';
 
 import Store from './store';
-import { ApolloQuery } from './apollo/query';
-import { ApolloMutation } from './apollo/mutation';
-import { RestQuery } from './rest/query';
-import { RestMutation } from './rest/mutation';
+import {
+    ApolloQuery,
+    ApolloMutation,
+    RestQuery,
+    RestMutation,
+} from './decorators/index';
 import {
     StreamsObj,
     GraphqlClients,
-    Constructor,
+    RestClients,
     VueApolloModelMetadata,
 } from './types';
-import { defineReactive } from './install';
+import { Constructor } from './types';
 import 'reflect-metadata';
 import { Route } from 'vue-router';
 
@@ -23,6 +25,7 @@ const skipProperty = [
     'startSubscriptions',
     'prefetch',
     'destroy',
+    'constructor',
 ];
 
 function isSkipProperty(key: string) {
@@ -32,8 +35,10 @@ function isSkipProperty(key: string) {
         || skipProperty.includes(key);
 }
 
-function getClient(clients: GraphqlClients, clientName?: string) {
-    return clientName && clientName in clients.clients
+function getClient<T extends GraphqlClients>(clients: T, clientName?: string): GraphqlClients['defaultClient'];
+function getClient<T extends RestClients>(clients: T, clientName?: string): RestClients['defaultClient'];
+function getClient(clients: any, clientName?: string) {
+    return clientName && clients.clients && clientName in clients.clients
         ? clients.clients[clientName]
         : clients.defaultClient;
 }
@@ -52,7 +57,10 @@ export class BaseModel {
     protected readonly $route!: Route;
     private readonly $store: Store;
     private subs: Subscription[] = [];
-    private $$userProperties: Array<keyof this> = [];
+    private $$userProperties: Array<{
+        key: string;
+        type: 'getter' | 'function' | 'other';
+    }> = [];
     private $$apolloQueries: Array<ApolloQuery<any> | RestQuery<any>> = [];
     // TODO临时放出来
     $clients!: GraphqlClients;
@@ -85,9 +93,11 @@ export class BaseModel {
     }
 
     private $$autoBind() {
-        for (const key of this.$$userProperties) {
-            if (typeof this[key] === 'function') {
-                this[key] = (this[key] as unknown as Function).bind(this);
+        for (const item of this.$$userProperties) {
+            if (item.type === 'function') {
+                Object.defineProperty(this, item.key, {
+                    value: (this[item.key as keyof this] as unknown as Function).bind(this)
+                });
             }
         }
     }
@@ -99,32 +109,57 @@ export class BaseModel {
         this.$$initSubscriptions();
         this.$$autoBind();
         // TODO因为apollo的缓存有点迷，临时性还是先把$clients放出来了，但是不推荐使用……
-        defineReactive(this, '$clients', this.$store.graphqlClients)
+        Object.defineProperty(this, '$clients', {
+            get() {
+                return this.$store.graphqlClients;
+            },
+            configurable: true,
+        });
     }
 
-    private $$addProperty(keys: Array<keyof this>) {
-        for (const key of keys) {
-            if (!isSkipProperty(key as string)) {
-                this.$$userProperties.push(key);
+    private $$addProperty(target: any) {
+        (Object.getOwnPropertyNames(target)).forEach(key => {
+            if (isSkipProperty(key)) {
+                return;
             }
-        }
+            const desc = Object.getOwnPropertyDescriptor(target, key)!;
+            if (desc.get) {
+                this.$$userProperties.push({
+                    key,
+                    type: 'getter',
+                });
+            } else if (typeof desc.value === 'function') {
+                this.$$userProperties.push({
+                    key,
+                    type: 'function',
+                });
+            } else {
+                this.$$userProperties.push({
+                    key,
+                    type: 'other',
+                });
+            }
+        });
     }
 
     private $$collectProperties() {
         // 处理自身属性
-        this.$$addProperty(Object.keys(this) as Array<keyof this>)
+        this.$$addProperty(this);
+        Object.getOwnPropertyNames(this)
+        
+        
         // 处理原型链
         let proto = Object.getPrototypeOf(this);
         while (proto && proto !== Object.prototype) {
-            this.$$addProperty(Object.keys(proto) as Array<keyof this>)
+            this.$$addProperty(proto);
             proto = Object.getPrototypeOf(proto);
         }
     }
 
     private $$initState() {
-        for (const key of this.$$userProperties) {
-            if (typeof this[key] !== 'function') {
-                makeObservable(this, key);
+        for (const item of this.$$userProperties) {
+            if (item.type === 'other') {
+                makeObservable(this, item.key as keyof this);
             }
         }
     }
@@ -138,6 +173,12 @@ export class BaseModel {
         key: string,
         options: VueApolloModelMetadata<T>,
     ) {
+        if (options.type.startsWith('apollo') && !this.$store.gqlClients) {
+            throw new Error('Before use an apolloQuery / apolloMutation, you must init "gqlClients" first');
+        }
+        if (options.type.startsWith('rest') && !this.$store.restClients) {
+            throw new Error('Before use an restQuery / restMutation, you must init "gqlClients" first');
+        }
         if (options.type.endsWith('Mutation')) {
             let mutation: ApolloMutation<T> | RestMutation<T>;
             if (options.type === 'apolloMutation') {
@@ -145,14 +186,14 @@ export class BaseModel {
                     options.detail,
                     this as unknown as T,
                     this.$vm,
-                    getClient(this.$store.graphqlClients, options.detail.client),
+                    getClient(this.$store.gqlClients!, options.detail.client),
                 );
             } else if (options.type === 'restMutation') {
                 mutation = new RestMutation<T>(
                     options.detail,
                     this as unknown as T,
                     this.$vm,
-                    this.$store.request
+                    getClient(this.$store.restClients!, options.detail.client),
                 )
             }
             const value = {
@@ -177,14 +218,14 @@ export class BaseModel {
                     options.detail,
                     this as unknown as T,
                     this.$vm,
-                    getClient(this.$store.graphqlClients, options.detail.client),
+                    getClient(this.$store.gqlClients!, options.detail.client),
                 );
             } else if (options.type === 'restQuery') {
                 query = new RestQuery<T>(
                     options.detail,
                     this as unknown as T,
                     this.$vm,
-                    this.$store.request,
+                    getClient(this.$store.restClients!, options.detail.client),
                 )
             }
             const value = {
@@ -246,14 +287,24 @@ export class BaseModel {
 
         Object.keys(this.$streamsFromSubscriptions).forEach(key => {
             const rKey = key.lastIndexOf('$') === key.length - 1 ? key.slice(0, -1) : key;
-            if (!(rKey in this)) {
-                defineReactive(this, rKey, null);
+            // TODO后面看一下怎么把这部分subscriptions的东西干掉吧= =
+            const obj = Vue.observable({
+                data: null as any,
+            });
+            if (!(rKey in this)) { 
+                Object.defineProperty(this, rKey, {
+                    get() {
+                        return obj.data
+                    },
+                    set(data: any) {
+                        obj.data = data;
+                    },
+                });
             }
             const sub = this.$streamsFromSubscriptions[key].subscribe({
                 next: val => {
                     // TODO subscriptions的形式后面还需要改变
-                    // @ts-ignore
-                    this[rKey] = val;
+                    obj.data = val
                 },
             });
             this.subs.push(sub);
@@ -294,11 +345,22 @@ function makeObservable<T extends BaseModel>(model: T, key: keyof T) {
         },
     });
 
-    defineReactive(model, key as string, initialValue, () => {
-        Promise.resolve().then(() => {
-            if (observerListener) {
-                observerListener.next(model[key]);
-            }
-        });
+    // TODO后面看一下要怎么改动常规属性……
+    const obj = Vue.observable({
+        data: initialValue,
     });
+
+    Object.defineProperty(model, key as string, {
+        get() {
+            return obj.data;
+        },
+        set(data: T[keyof T]) {
+            obj.data = data;
+            Promise.resolve().then(() => {
+                if (observerListener) {
+                    observerListener.next(model[key]);
+                }
+            });
+        },
+    })
 }

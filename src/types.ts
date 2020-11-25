@@ -5,8 +5,8 @@
  * Oct 29, 2018
  */
 
-import Vue from 'vue';
 import { Route } from 'vue-router';
+import Vue from 'vue';
 import { Stream } from 'xstream';
 import { ApolloClient, WatchQueryOptions } from 'apollo-client';
 
@@ -14,6 +14,8 @@ import Store from './store';
 import { BaseModel } from './model';
 import { DocumentNode } from 'graphql';
 
+import { RequestParams } from './clients/rest';
+export type Constructor<T> = new (...args: any[]) => T;
 
 export type ContentType = 'application/json'
     | 'multipart/form-data'
@@ -49,30 +51,15 @@ export interface StoreModelInstance<T> {
     count: number;
 }
 
-
-declare module 'vue/types/options' {
-    interface ComponentOptions<V extends Vue> {
-        // TODO这个类型不对，后面改一下
-        models?: any;
-        apolloStore?: Store;
-    }
-}
-
-
 declare module 'vue/types/vue' {
     interface Vue {
         apolloStore?: Store;
     }
-    interface VueConstructor {
-        util: {
-            defineReactive: (
-                obj: object,
-                key: string,
-                val?: any,
-                customSetter?: (val?: any) => void,
-                shallow?: boolean,
-            ) => {};
-        };
+}
+
+declare module 'vue/types/options' {
+    interface ComponentOptions<V extends Vue> {
+        apolloStore?: Store;
     }
 }
 
@@ -92,7 +79,7 @@ export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Rec
 export type BooleanFn<T> = (this: T, route: Route) => boolean;
 export type NumberFn<T> = (this: T, route: Route) => number;
 export type UrlFn<T> = (this: T, route: Route, variables: Record<string, any> | undefined) => string;
-export interface ApolloQueryOptions<T extends BaseModel> {
+export type ApolloQueryOptions<T extends BaseModel> = {
     query: DocumentNode;
     client?: string;
     fetchPolicy?: WatchQueryOptions['fetchPolicy'];
@@ -100,51 +87,62 @@ export interface ApolloQueryOptions<T extends BaseModel> {
     prefetch?: BooleanFn<T> | boolean;
     skip?: BooleanFn<T> | boolean;
     pollInterval?: NumberFn<T> | number;
-    initState?: Record<string, any>;
 }
 
-export interface RestQueryOptions<T extends BaseModel> {
+export type ApolloFetchMoreOptions<DataType> = {
+    variables?: Record<string, any>;
+    updateQuery(prev: DataType, next: DataType | undefined): DataType;
+}
+
+export type RestQueryOptions<T extends BaseModel> = {
     url: UrlFn<T> | string;
     method?: Method;
     headers?: Headers;
     variables?: VariablesFn<T> | Record<string, any>;
     skip?: BooleanFn<T> | boolean;
+    client?: string;
 }
 
-export interface ApolloMutationOptions<T extends BaseModel> {
+export type ApolloMutationOptions<T extends BaseModel> = {
     client?: string;
     mutation: DocumentNode;
     variables: MutationVariablesFn<T> | Record<string, any>,
 }
 
-export interface RestMutationOptions<T extends BaseModel> {
+export type RestMutationOptions<T extends BaseModel> = {
+    client?: string;
     url: UrlFn<T> | string;
     method?: Method;
     headers?: Headers
     variables?: MutationVariablesFn<T> | Record<string, any>,
 }
 
-export interface QueryResult<T = any, P extends BaseModel = any> {
+export type QueryResult<T = any> = {
     refetch(): Promise<void>;
     data: T;
     loading: boolean;
-    fetchMore(options: ApolloQueryOptions<P>): Promise<void>;
+    fetchMore(options: ApolloFetchMoreOptions<T>): Promise<void>;
     error: any;
 }
 
-export interface MutationResult<T, P> {
+export type MutationResult<T, P> = {
     loading: boolean;
     data: P;
     mutate(args0: T, args1?: any): Promise<void>;
     error: any;
 }
 
-export interface GraphqlClients {
-    defaultClient: ApolloClient<any>;
-    clients: Record<string, ApolloClient<any>>;
-}
-export type Constructor<T> = new (...args: any[]) => T;
+export type RestClient<T> = (params: RequestParams) => Promise<T>;
 
+export type RestClients = {
+    defaultClient: RestClient<any>;
+    clients?: Record<string, RestClient<any>>;
+}
+
+export type GraphqlClients = {
+    defaultClient: ApolloClient<any>;
+    clients?: Record<string, ApolloClient<any>>;
+}
 export type VueApolloModelMetadata<T extends BaseModel> = {
     type: 'apolloQuery';
     detail: ApolloQueryOptions<T>;
