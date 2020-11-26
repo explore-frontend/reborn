@@ -94,6 +94,11 @@ export type ApolloFetchMoreOptions<DataType> = {
     updateQuery(prev: DataType, next: DataType | undefined): DataType;
 }
 
+export type RestFetchMoreOptions<DataType> = {
+    variables?: Record<string, any>;
+    updateQuery(prev: DataType, next: DataType | undefined): DataType;
+}
+
 export type RestQueryOptions<T extends BaseModel> = {
     url: UrlFn<T> | string;
     method?: Method;
@@ -101,6 +106,7 @@ export type RestQueryOptions<T extends BaseModel> = {
     variables?: VariablesFn<T> | Record<string, any>;
     skip?: BooleanFn<T> | boolean;
     client?: string;
+    pollInterval?: NumberFn<T> | number;
 }
 
 export type ApolloMutationOptions<T extends BaseModel> = {

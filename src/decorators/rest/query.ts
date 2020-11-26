@@ -6,9 +6,9 @@
  */
 
 import Vue from 'vue';
-import { RestQueryOptions, VariablesFn, RestClient } from '../../types';
+import { RestQueryOptions, VariablesFn, RestClient, RestFetchMoreOptions } from '../../types';
 import { BaseModel } from '../../model';
-import xstream from 'xstream';
+import xstream, { Subscription } from 'xstream';
 import { initDataType } from '../utils';
 
 export class RestQuery<ModelType extends BaseModel, DataType = any> {
@@ -43,6 +43,14 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
         }
         return this.option.skip;
     }
+
+    private get pollInterval() {
+        if (typeof this.option.pollInterval === 'function') {
+            return this.option.pollInterval.call(this.model, this.vm.$route);
+        }
+        return this.option.pollInterval;
+    }
+
     private get variables() {
         if (typeof this.option.variables === 'function') {
             return (this.option.variables as VariablesFn<ModelType>).call(this.model, this.vm.$route);
@@ -64,12 +72,41 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     }
 
     init() {
-        const watcher = this.vm.$watch(() => [ this.variables, this.skip, this.url ], this.changeVariables);
+        const watcher = this.vm.$watch(() => [
+            this.variables,
+            this.skip,
+            this.url,
+        ], this.changeVariables);
         this.listeners.push(watcher);
         if (!this.skip) {
             this.refetch();
         }
+        // TODO临时解，后面再优化
+        const intervalWatcher = this.vm.$watch(() => [
+            this.pollInterval,
+        ], this.changePollInterval);
+        this.listeners.push(intervalWatcher);
     }
+
+    private pollIntervalSub: null | Subscription = null;
+
+    private changePollInterval = () => {
+        this.vm.$nextTick(() => {
+            if (this.pollIntervalSub) {
+                this.pollIntervalSub.unsubscribe();
+                this.pollIntervalSub = null;
+            }
+            if (!this.pollInterval) {
+                return;
+            }
+            this.pollIntervalSub = xstream
+                .periodic(this.pollInterval)
+                .subscribe({
+                    next: () => this.refetch(),
+                });
+        });
+    }
+
     private changeVariables = () => {
         this.vm.$nextTick(() => {
             if (this.skip) {
@@ -82,29 +119,51 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     destroy() {
         this.listeners.forEach(unwatch => unwatch());
         this.listeners = [];
+        this.pollIntervalSub?.unsubscribe();
+        this.pollIntervalSub = null;
     }
 
-    fetchMore() {
-        // TODO
+    fetchMore({ variables, updateQuery } : RestFetchMoreOptions<DataType>) {
+        return new Promise(resolve => {
+            this.client({
+                url: this.url,
+                headers: this.option.headers,
+                method: this.option.method || 'GET',
+                data: variables,
+            }).then(data => {
+                this.error = null;
+                this.data = updateQuery(this.data, data);
+                this.loading = false;
+                resolve();
+            }).catch(e => {
+                this.error = e;
+                this.loading = false;
+                resolve();
+            });
+        });
     }
 
     refetch() {
         this.loading = true;
         // TODO差缓存数据做SSR还原
-        return this.client({
-            url: this.url,
-            headers: this.option.headers,
-            method: this.option.method || 'GET',
-            data: this.variables,
-        }).then(data => {
-            this.error = null;
-            if (data) {
-                this.data = data;
-            }
-            this.loading = false;
-        }).catch(e => {
-            this.error = e;
-            this.loading = false;
+        return new Promise(resolve => {
+            this.client({
+                url: this.url,
+                headers: this.option.headers,
+                method: this.option.method || 'GET',
+                data: this.variables,
+            }).then(data => {
+                this.error = null;
+                if (data) {
+                    this.data = data;
+                }
+                this.loading = false;
+                resolve();
+            }).catch(e => {
+                this.error = e;
+                this.loading = false;
+                resolve();
+            });
         });
     }
 }
