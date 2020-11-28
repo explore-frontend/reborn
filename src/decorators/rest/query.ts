@@ -76,7 +76,12 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
             this.variables,
             this.skip,
             this.url,
-        ], this.changeVariables);
+        ], (newV, oldV) => {
+            // TODO短时间内大概率会触发两次判断，具体原因未知= =
+            if (newV.some((v, index) => oldV[index] !== v)) {
+                this.changeVariables();
+            }
+        });
         this.listeners.push(watcher);
         if (!this.skip) {
             this.refetch();
@@ -84,7 +89,12 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
         // TODO临时解，后面再优化
         const intervalWatcher = this.vm.$watch(() => [
             this.pollInterval,
-        ], this.changePollInterval);
+        ], (newV, oldV) => {
+            // TODO短时间内大概率会触发两次判断，具体原因未知= =
+            if (newV.some((v, index) => oldV[index] !== v)) {
+                this.changePollInterval();
+            }
+        });
         this.listeners.push(intervalWatcher);
     }
 

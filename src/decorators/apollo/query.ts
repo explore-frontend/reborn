@@ -116,7 +116,12 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
             this.variables,
             this.skip,
             this.pollInterval,
-        ], this.changeOptions);
+        ], (newV, oldV) => {
+            // TODO短时间内大概率会触发两次判断，具体原因未知= =
+            if (newV.some((v, index) => oldV[index] !== v)) {
+                this.changeOptions();
+            }
+        });
         this.listeners.push(watcher);
     }
 
