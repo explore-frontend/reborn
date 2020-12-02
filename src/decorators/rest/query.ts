@@ -10,6 +10,7 @@ import { RestQueryOptions, VariablesFn, RestClient, RestFetchMoreOptions } from 
 import { BaseModel } from '../../model';
 import xstream, { Subscription } from 'xstream';
 import { initDataType } from '../utils';
+import { computed } from '@vue/composition-api';
 
 export class RestQuery<ModelType extends BaseModel, DataType = any> {
     observable = xstream.create<{loading: boolean, data: DataType}>();
@@ -72,30 +73,34 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     }
 
     init() {
-        const watcher = this.vm.$watch(() => [
+        const variablesComputed = computed(() => [
             this.variables,
             this.skip,
             this.url,
-        ], (newV, oldV) => {
+        ]);
+        const watcher = this.vm.$watch(() => variablesComputed.value, (newV, oldV) => {
             // TODO短时间内大概率会触发两次判断，具体原因未知= =
             if (newV.some((v, index) => oldV[index] !== v)) {
                 this.changeVariables();
             }
         });
-        this.listeners.push(watcher);
-        if (!this.skip) {
-            this.refetch();
-        }
+
+        const intervalComputed = computed(() => this.pollInterval);
+
         // TODO临时解，后面再优化
-        const intervalWatcher = this.vm.$watch(() => [
-            this.pollInterval,
-        ], (newV, oldV) => {
+        const intervalWatcher = this.vm.$watch(() => intervalComputed.value, (newV, oldV) => {
             // TODO短时间内大概率会触发两次判断，具体原因未知= =
-            if (newV.some((v, index) => oldV[index] !== v)) {
+            if (newV !== oldV) {
                 this.changePollInterval();
             }
         });
+
         this.listeners.push(intervalWatcher);
+        this.listeners.push(watcher);
+        if (!this.skip) {
+            this.refetch();
+            this.changePollInterval();
+        }
     }
 
     private pollIntervalSub: null | Subscription = null;
@@ -142,7 +147,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
                 data: variables,
             }).then(data => {
                 this.error = null;
-                this.data = updateQuery(this.data, data);
+                this.data = data ? updateQuery(this.data, data) : this.data;
                 this.loading = false;
                 resolve();
             }).catch(e => {

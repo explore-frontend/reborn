@@ -91,12 +91,12 @@ export type ApolloQueryOptions<T extends BaseModel> = {
 
 export type ApolloFetchMoreOptions<DataType> = {
     variables?: Record<string, any>;
-    updateQuery(prev: DataType, next: DataType | undefined): DataType;
+    updateQuery(prev: DataType, next: DataType): DataType;
 }
 
 export type RestFetchMoreOptions<DataType> = {
     variables?: Record<string, any>;
-    updateQuery(prev: DataType, next: DataType | undefined): DataType;
+    updateQuery(prev: DataType, next: DataType): DataType;
 }
 
 export type RestQueryOptions<T extends BaseModel> = {

@@ -53,7 +53,7 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
         }
         return this.option.url;
     }
-    mutate(params: any) {
+    mutate<T>(params: T) {
         this.loading = true;
         this.error = null;
         return this.client({

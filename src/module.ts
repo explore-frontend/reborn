@@ -16,12 +16,6 @@ export {
 } from './decorators';
 
 export {
-    createLink,
-    createApolloClient,
-    createRestClient,
-} from './clients';
-
-export {
     Store,
     useApolloModel,
 };

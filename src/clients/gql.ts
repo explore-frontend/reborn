@@ -1,7 +1,7 @@
 // TODO这些后面应该集成到apollo-model中而非每次都这么写
 import { ApolloLink } from 'apollo-link';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import ApolloClient, { DefaultOptions } from 'apollo-client';
+import { DefaultOptions, ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
 

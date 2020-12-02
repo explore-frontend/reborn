@@ -1,10 +1,12 @@
 {
     "name": "vue-apollo-model",
-    "version": "0.7.0-beta5",
+    "version": "0.7.0-beta10",
     "main": "dist/index.js",
     "module": "dist/index.es.js",
     "typings": "dist/module.d.ts",
-    "sideEffects": true,
+    "sideEffects": [
+        "reflect-metadata"
+    ],
     "license": "MIT",
     "scripts": {
         "build": "rollup -c",

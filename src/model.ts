@@ -53,7 +53,7 @@ function registerProperty(obj: any, key: string, value: any) {
 }
 
 export class BaseModel {
-    protected readonly $vm: Vue;
+    protected readonly $vm!: Vue;
     protected readonly $route!: Route;
     private readonly $store: Store;
     private subs: Subscription[] = [];
@@ -82,8 +82,13 @@ export class BaseModel {
         vm: Vue,
         store: Store,
     ) {
-        this.$vm = vm;
         this.$store = store;
+        Object.defineProperty(this, '$vm', {
+            get() {
+                return vm;
+            },
+            enumerable: false,
+        });
         // 保证每次获取都是响应式
         Object.defineProperty(this, '$route', {
             get() {
@@ -146,8 +151,6 @@ export class BaseModel {
         // 处理自身属性
         this.$$addProperty(this);
         Object.getOwnPropertyNames(this)
-        
-        
         // 处理原型链
         let proto = Object.getPrototypeOf(this);
         while (proto && proto !== Object.prototype) {

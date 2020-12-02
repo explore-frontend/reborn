@@ -22,6 +22,22 @@ const entires = [{
         ts: 'es5',
         name: 'index.es.js'
     }
+}, {
+    input: join(PACKAGE_ROOT_PATH, 'src/clients/gql.ts'),
+    // TODO这两个下一版本里面继续拆包吧= =
+    format: {
+        dist: 'es',
+        ts: 'es5',
+        name: 'clients/gql.js'
+    }
+}, {
+    input: join(PACKAGE_ROOT_PATH, 'src/clients/rest.ts'),
+    // TODO这两个下一版本里面继续拆包吧= =
+    format: {
+        dist: 'es',
+        ts: 'es5',
+        name: 'clients/rest.js'
+    }
 }];
 
 export default entires.map(entryConfig => ({

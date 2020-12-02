@@ -11,6 +11,7 @@ import { ApolloQueryOptions, VariablesFn, ApolloFetchMoreOptions } from '../../t
 import { BaseModel } from '../../model';
 import xstream, { Stream } from 'xstream';
 import { initDataType } from '../utils';
+import { computed } from '@vue/composition-api';
 
 export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
     observer!: ObservableQuery<DataType>;
@@ -112,11 +113,12 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
         if (!this.skip) {
             this.initObserver();
         }
-        const watcher = this.vm.$watch(() => [
+        const optionsComputed = computed(() => [
             this.variables,
             this.skip,
             this.pollInterval,
-        ], (newV, oldV) => {
+        ]);
+        const watcher = this.vm.$watch(() => optionsComputed.value, (newV, oldV) => {
             // TODO短时间内大概率会触发两次判断，具体原因未知= =
             if (newV.some((v, index) => oldV[index] !== v)) {
                 this.changeOptions();
@@ -193,6 +195,9 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
         return this.observer.fetchMore({
             variables,
             updateQuery: (prev, { fetchMoreResult } ) => {
+                if (!fetchMoreResult) {
+                    return prev;
+                }
                 return {
                     // TODO等后面特么的把apollo-client干掉，这里就不需要了
                     // @ts-ignore

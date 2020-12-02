@@ -6,32 +6,24 @@
  */
 import { useApolloModel } from './install';
 import Store from './store';
-import { BaseModel } from './model';
-import { useXStream } from './utils/stream';
-import {
-    createLink,
-    createApolloClient,
-    createRestClient,
-} from './clients';
-import {
+export { BaseModel } from './model';
+export { useXStream } from './utils/stream';
+export {
     apolloQuery,
     apolloMutation,
     restQuery,
     restMutation,
 } from './decorators';
 
-export default {
-    Store,
-    apolloQuery,
-    BaseModel,
-    apolloMutation,
-    restQuery,
-    restMutation,
-    useApolloModel,
-    useXStream,
+export {
     createLink,
     createApolloClient,
     createRestClient,
+} from './clients';
+
+export {
+    Store,
+    useApolloModel,
 };
 
 export * from './types';
