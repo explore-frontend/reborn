@@ -140,6 +140,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
 
     fetchMore({ variables, updateQuery } : RestFetchMoreOptions<DataType>) {
         return new Promise(resolve => {
+            this.loading = true;
             this.client({
                 url: this.url,
                 headers: this.option.headers,
@@ -149,11 +150,11 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
                 this.error = null;
                 this.data = data ? updateQuery(this.data, data) : this.data;
                 this.loading = false;
-                resolve();
+                resolve(undefined);
             }).catch(e => {
                 this.error = e;
                 this.loading = false;
-                resolve();
+                resolve(undefined);
             });
         });
     }
