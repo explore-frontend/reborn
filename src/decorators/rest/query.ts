@@ -127,6 +127,10 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
             if (this.skip) {
                 return;
             }
+            if (this.pollIntervalSub) {
+                // 参数改变等待下次interval触发
+                return;
+            }
             this.refetch();
         });
     }
@@ -174,11 +178,11 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
                     this.data = data;
                 }
                 this.loading = false;
-                resolve();
+                resolve(undefined);
             }).catch(e => {
                 this.error = e;
                 this.loading = false;
-                resolve();
+                resolve(undefined);
             });
         });
     }
