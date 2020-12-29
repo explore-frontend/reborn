@@ -48,6 +48,8 @@ export interface RestOptions {
     requestTransformer?: (data: any) => any;
     responseTransformer?: (data: any) => any;
     responsePreHandler?: (data: Response) => any;
+    // TODO临时加的timeout，后面需要重构的，所以先对付用着
+    _timeout?: number;
 }
 
 const requestTransformerMap: Record<ContentType, (data: any) => string | FormData> = {
@@ -68,6 +70,7 @@ export function createRestClient({
     responseTransformer,
     requestTransformer,
     responsePreHandler,
+    _timeout
 }: RestOptions = {}) {
     const defaultHeaders: Headers = {
         'content-type': 'application/json',
@@ -98,20 +101,28 @@ export function createRestClient({
         } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
             headers['content-type'] = headers['content-type'] + ';charset=UTF-8';
         }
-        return fetch(url, {
+        // TODO写的太脏了……
+        const timeoutPromise = new Promise((resolve, reject) => {
+            setTimeout(() => reject('timeout'), typeof _timeout !== 'undefined' && _timeout >= 0 ? _timeout : 60 * 1000);
+        });
+
+        const fetchPromise = fetch(url, {
             method,
             credentials: 'include',
             mode: params.mode || 'cors',
             headers,
             body,
-        })
-        .then(res => {
-            if (responsePreHandler) {
-                responsePreHandler(res.clone())
-            }
-            return res;
-        })
-        .then(res => res.ok ? res.json() : Promise.reject(res))
-        .then(responseTransformer);
+        });
+
+        return Promise
+            .race([timeoutPromise, fetchPromise])
+            .then((res) => {
+                if (responsePreHandler) {
+                    responsePreHandler((res as Response).clone())
+                }
+                return res as Response;
+            })
+            .then(res => res.ok ? res.json() : Promise.reject(res))
+            .then(responseTransformer);
     }
 }

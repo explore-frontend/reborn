@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import xstream, { Subscription } from 'xstream';
+import xstream, { Subscription, Stream, MemoryStream } from 'xstream';
 
 import Store from './store';
 import {
@@ -17,6 +17,7 @@ import {
 import { Constructor } from './types';
 import 'reflect-metadata';
 import { Route } from 'vue-router';
+import { Ref, ref } from '@vue/composition-api';
 
 const skipProperty = [
     'subscriptions',
