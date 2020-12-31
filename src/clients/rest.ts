@@ -118,7 +118,11 @@ export function createRestClient({
             .race([timeoutPromise, fetchPromise])
             .then((res) => {
                 if (responsePreHandler) {
-                    responsePreHandler((res as Response).clone())
+                    // 有可能是response有可能是timeout或者其它error，用这里搞一下……
+                    const clone = (res as Response).status
+                        ? (res as Response).clone()
+                        : res;
+                    responsePreHandler(clone as Response);
                 }
                 return res as Response;
             })
