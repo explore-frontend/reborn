@@ -1,4 +1,4 @@
-import { Method, ContentType, Headers } from '../types';
+import { Method, ContentType, Credentials, Headers } from '../types';
 
 function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {
@@ -37,6 +37,7 @@ function shimStringify(obj: any) {
 export interface RequestParams {
     url: string;
     method: Method;
+    credentials?: Credentials;
     mode?: 'no-cors' | 'cors' | 'same-origin';
     data?: Record<string, any>;
     headers?: Headers;
@@ -79,6 +80,7 @@ export function createRestClient({
     return function request(params: RequestParams) {
         const data = params.data;
         const method = params.method.toUpperCase() || 'GET';
+        const credentials = params.credentials || 'include';
         const url = method === 'GET' && data
             ? `${uri}${params.url}?${shimStringify(data)}`
             : `${uri}${params.url}`;
@@ -101,6 +103,11 @@ export function createRestClient({
         } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
             headers['content-type'] = headers['content-type'] + ';charset=UTF-8';
         }
+        // preload fetch情况下不允许携带content-type参数
+        if (headers['forbid-content-type']) {
+            delete headers['forbid-content-type'];
+            delete headers['content-type'];
+        }
         // TODO写的太脏了……
         const timeoutPromise = new Promise((resolve, reject) => {
             setTimeout(() => reject('timeout'), typeof _timeout !== 'undefined' && _timeout >= 0 ? _timeout : 60 * 1000);
@@ -108,7 +115,7 @@ export function createRestClient({
 
         const fetchPromise = fetch(url, {
             method,
-            credentials: 'include',
+            credentials,
             mode: params.mode || 'cors',
             headers,
             body,

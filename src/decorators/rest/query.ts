@@ -170,6 +170,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
             this.client({
                 url: this.url,
                 headers: this.option.headers,
+                credentials: this.option.credentials,
                 method: this.option.method || 'GET',
                 data: this.variables,
             }).then(data => {

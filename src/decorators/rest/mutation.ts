@@ -59,6 +59,7 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
         return this.client({
             url: this.url(this.variables(params)),
             headers: this.option.headers,
+            credentials: this.option.credentials,
             method: this.option.method || 'get',
             data: this.variables(params),
         }).then(data => {
