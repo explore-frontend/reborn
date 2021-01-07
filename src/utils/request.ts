@@ -1,9 +1,10 @@
 import { shimStringify } from './qs';
-import { Method, ContentType, Headers } from '../types';
+import { Method, ContentType, Credentials, Headers } from '../types';
 
 export interface RequestParams {
     url: string;
     method: Method;
+    credentials?: Credentials;
     mode?: 'no-cors' | 'cors' | 'same-origin';
     data?: Record<string, any>;
     headers?: Headers;
@@ -41,6 +42,7 @@ export function createRequest({
     return function request(params: RequestParams) {
         const data = params.data;
         const method = params.method.toUpperCase() || 'GET';
+        const credentials = params.credentials || 'include';
         const url = method === 'GET' && data
             ? `${uri}${params.url}?${shimStringify(data)}`
             : `${uri}${params.url}`;
@@ -65,7 +67,7 @@ export function createRequest({
         }
         return fetch(url, {
             method,
-            credentials: 'include',
+            credentials,
             mode: params.mode || 'cors',
             headers,
             body,

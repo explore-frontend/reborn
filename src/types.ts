@@ -21,6 +21,7 @@ export type ContentType = 'application/json'
     | 'multipart/form-data'
     | 'application/x-www-form-urlencoded';
 
+export type Credentials = 'include' | 'same-origin' | 'omit';
 
 export type Headers = {
     'content-type'?: ContentType;
@@ -102,6 +103,7 @@ export type RestFetchMoreOptions<DataType> = {
 export type RestQueryOptions<T extends BaseModel> = {
     url: UrlFn<T> | string;
     method?: Method;
+    credentials?: Credentials;
     headers?: Headers;
     variables?: VariablesFn<T> | Record<string, any>;
     skip?: BooleanFn<T> | boolean;
@@ -119,6 +121,7 @@ export type RestMutationOptions<T extends BaseModel> = {
     client?: string;
     url: UrlFn<T> | string;
     method?: Method;
+    credentials?: Credentials;
     headers?: Headers
     variables?: MutationVariablesFn<T> | Record<string, any>,
 }
