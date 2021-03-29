@@ -53,7 +53,8 @@ GraphQL文档，定义一个graphql mutation查询
 
 ### loading
 布尔值，当前mutation是否处于请求状态
-
+### error
+如果当前mutation查询发生错误，返回当前mutation的查询错误信息，其结果为响应式数据；否则为null
 ## 方法
 
 ### mutate

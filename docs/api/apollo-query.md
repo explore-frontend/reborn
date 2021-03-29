@@ -106,6 +106,9 @@ query缓存模式，具体请参考[ApolloClient watchQuery](https://www.apollog
 ### loading
 布尔值，当前query是否处于请求状态
 
+### error
+如果当前query查询发生错误，返回当前query的查询错误信息，其结果为响应式数据；否则为null
+
 ## 方法
 
 ### refetch

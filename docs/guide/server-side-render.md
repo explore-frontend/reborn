@@ -9,27 +9,19 @@
 
 例如：
 ```javascript
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
 // 参考https://www.apollographql.com/docs/link/links/schema
 import { SchemaLink } from 'apollo-link-schema';
-
+import { createApolloClient } from 'vue-apollo-model/dist/clients/gql';
 // schema为整体项目的GraphQLSchema
 import schema from '../graphql/schema';
-
 // 假设后端所使用的node http服务为koa
-export default function createGraphQLClient(koaContext) {
-    return new ApolloClient({
-        link: new SchemaLink({
-            schema,
-            context: koaContext,
-        }),
-        cache: new InMemoryCache(),
-        // 注意这里需要设置ssrMode为true
-        ssrMode: true,
-    });
-}
-
+export const defaultApolloClient = createApolloClient(
+    new SchemaLink({
+        schema,
+        context: koaContext,
+    }),
+    'node',
+);
 ```
 在示例中，我们假设API Proxy服务器与Server Render服务器在同一个应用内，故而此处使用`SchemaLink`，您也可以根据您的需要自行进行定制。
 
@@ -84,24 +76,18 @@ export default (context: any) => {
 
 例如：
 ```javascript
-import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { createApolloClient } from 'vue-apollo-model/dist/clients/gql';
 
-const cache = new InMemoryCache();
-
-// 在这里进行状态还原
-if (window.__APOLLO_STATE__) {
-    cache.restore(window.__APOLLO_STATE__.defaultClient);
-}
-
-export default new ApolloClient({
-    cache: new InMemoryCache(),
-    link: new HttpLink({
+export const defaultApolloClient = createApolloClient(
+    new HttpLink({
         // 接口相对应的绝对路径
         uri: 'http://localhost:5100/graphql',
     }),
-});
+    'node',
+    'defaultClient',
+);
 ```
+通过注入第三个参数**restoreKey**来对服务端状态进行还原
 
 

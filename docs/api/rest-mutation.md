@@ -58,9 +58,11 @@
 ## 属性
 ### data
 返回当前mutation执行后的结果，其结果为响应式数据
-
 ### loading
 布尔值，当前mutation是否处于请求状态
+
+### error
+如果当前mutation查询发生错误，返回当前mutation的查询错误信息，其结果为响应式数据；否则为null
 
 ## 方法
 
