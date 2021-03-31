@@ -9,7 +9,7 @@ import { BaseModel } from './model';
 
 export function useApolloModel<T extends BaseModel>(ctor: Constructor<T>) {
     const instance = getCurrentInstance();
-    const root = instance?.$root;
+    const root = instance?.root.proxy;
     // 为了适配小程序，$store去原型上找一下
     const store = root?.$options.apolloStore || root?.apolloStore;
     if (!store) {
