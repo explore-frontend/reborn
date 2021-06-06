@@ -36,7 +36,7 @@ function shimStringify(obj: any) {
 
 export interface RequestParams {
     url: string;
-    method: Method;
+    method?: Method;
     credentials?: Credentials;
     mode?: 'no-cors' | 'cors' | 'same-origin';
     data?: Record<string, any>;
@@ -46,7 +46,7 @@ export interface RequestParams {
 export interface RestOptions {
     uri?: string;
     headers?: Headers;
-    requestTransformer?: (data: any) => any;
+    requestTransformer?: (params: RequestParams) => any;
     responseTransformer?: (data: any) => any;
     responsePreHandler?: (data: Response) => any;
     // TODO临时加的timeout，后面需要重构的，所以先对付用着
@@ -78,8 +78,12 @@ export function createRestClient({
         ...headers,
     };
     return function request(params: RequestParams) {
+        params = requestTransformer
+            ? requestTransformer(params)
+            : params;
+
         const data = params.data;
-        const method = params.method.toUpperCase() || 'GET';
+        const method = params.method?.toUpperCase() || defaultHeaders.method.toUpperCase() || 'GET';
         const credentials = params.credentials || 'include';
         const url = method === 'GET' && data
             ? `${uri}${params.url}?${shimStringify(data)}`
@@ -92,8 +96,6 @@ export function createRestClient({
         let body: string | FormData | undefined;
         if (method === 'GET') {
             body === undefined;
-        } else if (requestTransformer) {
-            body = requestTransformer(data);
         } else {
             body = defaultRequestTransformer(data);
         }

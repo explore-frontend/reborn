@@ -1,14 +1,14 @@
 import Vue from 'vue';
 
-type ObservableData<DataType> = {
+type ObservableData = {
     loading: boolean;
-    data: DataType;
+    data: any;
     error: any;
 };
 
-export function initDataType<T, P>(model: T, data: P) {
-    const observableData: ObservableData<P> = Vue.observable({
-        data,
+export function initDataType<T>(model: T) {
+    const observableData: ObservableData = Vue.observable({
+        data: undefined,
         loading: false,
         error: null
     });
@@ -17,7 +17,7 @@ export function initDataType<T, P>(model: T, data: P) {
         get() {
             return observableData.data
         },
-        set(data: P) {
+        set(data) {
             observableData.data = data;
         },
         configurable: true,

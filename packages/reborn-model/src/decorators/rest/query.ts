@@ -12,7 +12,7 @@ import xstream, { Subscription } from 'xstream';
 import { initDataType } from '../utils';
 import { computed } from '@vue/composition-api';
 
-export class RestQuery<ModelType extends BaseModel, DataType = any> {
+export class RestQuery<ModelType extends BaseModel, DataType> {
     observable = xstream.create<{loading: boolean, data: DataType}>();
 
     private option: RestQueryOptions<ModelType>;
@@ -22,7 +22,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
     private vm: Vue;
 
     loading: boolean = false;
-    data!: DataType;
+    data?: DataType;
     error: any;
 
     constructor(
@@ -35,7 +35,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
         this.model = model;
         this.client = client;
         this.vm = vm;
-        initDataType(this, {} as DataType);
+        initDataType(this);
     }
 
     private get skip() {
@@ -148,7 +148,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
             this.client({
                 url: this.url,
                 headers: this.option.headers,
-                method: this.option.method || 'GET',
+                method: this.option.method,
                 data: variables,
             }).then(data => {
                 this.error = null;
@@ -171,7 +171,7 @@ export class RestQuery<ModelType extends BaseModel, DataType = any> {
                 url: this.url,
                 headers: this.option.headers,
                 credentials: this.option.credentials,
-                method: this.option.method || 'GET',
+                method: this.option.method,
                 data: this.variables,
             }).then(data => {
                 this.error = null;

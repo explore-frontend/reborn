@@ -1,5 +1,6 @@
 import Vue from 'vue';
-import xstream, { Subscription, Stream, MemoryStream } from 'xstream';
+import xstream, { Subscription } from 'xstream';
+import { computed } from '@vue/composition-api';
 
 import Store from './store';
 import {
@@ -61,8 +62,10 @@ export class BaseModel {
     private $$userProperties: Array<{
         key: string;
         type: 'getter' | 'function' | 'other';
+        get?: Function;
+        set?: Function;
     }> = [];
-    private $$apolloQueries: Array<ApolloQuery<any> | RestQuery<any>> = [];
+    private $$apolloQueries: Array<ApolloQuery<any, any> | RestQuery<any, any>> = [];
     // TODO临时放出来
     $clients!: GraphqlClients;
     hasSubscribed = false;
@@ -133,6 +136,8 @@ export class BaseModel {
                 this.$$userProperties.push({
                     key,
                     type: 'getter',
+                    get: desc.get,
+                    set: desc.set,
                 });
             } else if (typeof desc.value === 'function') {
                 this.$$userProperties.push({
@@ -164,6 +169,22 @@ export class BaseModel {
         for (const item of this.$$userProperties) {
             if (item.type === 'other') {
                 makeObservable(this, item.key as keyof this);
+            } else if (item.type === 'getter') {
+                const { get = () => {}, set = () => {} } = item;
+                // 使用computed作为缓存，避免getter触发多次
+                const computedValue = computed({
+                    get: () => {
+                        return get.call(this);
+                    },
+                    set: (val: any) => {
+                        return set.call(this, val);
+                    },
+                });
+                Object.defineProperty(this, item.key, {
+                    get() {
+                        return computedValue.value;
+                    },
+                });
             }
         }
     }
@@ -184,16 +205,16 @@ export class BaseModel {
             throw new Error('Before use an restQuery / restMutation, you must init "gqlClients" first');
         }
         if (options.type.endsWith('Mutation')) {
-            let mutation: ApolloMutation<T> | RestMutation<T>;
+            let mutation: ApolloMutation<T, any> | RestMutation<T, any>;
             if (options.type === 'apolloMutation') {
-                mutation = new ApolloMutation<T>(
+                mutation = new ApolloMutation<T, any>(
                     options.detail,
                     this as unknown as T,
                     this.$vm,
                     getClient(this.$store.gqlClients!, options.detail.client),
                 );
             } else if (options.type === 'restMutation') {
-                mutation = new RestMutation<T>(
+                mutation = new RestMutation<T, any>(
                     options.detail,
                     this as unknown as T,
                     this.$vm,
@@ -216,16 +237,16 @@ export class BaseModel {
             };
             registerProperty(this, key, value);
         } else {
-            let query!: ApolloQuery<T> | RestQuery<T>;
+            let query!: ApolloQuery<T, any> | RestQuery<T, any>;
             if (options.type === 'apolloQuery') {
-                query = new ApolloQuery<T>(
+                query = new ApolloQuery<T, any>(
                     options.detail,
                     this as unknown as T,
                     this.$vm,
                     getClient(this.$store.gqlClients!, options.detail.client),
                 );
             } else if (options.type === 'restQuery') {
-                query = new RestQuery<T>(
+                query = new RestQuery<T, any>(
                     options.detail,
                     this as unknown as T,
                     this.$vm,

@@ -13,7 +13,7 @@ import xstream, { Stream } from 'xstream';
 import { initDataType } from '../utils';
 import { computed } from '@vue/composition-api';
 
-export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
+export class ApolloQuery<ModelType extends BaseModel, DataType> {
     observer!: ObservableQuery<DataType>;
     observable: Stream<{loading: boolean, data: DataType}> = xstream.create();
 
@@ -25,7 +25,7 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
     private hasPrefetched = false;
 
     loading: boolean = false;
-    data!: DataType;
+    data?: DataType;
     error: any;
 
     constructor(
@@ -39,7 +39,7 @@ export class ApolloQuery<ModelType extends BaseModel, DataType = any> {
         this.model = model;
         this.vm = vm;
 
-        initDataType(this, {} as DataType);
+        initDataType(this);
     }
 
     // TODO后面应该要把fetchMore，refetch什么的都干掉才行……否则这块就是乱的= =

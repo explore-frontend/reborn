@@ -4,12 +4,12 @@ import Vue from 'vue';
 import { ApolloClient } from 'apollo-client';
 import { initDataType } from '../utils';
 
-export class ApolloMutation<P extends BaseModel, T = any> {
+export class ApolloMutation<P extends BaseModel, T> {
     private option: ApolloMutationOptions<P>;
     private model: P;
     private vm: Vue;
     private client: ApolloClient<any>
-    data!: T;
+    data?: T;
     loading = false;
     error: any;
 
@@ -23,7 +23,7 @@ export class ApolloMutation<P extends BaseModel, T = any> {
         this.client = client;
         this.model = model;
         this.vm = vm;
-        initDataType(this, {} as T);
+        initDataType(this);
     }
     private variables<T>(params: T) {
         if (this.option.variables && typeof this.option.variables === 'function') {

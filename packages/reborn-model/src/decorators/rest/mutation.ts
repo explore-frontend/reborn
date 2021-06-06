@@ -10,14 +10,14 @@ import { RestMutationOptions, MutationVariablesFn, RestClient } from '../../type
 import { BaseModel } from '../../model';
 import { initDataType } from '../utils';
 
-export class RestMutation<ModelType extends BaseModel, DataType = any> {
+export class RestMutation<ModelType extends BaseModel, DataType> {
     private option: RestMutationOptions<ModelType>;
     private client: RestClient<DataType>;
     private model: ModelType;
     private vm: Vue;
 
     loading: boolean = false;
-    data!: DataType;
+    data?: DataType;
     error: any;
 
     constructor(
@@ -30,7 +30,7 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
         this.model = model;
         this.client = request;
         this.vm = vm;
-        initDataType(this, {} as DataType);
+        initDataType(this);
     }
 
     private variables<T>(params: T) {
@@ -60,7 +60,7 @@ export class RestMutation<ModelType extends BaseModel, DataType = any> {
             url: this.url(this.variables(params)),
             headers: this.option.headers,
             credentials: this.option.credentials,
-            method: this.option.method || 'get',
+            method: this.option.method,
             data: this.variables(params),
         }).then(data => {
             this.error = null;

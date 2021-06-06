@@ -97,7 +97,7 @@ export type ApolloFetchMoreOptions<DataType> = {
 
 export type RestFetchMoreOptions<DataType> = {
     variables?: Record<string, any>;
-    updateQuery(prev: DataType, next: DataType): DataType;
+    updateQuery(prev?: DataType, next?: DataType): DataType;
 }
 
 export type RestQueryOptions<T extends BaseModel> = {
@@ -128,7 +128,7 @@ export type RestMutationOptions<T extends BaseModel> = {
 
 export type QueryResult<T = any> = {
     refetch(): Promise<void>;
-    data: T;
+    data?: T;
     loading: boolean;
     fetchMore(options: ApolloFetchMoreOptions<T>): Promise<void>;
     error: any;
@@ -136,7 +136,7 @@ export type QueryResult<T = any> = {
 
 export type MutationResult<T, P> = {
     loading: boolean;
-    data: P;
+    data?: P;
     mutate(args0: T, args1?: any): Promise<void>;
     error: any;
 }
