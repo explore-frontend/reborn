@@ -18,7 +18,6 @@ import {
 import { Constructor } from './types';
 import 'reflect-metadata';
 import { Route } from 'vue-router';
-import { Ref, ref } from '@vue/composition-api';
 
 const skipProperty = [
     'subscriptions',
@@ -170,21 +169,32 @@ export class BaseModel {
             if (item.type === 'other') {
                 makeObservable(this, item.key as keyof this);
             } else if (item.type === 'getter') {
-                const { get = () => {}, set = () => {} } = item;
+                const { get = () => {}, set } = item;
                 // 使用computed作为缓存，避免getter触发多次
                 const computedValue = computed({
                     get: () => {
                         return get.call(this);
                     },
                     set: (val: any) => {
-                        return set.call(this, val);
+                        if (set) {
+                            set.call(this, val);
+                        }
                     },
                 });
-                Object.defineProperty(this, item.key, {
+
+                const descriptors: PropertyDescriptor = {
                     get() {
                         return computedValue.value;
                     },
-                });
+                };
+
+                if (set) {
+                    descriptors.set = (val) => {
+                        computedValue.value = val;
+                    };
+                }
+
+                Object.defineProperty(this, item.key, descriptors);
             }
         }
     }

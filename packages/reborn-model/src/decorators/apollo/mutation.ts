@@ -33,7 +33,7 @@ export class ApolloMutation<P extends BaseModel, T> {
                 this.vm.$route,
             );
         }
-        return this.option.variables;
+        return params;
     }
     mutate(params: any) {
         this.loading = true;

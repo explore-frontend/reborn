@@ -41,7 +41,7 @@ export class RestMutation<ModelType extends BaseModel, DataType> {
                 this.vm.$route,
             );
         }
-        return this.option.variables;
+        return params;
     }
     private url<T>(params: T) {
         if (this.option.url && typeof this.option.url === 'function') {
