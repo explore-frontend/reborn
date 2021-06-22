@@ -170,27 +170,40 @@ export class BaseModel {
                 makeObservable(this, item.key as keyof this);
             } else if (item.type === 'getter') {
                 const { get = () => {}, set } = item;
-                // 使用computed作为缓存，避免getter触发多次
-                const computedValue = computed({
-                    get: () => {
-                        return get.call(this);
-                    },
-                    set: (val: any) => {
-                        if (set) {
-                            set.call(this, val);
-                        }
-                    },
-                });
+                // // 使用computed作为缓存，避免getter触发多次
+                // const computedValue = computed({
+                //     get: () => {
+                //         return get.call(this);
+                //     },
+                //     set: (val: any) => {
+                //         if (set) {
+                //             set.call(this, val);
+                //         }
+                //     },
+                // });
 
+                // const descriptors: PropertyDescriptor = {
+                //     get() {
+                //         return computedValue.value;
+                //     },
+                // };
+
+                // if (set) {
+                //     descriptors.set = (val) => {
+                //         computedValue.value = val;
+                //     };
+                // }
+
+                // 上面那东西有点坑，先临时改一下
                 const descriptors: PropertyDescriptor = {
                     get() {
-                        return computedValue.value;
+                        return get.call(this);
                     },
                 };
 
                 if (set) {
                     descriptors.set = (val) => {
-                        computedValue.value = val;
+                        set.call(this);
                     };
                 }
 
