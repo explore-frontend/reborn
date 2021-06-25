@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import xstream, { Subscription } from 'xstream';
-import { computed } from '@vue/composition-api';
 
 import Store from './store';
 import {
@@ -202,8 +201,8 @@ export class BaseModel {
                 };
 
                 if (set) {
-                    descriptors.set = (val) => {
-                        set.call(this);
+                    descriptors.set = (val: any) => {
+                        set.call(this, val);
                     };
                 }
 
