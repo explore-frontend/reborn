@@ -11,8 +11,6 @@ import { ApolloQueryOptions, VariablesFn, ApolloFetchMoreOptions } from '../../t
 import { BaseModel } from '../../model';
 import xstream, { Stream } from 'xstream';
 import { initDataType } from '../utils';
-import { computed } from '@vue/composition-api';
-
 export class ApolloQuery<ModelType extends BaseModel, DataType> {
     observer!: ObservableQuery<DataType>;
     observable: Stream<{loading: boolean, data: DataType}> = xstream.create();
@@ -113,14 +111,14 @@ export class ApolloQuery<ModelType extends BaseModel, DataType> {
         if (!this.skip) {
             this.initObserver();
         }
-        const optionsComputed = computed(() => [
+
+        const watcher = this.vm.$watch(() => [
             this.variables,
             this.skip,
             this.pollInterval,
-        ]);
-        const watcher = this.vm.$watch(() => optionsComputed.value, (newV, oldV) => {
+        ], (newV, oldV) => {
             // TODO短时间内大概率会触发两次判断，具体原因未知= =
-            if (newV.some((v, index) => oldV[index] !== v)) {
+            if (newV.some((v, index) => JSON.stringify(oldV[index]) !== JSON.stringify(v))) {
                 this.changeOptions();
             }
         });

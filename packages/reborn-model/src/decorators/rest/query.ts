@@ -10,7 +10,6 @@ import { RestQueryOptions, VariablesFn, RestClient, RestFetchMoreOptions } from 
 import { BaseModel } from '../../model';
 import xstream, { Subscription } from 'xstream';
 import { initDataType } from '../utils';
-import { computed } from '@vue/composition-api';
 
 export class RestQuery<ModelType extends BaseModel, DataType> {
     observable = xstream.create<{loading: boolean, data: DataType}>();
@@ -73,22 +72,19 @@ export class RestQuery<ModelType extends BaseModel, DataType> {
     }
 
     init() {
-        const variablesComputed = computed(() => [
+        const watcher = this.vm.$watch(() => [
             this.variables,
             this.skip,
             this.url,
-        ]);
-        const watcher = this.vm.$watch(() => variablesComputed.value, (newV, oldV) => {
+        ], (newV, oldV) => {
             // TODO短时间内大概率会触发两次判断，具体原因未知= =
-            if (newV.some((v, index) => oldV[index] !== v)) {
+            if (newV.some((v, index) => JSON.stringify(oldV[index]) !== JSON.stringify(v))) {
                 this.changeVariables();
             }
         });
 
-        const intervalComputed = computed(() => this.pollInterval);
-
         // TODO临时解，后面再优化
-        const intervalWatcher = this.vm.$watch(() => intervalComputed.value, (newV, oldV) => {
+        const intervalWatcher = this.vm.$watch(() => this.pollInterval, (newV, oldV) => {
             // TODO短时间内大概率会触发两次判断，具体原因未知= =
             if (newV !== oldV) {
                 this.changePollInterval();
