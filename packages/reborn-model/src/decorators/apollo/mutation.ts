@@ -45,8 +45,10 @@ export class ApolloMutation<P extends BaseModel, T> {
             if (data) {
                 this.data = data;
             }
+            this.loading = false;
         }).catch(e => {
-            this.error = e
-        }).finally(() => this.loading = false);
+            this.error = e;
+            this.loading = false
+        });
     }
 }
