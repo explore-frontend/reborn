@@ -15,6 +15,7 @@ export class RestMutation<ModelType extends BaseModel, DataType> {
     private client: RestClient<DataType>;
     private model: ModelType;
     private vm: Vue;
+    private requestId = 0;
 
     loading: boolean = false;
     data?: DataType;
@@ -54,6 +55,7 @@ export class RestMutation<ModelType extends BaseModel, DataType> {
         return this.option.url;
     }
     mutate<T>(params: T) {
+        const requestId = ++this.requestId;
         this.loading = true;
         this.error = null;
         return this.client({
@@ -63,12 +65,20 @@ export class RestMutation<ModelType extends BaseModel, DataType> {
             method: this.option.method,
             data: this.variables(params),
         }).then(data => {
+            // 临时处理race problem
+            if (requestId !== this.requestId) {
+                return;
+            }
             this.error = null;
             if (data) {
                 this.data = data;
             }
             this.loading = false;
         }).catch(e => {
+            // 临时处理race problem
+            if (requestId !== this.requestId) {
+                return;
+            }
             this.error = e;
             this.loading = false;
         });

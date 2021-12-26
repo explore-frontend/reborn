@@ -126,6 +126,11 @@ export function createRestClient({
         return Promise
             .race([timeoutPromise, fetchPromise])
             .then((res) => {
+                // by 王欢，在断开网络的情况下浏览器可能会返回null
+                if (res === null) {
+                    return Promise.reject('timeout');
+                }
+
                 if (responsePreHandler) {
                     // 有可能是response有可能是timeout或者其它error，用这里搞一下……
                     const clone = (res as Response).status

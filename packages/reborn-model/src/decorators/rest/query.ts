@@ -19,6 +19,7 @@ export class RestQuery<ModelType extends BaseModel, DataType> {
     private client: RestClient<DataType>;
     private model: ModelType;
     private vm: Vue;
+    private requestId = 0;
 
     loading: boolean = false;
     data?: DataType;
@@ -139,6 +140,7 @@ export class RestQuery<ModelType extends BaseModel, DataType> {
     }
 
     fetchMore({ variables, updateQuery } : RestFetchMoreOptions<DataType>) {
+        const requestId = ++this.requestId;
         return new Promise(resolve => {
             this.loading = true;
             this.client({
@@ -147,11 +149,21 @@ export class RestQuery<ModelType extends BaseModel, DataType> {
                 method: this.option.method,
                 data: variables,
             }).then(data => {
+                // 临时处理race problem
+                if (requestId !== this.requestId) {
+                    resolve(undefined);
+                    return;
+                }
                 this.error = null;
                 this.data = data ? updateQuery(this.data, data) : this.data;
                 this.loading = false;
                 resolve(undefined);
             }).catch(e => {
+                // 临时处理race problem
+                if (requestId !== this.requestId) {
+                    resolve(undefined);
+                    return;
+                }
                 this.error = e;
                 this.loading = false;
                 resolve(undefined);
@@ -161,6 +173,7 @@ export class RestQuery<ModelType extends BaseModel, DataType> {
 
     refetch() {
         this.loading = true;
+        const requestId = ++this.requestId;
         // TODO差缓存数据做SSR还原
         return new Promise(resolve => {
             this.client({
@@ -170,6 +183,11 @@ export class RestQuery<ModelType extends BaseModel, DataType> {
                 method: this.option.method,
                 data: this.variables,
             }).then(data => {
+                // 临时处理race problem
+                if (requestId !== this.requestId) {
+                    resolve(undefined);
+                    return;
+                }
                 this.error = null;
                 if (data) {
                     this.data = data;
@@ -177,6 +195,11 @@ export class RestQuery<ModelType extends BaseModel, DataType> {
                 this.loading = false;
                 resolve(undefined);
             }).catch(e => {
+                // 临时处理race problem
+                if (requestId !== this.requestId) {
+                    resolve(undefined);
+                    return;
+                }
                 this.error = e;
                 this.loading = false;
                 resolve(undefined);
