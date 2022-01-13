@@ -65,20 +65,12 @@ export class RestMutation<ModelType extends BaseModel, DataType> {
             method: this.option.method,
             data: this.variables(params),
         }).then(data => {
-            // 临时处理race problem
-            if (requestId !== this.requestId) {
-                return;
-            }
             this.error = null;
             if (data) {
                 this.data = data;
             }
             this.loading = false;
         }).catch(e => {
-            // 临时处理race problem
-            if (requestId !== this.requestId) {
-                return;
-            }
             this.error = e;
             this.loading = false;
         });
