@@ -1,13 +1,15 @@
 {
   "name": "reborn",
   "private": true,
-  "npmClient": "yarn",
-  "workspaces": {
-		"packages": [
-			"packages/*"
-		],
-		"nohoist": []
-	},
+  "npmClient": "pnpm",
   "devDependencies": {
+    "@commitlint/config-conventional": "^16.0.0",
+    "commitlint": "^16.2.3",
+    "cz-conventional-changelog": "^3.3.0",
+    "lint-staged": "^12.3.7",
+    "yorkie": "^2.0.0"
+  },
+  "gitHooks": {
+    "commit-msg": "commitlint -E GIT_PARAMS"
   }
 }
