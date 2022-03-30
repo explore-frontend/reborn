@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "target": "es2015",
+        "target": "es5",
         "module": "es2015",
         "strict": true,
         "jsx": "preserve",
@@ -13,7 +13,10 @@
         "resolveJsonModule": true,
         "sourceMap": true,
         "baseUrl": ".",
-        "lib": ["esnext", "dom"]
+        "lib": ["esnext", "dom"],
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "declarationDir": "."
     },
     "exclude": [
         "node_modules",

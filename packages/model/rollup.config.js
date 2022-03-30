@@ -1,6 +1,6 @@
-import typescript from 'rollup-plugin-typescript2';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import typescript from '@rollup/plugin-typescript';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import { join } from 'path';
 
 const PACKAGE_ROOT_PATH = process.cwd();
@@ -12,7 +12,6 @@ const entires = [{
     input: join(PACKAGE_ROOT_PATH, 'src/index.ts'),
     format: {
         dist: 'es',
-        ts: 'es5',
         name: 'index.es.js'
     }
 }];
@@ -21,12 +20,7 @@ export default entires.map(entryConfig => ({
     plugins: [
         resolve({browser: true}),
         commonjs(),
-        typescript({
-            clean: true,
-            tsconfigOverride: {
-                compilerOptions: {target: entryConfig.format.ts},
-            },
-        }),
+        typescript({ tsconfig: './tsconfig.json' }),
     ],
     input: entryConfig.input,
     external: [
