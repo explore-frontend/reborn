@@ -10,17 +10,17 @@ function transformRequestBody<T extends Record<string, any>>(data: T, headers?: 
     }
 
     // ArrayBuffer
-    if (Object.toString.call(data) === '[object ArrayBuffer]') {
+    if (Object.prototype.toString.call(data) === '[object ArrayBuffer]') {
         return data as unknown as ArrayBuffer;
     }
 
     // File
-    if (Object.toString.call(data) === '[object File]') {
+    if (Object.prototype.toString.call(data) === '[object File]') {
         return data as unknown as File;
     }
 
     // Blob
-    if (Object.toString.call(data) === '[object Blob]') {
+    if (Object.prototype.toString.call(data) === '[object Blob]') {
         return data as unknown as Blob;
     }
 
@@ -150,6 +150,6 @@ export function generateRequestInfo(
     params: GQLClientParams | RestClientParams,
 ) {
     return type === 'gql'
-        ? generateRestRequestInfo(clientOptions, params as RestClientParams)
-        : generateGQLRequestInfo(clientOptions, params as GQLClientParams)
+        ? generateGQLRequestInfo(clientOptions, params as GQLClientParams)
+        : generateRestRequestInfo(clientOptions, params as RestClientParams);
 }
