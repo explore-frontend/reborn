@@ -57,7 +57,7 @@ export function createGQLQuery<ModelType, DataType>(
                 pollIntervalSub.unsubscribe();
                 pollIntervalSub = null;
             }
-            if (!pollInterval) {
+            if (!pollInterval.value) {
                 return;
             }
             pollIntervalSub = xstream

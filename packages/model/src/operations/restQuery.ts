@@ -33,7 +33,7 @@ export function createRestQuery<ModelType, DataType>(
 
     const url = computed(() => {
         if (typeof option.url === 'function') {
-            return option.url.call(model, route, variables);
+            return option.url.call(model, route, variables.value);
         }
         return option.url;
     });
@@ -93,7 +93,7 @@ export function createRestQuery<ModelType, DataType>(
                 pollIntervalSub.unsubscribe();
                 pollIntervalSub = null;
             }
-            if (!pollInterval) {
+            if (!pollInterval.value) {
                 return;
             }
             pollIntervalSub = xstream
