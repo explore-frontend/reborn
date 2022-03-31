@@ -19,16 +19,16 @@
 </div>
 </template>
 <script lang="ts">
-import ProfileModel from './profile-model';
 import { defineComponent, reactive, toRefs, computed } from '@vue/composition-api';
-import { useApolloModel } from 'vue-apollo-model';
+import { useModel } from 'vue-apollo-model';
+import ProfileModel from './profile-model';
 
 export default defineComponent({
     setup() {
         const state = reactive({
             userIdList: [1, 2, 3, 4],
         });
-        const profileModel = useApolloModel(ProfileModel);
+        const profileModel = useModel(ProfileModel);
         const userInfo = computed(() => profileModel.userInfo);
         function searchUser(id: string;) {
             profileModel.id = id;

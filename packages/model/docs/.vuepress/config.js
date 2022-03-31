@@ -8,7 +8,7 @@ module.exports = {
         '/': {
             lang: '简体中文',
             title: 'Vue Apollo Model',
-            description: '基于Apollo的Vue.js状态管理方案',
+            description: '基于Vue.js状态管理方案',
         }
     },
     themeConfig: {
@@ -26,6 +26,7 @@ module.exports = {
                             children: [
                                 'installation',
                                 'store',
+                                'client',
                                 'model',
                                 'component',
                                 'server-side-render'
@@ -36,11 +37,10 @@ module.exports = {
                         title: 'API参考',
                         collapsable: false,
                         children: [
-                            'base-model',
-                            'apollo-query',
-                            'apollo-mutation',
-                            'rest-query',
-                            'rest-mutation',
+                            'model',
+                            'client',
+                            'query',
+                            'mutation',
                         ]
                     }]
                 },
