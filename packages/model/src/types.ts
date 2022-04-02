@@ -21,7 +21,7 @@ export type Constructor<T> = new (...args: any[]) => T;
 
 export type ModelCotrInfo<T> = {
     type: 'FunctionlModel' | 'ClassModel';
-    cotr: (client: RebornClient) => OriginalModelInstance<T>;
+    cotr: (client?: RebornClient) => OriginalModelInstance<T>;
 };
 
 export type OriginalModelInstance<T> = {

@@ -4,9 +4,32 @@ import type { RestClientParams, GQLClientParams } from '../operations/types';
 import { deepMerge, shimStringify } from '../utils';
 
 function transformRequestBody<T extends Record<string, any>>(data: T, headers?: HTTPHeaders) {
+    if (headers && headers['content-type'] === 'application/json') {
+        return JSON.stringify(data);
+    }
+
+    if (headers && headers['content-type'] === 'application/x-www-form-urlencoded') {
+        return shimStringify(data);
+    }
+
+    if (headers && headers['content-type'] === 'multipart/form-data') {
+        // TODO这里如果在Node环境，需要polyfill实现
+        const formData = new FormData();
+        for (const name in data) {
+            formData.append(name, data[name]);
+        }
+        return formData;
+    }
+
     // FormData
-    if (data instanceof FormData) {
+    if (typeof FormData === 'function' && FormData && data instanceof FormData) {
         return data;
+    }
+
+    // URLSerchParams
+    if (typeof URLSearchParams === 'function' && data instanceof URLSearchParams && headers) {
+        headers['content-type'] = 'application/x-www-form-urlencoded';
+        return data.toString();
     }
 
     // ArrayBuffer
@@ -22,27 +45,6 @@ function transformRequestBody<T extends Record<string, any>>(data: T, headers?: 
     // Blob
     if (Object.prototype.toString.call(data) === '[object Blob]') {
         return data as unknown as Blob;
-    }
-
-    if (data instanceof URLSearchParams && headers) {
-        headers['content-type'] = 'application/x-www-form-urlencoded';
-        return data.toString();
-    }
-
-    if (headers && headers['content-type'] === 'application/json') {
-        return JSON.stringify(data);
-    }
-
-    if (headers && headers['content-type'] === 'multipart/form-data') {
-        const formData = new FormData();
-        for (const name in data) {
-            formData.append(name, data[name]);
-        }
-        return formData;
-    }
-
-    if (headers && headers['content-type'] === 'application/x-www-form-urlencoded') {
-        return shimStringify(data);
     }
 
     return JSON.stringify(data);
@@ -96,14 +98,15 @@ function generateRestRequestInfo(
         ? transformRequestBody(variables, headers)
         : undefined;
 
-    if (params.method === 'GET') {
+    if (requestInit.method?.toLowerCase() === 'get' || requestInit.method?.toLowerCase() === 'head') {
         if (headers['content-type'] === 'application/x-www-form-urlencoded') {
             url = url.indexOf('?') ? `${url}&${body}` : `${url}?${body}`;
         }
         body = undefined;
     }
 
-    if (body instanceof FormData) {
+    // TODO这里在Node环境也一样需要FormData的polyfill实现
+    if (typeof FormData === 'function' && body instanceof FormData) {
         // form-data的话header交由浏览器自己计算
         delete headers['content-type'];
     } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
@@ -145,11 +148,11 @@ function generateGQLRequestInfo(
 }
 
 export function generateRequestInfo(
-    type: 'gql' | 'rest',
+    type: 'GQL' | 'REST',
     clientOptions: ClientOptions,
     params: GQLClientParams | RestClientParams,
 ) {
-    return type === 'gql'
+    return type === 'GQL'
         ? generateGQLRequestInfo(clientOptions, params as GQLClientParams)
         : generateRestRequestInfo(clientOptions, params as RestClientParams);
 }

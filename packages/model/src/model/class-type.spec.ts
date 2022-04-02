@@ -20,7 +20,6 @@ import 'unfetch/polyfill'
 
 Vue.use(CompositionAPI);
 fetchMock.enableMocks();
-
 class CustomModel extends BaseModel {
     private a = 1;
 
@@ -75,11 +74,22 @@ class CustomModel extends BaseModel {
     c = 10;
 };
 
-const restClient = createClient('rest', {
+const restClient = createClient('REST', {
     method: 'get',
 });
 
-const gqlClient = createClient('gql', {
+restClient.interceptors.response.use((params) => {
+    // 改在这里mock了= =，原因：找不到靠谱的mock Response Header的方式
+    if (params.config.url === '/query') {
+        return {
+            a: 1,
+            b: 1,
+        };
+    }
+    return params;
+});
+
+const gqlClient = createClient('GQL', {
     url: './',
     method: 'post',
 });
@@ -124,7 +134,7 @@ describe('transform model success', () => {
         fetchMock.doMock();
     });
 
-    it('transform classModel', done => {
+    it('transform class mode model', done => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
@@ -169,7 +179,7 @@ describe('transform model success', () => {
         }).mount(div);
     });
 
-    it('transform classModel with extends', done => {
+    it('transform class mode model with extends', done => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
@@ -186,7 +196,6 @@ describe('transform model success', () => {
                         a: 1,
                         b: 1,
                     });
-                    done();
                 });
 
                 onMounted(() => {
@@ -201,6 +210,7 @@ describe('transform model success', () => {
                     expect(model.b).toBe(result.b);
                     expect(model.c).toBe(result.c);
                     expect(model.d).toBe(result.d);
+                    done();
                 });
 
                 return () => null;

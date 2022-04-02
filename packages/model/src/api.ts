@@ -90,8 +90,19 @@ export function createStore() {
         })
     }
 
-    return {
+    const result = {
         install,
         registerClient,
-    };
+    } as const;
+
+
+    Object.defineProperty(result, 'storeInstance', {
+        get() {
+            return store;
+        },
+        enumerable: false,
+        configurable: false,
+    });
+
+    return result;
 }

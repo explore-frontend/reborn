@@ -79,7 +79,7 @@ export type RequestInfo = {
 }
 
 export function clientFactory(
-    type: 'gql' | 'rest',
+    type: 'GQL' | 'REST',
     createRequestInfo: typeof generateRequestInfo,
     options?: ClientOptions,
 ) {
@@ -87,7 +87,13 @@ export function clientFactory(
         ? deepMerge({} as ClientOptions, DEFAULT_OPTIONS, options)
         : deepMerge({} as ClientOptions, DEFAULT_OPTIONS);
     if (!opts.fetch) {
-        opts.fetch = typeof window === 'undefined' ? global.fetch.bind(global) : fetch.bind(window);
+        if (typeof typeof window !== 'undefined' && window.fetch) {
+            opts.fetch = window.fetch.bind(window);
+        } else if (typeof typeof global !== 'undefined' && global.fetch) {
+            opts.fetch = global.fetch.bind(global);
+        } else {
+            throw new Error('create client need a fetch function to init');
+        }
     }
     const requestInterceptor = createInterceptor('request');
     const responseInterceptor = createInterceptor('response');
@@ -142,7 +148,10 @@ export function clientFactory(
                 if (res === null) {
                     return Promise.reject(new DOMException('The request has been timeout'));
                 }
-                const receiveType = res.headers.get('Content-Type') || 'application/json';
+                const receiveType = res.headers.get('Content-Type')
+                    || (config.requestInit.headers as Record<string, string>)?.['Content-Type']
+                    || (config.requestInit.headers as Record<string, string>)?.['content-type']
+                    || 'application/json';
                 const commonInfo = {
                     status: res.status,
                     statusText: res.statusText,

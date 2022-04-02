@@ -86,7 +86,7 @@ export function createModelFromCA<T>(
 ): ModelCotrInfo<T> {
     return {
         type: 'FunctionlModel',
-        cotr: (client: RebornClient) => {
+        cotr: (client?: RebornClient) => {
             const vm = getCurrentInstance()!;
             const { model, queryList } = fn.creator();
 

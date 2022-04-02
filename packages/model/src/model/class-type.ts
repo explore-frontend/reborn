@@ -292,7 +292,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
 
     return {
         type: 'ClassModel',
-        cotr: (client: RebornClient) => {
+        cotr: (client?: RebornClient) => {
             const {
                 originalData,
                 reactiveData: model,
@@ -303,6 +303,10 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
             const store = vm.root.proxy.rebornStore;
 
             const decoratorList = getDecoratorList(originalData as unknown as RebornDecorators);
+
+            if (!client) {
+                throw new Error('no client has been set before you use class mode model')
+            }
 
             const queryList = decoratorList.length
                 ? initRebornDesc(model, decoratorList, client)
