@@ -40,3 +40,7 @@ export type {
     QueryResult,
     MutationResult,
 } from './operations/types';
+
+export type {
+    FNModelCreator,
+} from './model';

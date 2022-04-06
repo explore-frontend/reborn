@@ -36,7 +36,7 @@ describe('rest request transform should be correct', () => {
         });
 
         expect(getRequest.requestInit.body).toBe(undefined);
-        expect(getRequest.url).toBe('/test&a=1');
+        expect(getRequest.url).toBe('/test?a=1');
 
         const headRequest = generateRequestInfo('REST', clientOptions, {
             url: '/test',
@@ -48,10 +48,33 @@ describe('rest request transform should be correct', () => {
         });
 
         expect(headRequest.requestInit.body).toBe(undefined);
-        expect(headRequest.url).toBe('/test&a=1');
+        expect(headRequest.url).toBe('/test?a=1');
+
+
+        const getRequest1 = generateRequestInfo('REST', clientOptions, {
+            url: '/test',
+            method: 'get',
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+        });
+
+        expect(getRequest1.requestInit.body).toBe(undefined);
+        expect(getRequest1.url).toBe('/test');
+
+        const headRequest1 = generateRequestInfo('REST', clientOptions, {
+            url: '/test',
+            method: 'head',
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+        });
+
+        expect(headRequest1.requestInit.body).toBe(undefined);
+        expect(headRequest1.url).toBe('/test');
     });
 
-    it('method other should not have a body', () => {
+    it('method other should have a body', () => {
         const request = generateRequestInfo('REST', clientOptions, {
             url: '/test',
             method: 'post',

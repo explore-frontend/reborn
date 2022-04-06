@@ -37,6 +37,12 @@ export function shimStringify(obj: any) {
     }).join('&');
 }
 
+// TODO 因为当前url仅存在于代码中，暂不考虑hash的情况存在
+export function appendQueryStringToUrl(url: string, queryString: string) {
+    url = url.indexOf('?') !== -1 ? `${url}&${queryString}` : `${url}?${queryString}`;
+    return url;
+}
+
 export function useXStream<T>(stream: Stream<T>, listener: Partial<Listener<T>>) {
     const sub: Subscription = stream.subscribe(listener);
     onBeforeUnmount(() => {

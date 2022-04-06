@@ -1,7 +1,7 @@
-import type { HTTPHeaders, Method, ClientOptions } from './common';
+import type { HTTPHeaders, ClientOptions } from './common';
 import type { RestClientParams, GQLClientParams } from '../operations/types';
 
-import { deepMerge, shimStringify } from '../utils';
+import { deepMerge, shimStringify, appendQueryStringToUrl } from '../utils';
 
 function transformRequestBody<T extends Record<string, any>>(data: T, headers?: HTTPHeaders) {
     if (headers && headers['content-type'] === 'application/json') {
@@ -99,8 +99,8 @@ function generateRestRequestInfo(
         : undefined;
 
     if (requestInit.method?.toLowerCase() === 'get' || requestInit.method?.toLowerCase() === 'head') {
-        if (headers['content-type'] === 'application/x-www-form-urlencoded') {
-            url = url.indexOf('?') ? `${url}&${body}` : `${url}?${body}`;
+        if (headers['content-type'] === 'application/x-www-form-urlencoded' && body) {
+            url = appendQueryStringToUrl(url, body as string);
         }
         body = undefined;
     }
