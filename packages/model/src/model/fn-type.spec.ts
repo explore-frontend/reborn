@@ -21,7 +21,8 @@ Vue.use(CompositionAPI);
 fetchMock.enableMocks();
 
 const restClient = createClient('REST', {
-    method: 'get',
+    method: 'post',
+    timeout: 10 * 1000,
 });
 
 let count = 0;
@@ -49,6 +50,7 @@ describe('transform model success', () => {
             b: string;
         }>({
             url: '/',
+            method: 'POST',
             variables() {
                 return {
                     mockData: testVariablels.value,
@@ -57,11 +59,18 @@ describe('transform model success', () => {
             skip() {
                 return !testVariablels.value;
             },
+            updateQuery(before, after) {
+                return {
+                    a: '' + before?.a + after?.a,
+                    b: '' + before?.b + after?.b,
+                };
+            }
         });
 
         return {
             info: query.info,
             testVariablels,
+            fetchMore: query.fetchMore,
         };
     });
 
@@ -72,10 +81,8 @@ describe('transform model success', () => {
 
                 const params = createModelFromCA(MockModel);
                 const vm = getCurrentInstance()!;
-                fetchMock.mockResponseOnce(JSON.stringify({
-                    a: 1,
-                    b: 1,
-                }));
+                // TODO就是简单意思一下，实际mock在上头写的
+                fetchMock.mockResponse(JSON.stringify({}));
 
                 // 手动mock一下
                 vm.proxy.$root.rebornStore = {
@@ -93,16 +100,31 @@ describe('transform model success', () => {
 
                 watch(() => model.info.data?.b, () => {
                     expect(typeof model.info.data?.a).toBe('string');
-                    expect(model.info.data?.a).toBe(model.info.data?.b);
-                    model.testVariablels.value = '';
-                    if (model.info.data?.a === '2') {
+                    if (count < 3) {
+                        expect(model.info.data?.a).toBe(count + '');
+                        expect(model.info.data?.b).toBe(count + '');
+                        // 第二次变化
+                        model.testVariablels.value = '';
+                    } else {
+                        expect(model.info.data?.a).toBe('23');
+                        expect(model.info.data?.b).toBe('23');
+                    }
+                    if (model.info.data?.a === '23') {
                         done();
                     }
                 });
 
                 onMounted(() => {
+                    expect(typeof model.info.data).toBe('undefined');
                     setTimeout(() => {
                         model.testVariablels.value = '123';
+                    }, 100);
+
+                    setTimeout(() => {
+                        // 第三次变化
+                        model.fetchMore({
+                            mockData: '12',
+                        });
                     }, 300);
                 })
                 return () => null;

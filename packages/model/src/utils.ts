@@ -61,22 +61,40 @@ export function deepMerge<T extends Record<string, any> | Array<T>>(origin: T, .
             if (targetItem === undefined || targetItem === null) {
                 continue;
             }
-            if (originItem === undefined || originItem === null) {
-                origin[key] = targetItem;
+            let copy: any;
+            if (Array.isArray(targetItem)) {
+                copy = targetItem.map(info => {
+                    if (Array.isArray(info)) {
+                        return [...deepMerge([], info)];
+                    }
+
+                    if (typeof info === 'object' && info !== null) {
+                        return deepMerge({}, info);
+                    }
+
+                    return info;
+                })
+            } else if (typeof targetItem === 'object' && targetItem !== null) {
+                copy = deepMerge({}, targetItem);
+            } else {
+                copy = targetItem;
+            }
+
+            if (typeof originItem !== typeof targetItem || originItem === null) {
+                origin[key] = copy;
                 continue;
             }
-            if (typeof originItem !== typeof targetItem) {
-                origin[key] = targetItem;
-                continue;
-            }
+
             if (Array.isArray(originItem)) {
-                originItem.push(...(targetItem as unknown as Array<T>));
+                originItem.push(...copy);
                 continue;
             }
-            if (typeof targetItem !== 'object') {
+
+            if (typeof copy !== 'object') {
                 origin[key] = targetItem;
                 continue;
             }
+
             origin[key] = deepMerge(originItem, targetItem);
         }
     }

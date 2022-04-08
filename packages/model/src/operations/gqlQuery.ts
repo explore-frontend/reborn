@@ -89,7 +89,7 @@ export function createGQLQuery<ModelType, DataType>(
         // TODO
     }
 
-    function fetchMore({ variables } : GQLFetchMoreOptions) {
+    function fetchMore(variables: GQLFetchMoreOptions['variables']) {
         // TODO
     }
 

@@ -125,7 +125,7 @@ export function createRestQuery<ModelType, DataType>(
         pollIntervalSub = null;
     }
 
-    function fetchMore({ variables } : RestFetchMoreOption) {
+    function fetchMore(variables: RestFetchMoreOption['variables']) {
         return new Promise(resolve => {
             info.loading = true;
             const params: RestClientParams = {
@@ -135,8 +135,7 @@ export function createRestQuery<ModelType, DataType>(
             };
 
             if (option.headers) {
-                // TODO这里类型其实也没写对，后面再说= =
-                params.headers = deepMerge(params.headers!, option.headers);
+                params.headers = deepMerge(params.headers || {}, option.headers);
             }
 
             client!.request<DataType>(params).then(data => {
