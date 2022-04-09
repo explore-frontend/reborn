@@ -135,7 +135,7 @@ export function createRestQuery<ModelType, DataType>(
             };
 
             if (option.headers) {
-                params.headers = deepMerge(params.headers || {}, option.headers);
+                params.headers = deepMerge({}, params.headers || {}, option.headers);
             }
 
             client!.request<DataType>(params).then(data => {

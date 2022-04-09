@@ -22,19 +22,33 @@ fetchMock.enableMocks();
 
 const restClient = createClient('REST', {
     method: 'post',
+    headers: {
+        "content-type": 'application/x-www-form-urlencoded',
+    },
     timeout: 10 * 1000,
 });
 
 let count = 0;
-restClient.interceptors.response.use((params) => {
-    if (params.config.url === '/') {
+
+restClient.interceptors.request.use((params) => {
+    if (params.url === '/') {
+        expect(params.headers?.['content-type']).toBe('application/x-www-form-urlencoded');
+    } else {
+        expect(params.headers?.['content-type']).toBe('application/json');
+    }
+
+    return params;
+});
+
+restClient.interceptors.response.use(({ data, config }) => {
+    if (config.url === '/') {
         ++count;
         return {
             a: `${count}`,
             b: `${count}`,
         };
     }
-    return params;
+    return data;
 });
 
 describe('transform model success', () => {
@@ -67,10 +81,22 @@ describe('transform model success', () => {
             }
         });
 
+        const query1 = useRestQuery<{
+            a: string;
+            b: string;
+        }>({
+            url: '/test',
+            headers: {
+                "content-type": 'application/json'
+            },
+            skip: true,
+        });
+
         return {
             info: query.info,
             testVariablels,
             fetchMore: query.fetchMore,
+            refetch: query1.refetch,
         };
     });
 
@@ -116,6 +142,8 @@ describe('transform model success', () => {
 
                 onMounted(() => {
                     expect(typeof model.info.data).toBe('undefined');
+                    model.refetch();
+
                     setTimeout(() => {
                         model.testVariablels.value = '123';
                     }, 100);

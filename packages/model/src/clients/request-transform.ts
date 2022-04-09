@@ -67,7 +67,7 @@ function generateCommonRequestInfo(
         ...targetRequestInit
     } = params;
 
-    const requestInit: RequestInit = deepMerge(originalRequestInit, targetRequestInit);
+    const requestInit: RequestInit = deepMerge({}, originalRequestInit, targetRequestInit);
     const timeout = (targetTimeout || originalTimeout);
 
     url = targetUrl || url || '';

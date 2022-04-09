@@ -27,9 +27,11 @@ export type HTTPHeaders = {
     'content-type'?: ContentType;
 } & Record<string, string>;
 
-type TransformRequest = (params: any) => any;
+type TransformRequest = (params: RestClientParams | GQLClientParams) => any;
 
-type TransformResponse = (result: any) => Promise<any>;
+type TransformResponse = (result: CommonResponse | Record<string, any>) => any | Promise<any>;
+
+type TransformReject = (params: any) => any;
 
 export type ClientOptions = {
     url?: string;
@@ -46,20 +48,20 @@ const DEFAULT_OPTIONS: ClientOptions = {
     credentials: 'include',
 };
 
-type Interceptor<T> = {
+type Interceptor<T, P> = {
     list: Array<{
         onResolve: T | undefined;
-        onReject: T | undefined;
+        onReject: P | undefined;
     }>;
-    use(params: T): void;
+    use(onResolve: T, onReject?: P): void;
 };
 
 
-function createInterceptor(type: 'request'): Interceptor<TransformRequest>;
-function createInterceptor(type: 'response'):  Interceptor<TransformResponse>;
-function createInterceptor(type: 'response' | 'request') {
-    const list: Interceptor<TransformRequest | TransformResponse>['list']  = [];
-    function use(onResolve: TransformRequest | TransformResponse, onReject?: TransformRequest | TransformResponse) {
+function createInterceptor(type: 'request'): Interceptor<TransformRequest, TransformReject>;
+function createInterceptor(type: 'response'):  Interceptor<TransformResponse, TransformReject>;
+function createInterceptor(type: any) {
+    const list: Array<any>  = [];
+    function use(onResolve: (...params: any) => any, onReject?: (...params: any) => any) {
         list.push({
             onResolve,
             onReject,
@@ -76,6 +78,14 @@ export type RequestInfo = {
     url: string;
     timeout: number;
     requestInit: RequestInit;
+}
+
+type CommonResponse = {
+    status: Response['status'];
+    statusText: Response['statusText'];
+    headers: Response['headers'];
+    config: RequestInfo;
+    data: any;
 }
 
 export function clientFactory(
@@ -114,7 +124,7 @@ export function clientFactory(
         while (list.length) {
             const item = list.shift();
             try {
-                item?.onResolve?.(params.variables);
+                item?.onResolve?.(params);
             } catch (e) {
                 item?.onReject?.(e);
                 break;
@@ -152,13 +162,14 @@ export function clientFactory(
                     || (config.requestInit.headers as Record<string, string>)?.['Content-Type']
                     || (config.requestInit.headers as Record<string, string>)?.['content-type']
                     || 'application/json';
-                const commonInfo = {
+
+                const commonInfo: CommonResponse = {
                     status: res.status,
                     statusText: res.statusText,
                     headers: res.headers,
                     config,
                     data: undefined,
-                } as any;
+                };
 
                 let promise;
                 if (receiveType.indexOf('application/json') !== -1) {
