@@ -30,16 +30,17 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     }
 
     const storeModelInstance = store.registerModel<T>(ctor);
-    if (!storeModelInstance.count) {
-        let creator: ModelCotrInfo<unknown | BaseModel>;
-        if ('type' in ctor) {
-            creator = createModelFromCA(ctor);
-        } else {
-            creator = createModelFromClass(ctor);
-        }
 
-        const instance = creator.cotr(client) as OriginalModelInstance<T>;
-        storeModelInstance.instance = instance;
+    if (!storeModelInstance.count) {
+        const creator = 'type' in ctor
+            ? createModelFromCA(ctor)
+            : createModelFromClass(ctor);
+        const scope = storeModelInstance.scope;
+
+        scope.run(() => {
+            const instance = creator.cotr(client) as OriginalModelInstance<T>;
+            storeModelInstance.instance = instance;
+        });
     }
     storeModelInstance.count++;
 
@@ -48,6 +49,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
+            storeModelInstance.scope.stop();
         }
     });
     onServerPrefetch(() => {

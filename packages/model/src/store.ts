@@ -1,6 +1,8 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from './api';
+
 import { Cache } from './cache';
+import { effectScope } from './dep';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
@@ -22,6 +24,7 @@ export function storeFactory() {
             instance: null,
             count: 0,
             queryList: [],
+            scope: effectScope(true),
         };
         modelMap.set(constructor, storeModelInstance);
         return storeModelInstance as ModelInfo<T>;
