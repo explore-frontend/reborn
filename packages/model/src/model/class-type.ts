@@ -1,4 +1,3 @@
-import type { UnwrapRef } from '../dep';
 import type { RebornClient, Constructor, ModelCotrInfo, ModelMetadata } from '../types';
 import type { GetModelInstance } from '../store';
 
@@ -53,6 +52,7 @@ function getDecoratorList<T extends RebornDecorators>(instance: T) {
 
 function initRebornDesc<T>(
     instance: T,
+    instanceAccessor: Partial<T>,
     decoratorList: DecoratorInfoList,
     rebornClient: RebornClient,
 ) {
@@ -100,7 +100,7 @@ function initRebornDesc<T>(
                     return mutation.info.error;
                 },
             };
-            registerProperty(instance, key, value);
+            registerProperty(instanceAccessor, key, value);
         } else {
             let query!: ReturnType<typeof createGQLQuery | typeof createRestQuery>;
             if (meta.type === 'gqlQuery') {
@@ -136,14 +136,10 @@ function initRebornDesc<T>(
                 },
             };
             queryList.push(query);
-            registerProperty(instance, key, value);
+            registerProperty(instanceAccessor, key, value);
         }
     }
 
-    // 延迟初始化，保证query间依赖
-    if (queryList.length && !vm.proxy.$isServer) {
-        queryList.forEach(query => query.init());
-    }
     return queryList;
 }
 
@@ -200,30 +196,36 @@ function collectProperty<T>(target: any) {
 
 function getDataFactory<T>(ctor: Constructor<T>) {
     return () => {
-        const originalData = new ctor();
+        const original = new ctor();
 
-        const plainData: Partial<T> = {};
+        const plain: Partial<T> = {
+            ...original,
+        };
 
-        Object.keys(originalData).forEach(key => {
-            plainData[key as keyof typeof originalData] = originalData[key as keyof typeof originalData];
-        });
-
-        const reactiveData = reactive(plainData);
+        const reactiveData = reactive(plain) as Partial<T>;
+        const modelAccessor: Partial<T> = {};
 
         const keys = Object.getOwnPropertyNames(reactiveData)
         keys.forEach(key => {
-            Object.defineProperty(originalData, key, {
+            Object.defineProperty(modelAccessor, key, {
                 get: () => reactiveData[key as keyof typeof reactiveData],
                 set: value => {
                     reactiveData[key as keyof typeof reactiveData] = value;
                 },
-                configurable: true
+            });
+
+            Object.defineProperty(original, key, {
+                get: () => modelAccessor[key as keyof typeof modelAccessor],
+                set: value => {
+                    modelAccessor[key as keyof typeof modelAccessor] = value;
+                },
             });
         });
 
         return {
             reactiveData,
-            originalData,
+            original,
+            modelAccessor,
         };
     }
 }
@@ -242,22 +244,28 @@ function getPropertyMetaList<T>(ctor: Constructor<T>) {
 }
 
 function generateProtoData<T>(ctor: Constructor<T>) {
-    return (plainData: UnwrapRef<Partial<T>>) => {
+    return (
+        accessor: Partial<T>,
+    ) => {
         const properties = getPropertyMetaList<T>(ctor);
 
         for (const item of properties) {
             if (item.type === 'function') {
-                plainData[item.key as keyof typeof plainData] = item.value.bind(plainData);
+                Object.defineProperty(accessor, item.key, {
+                    get() {
+                        return item.value.bind(accessor);
+                    },
+                });
             } else if (item.type === 'getter') {
                 const { get = () => {}, set } = item;
                 // 使用computed作为缓存，避免getter触发多次
                 const computedValue = computed({
                     get: () => {
-                        return get.call(plainData);
+                        return get.call(accessor);
                     },
                     set: (val: any) => {
                         if (set) {
-                            set.call(plainData, val);
+                            set.call(accessor, val);
                         }
                     },
                 });
@@ -275,10 +283,9 @@ function generateProtoData<T>(ctor: Constructor<T>) {
                     };
                 }
 
-                Object.defineProperty(plainData, item.key, descriptors);
+                Object.defineProperty(accessor, item.key, descriptors);
             }
         }
-        return plainData as T;
     }
 }
 
@@ -293,24 +300,29 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
     return {
         type: 'ClassModel',
         cotr: (client?: RebornClient) => {
-            const {
-                originalData,
-                reactiveData: model,
-            } = data();
-            protoData(model as UnwrapRef<T>);
-
-            const vm = getCurrentInstance()!;
-            const store = vm.root.proxy.rebornStore;
-
-            const decoratorList = getDecoratorList(originalData as unknown as RebornDecorators);
-
             if (!client) {
                 throw new Error('no client has been set before you use class mode model')
             }
+            const {
+                original,
+                reactiveData: model,
+                modelAccessor,
+            } = data();
+
+            const vm = getCurrentInstance()!;
+            const store = vm.root.proxy.rebornStore;
+            const decoratorList = getDecoratorList(original as unknown as RebornDecorators);
 
             const queryList = decoratorList.length
-                ? initRebornDesc(model, decoratorList, client)
-                : []
+                ? initRebornDesc(
+                    model,
+                    modelAccessor,
+                    decoratorList,
+                    client
+                )
+                : [];
+
+            protoData(modelAccessor);
 
             function destroy() {
                 if (queryList) {
@@ -318,7 +330,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                     queryList.length = 0
                 }
 
-                Object.defineProperty(model, 'getModelInstance', {
+                Object.defineProperty(modelAccessor, 'getModelInstance', {
                     get() {
                         return null
                     },
@@ -327,7 +339,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                 });
             }
 
-            Object.defineProperty(model, 'getModelInstance', {
+            Object.defineProperty(modelAccessor, 'getModelInstance', {
                 get() {
                     return store.getModelInstance
                 },
@@ -335,8 +347,13 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                 enumerable: false,
             });
 
+            // 延迟初始化，保证query间依赖
+            if (queryList.length && !vm.proxy.$isServer) {
+                queryList.forEach(query => query.init());
+            }
+
             return {
-                model: model as T,
+                model: modelAccessor as T,
                 destroy,
             };
         },
