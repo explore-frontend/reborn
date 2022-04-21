@@ -151,13 +151,22 @@ export function clientFactory(
         return Promise
             .race([timeoutPromise, fetchPromise])
             .then(res => {
-                if (res instanceof DOMException) {
-                    return Promise.reject(res);
-                }
                 // 浏览器断网情况下有可能会是null
                 if (res === null) {
-                    return Promise.reject(new DOMException('The request has been timeout'));
+                    res = new DOMException('The request has been timeout');
                 }
+
+                const list = [...responseInterceptor.list];
+
+                if (res instanceof DOMException) {
+                    let promise: Promise<any> = Promise.reject(res);
+                    while (list.length) {
+                        const transform = list.shift();
+                        promise = promise.then(transform?.onResolve, transform?.onReject);
+                    }
+                    return promise;
+                }
+
                 const receiveType = res.headers.get('Content-Type')
                     || (config.requestInit.headers as Record<string, string>)?.['Content-Type']
                     || (config.requestInit.headers as Record<string, string>)?.['content-type']
@@ -184,7 +193,6 @@ export function clientFactory(
                     // 其它类型就把body先扔回去……也许以后有用……
                     promise = res.ok ? Promise.resolve(commonInfo) : Promise.reject(res)
                 }
-                const list = [...responseInterceptor.list];
                 while (list.length) {
                     const transform = list.shift();
                     promise = promise.then(transform?.onResolve, transform?.onReject);
