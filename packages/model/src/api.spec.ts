@@ -6,9 +6,8 @@ import type { ComponentInternalInstance } from '@vue/composition-api';
 import { createModel } from './model';
 import { useModel, createStore } from './api';
 import CompositionAPI, { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from '@vue/composition-api';
-// 为了测试简单些，引一个带编译的Vue进来
-// @ts-ignore
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue';
+import { compileToFunctions } from 'vue-template-compiler';
 
 Vue.use(CompositionAPI);
 
@@ -25,7 +24,7 @@ const testModel = createModel(() => {
 
 let currentComponentAInstance: ComponentInternalInstance | null;
 const ComponentA = defineComponent({
-    template: '<div>A: a: {{ model.a.value }} b: {{ model.b.value }}</div>',
+    ...compileToFunctions('<div>A: a: {{ model.a.value }} b: {{ model.b.value }}</div>'),
     setup() {
         currentComponentAInstance = getCurrentInstance();
         const model = useModel(testModel);
@@ -43,7 +42,7 @@ const ComponentA = defineComponent({
 
 let currentComponentBInstance: ComponentInternalInstance | null;
 const ComponentB = defineComponent({
-    template: '<div>B: a: {{ model.a.value }} b: {{ model.b.value }}</div>',
+    ...compileToFunctions('<div>B: a: {{ model.a.value }} b: {{ model.b.value }}</div>'),
     setup() {
         currentComponentBInstance = getCurrentInstance();
         const model = useModel(testModel);
@@ -69,9 +68,9 @@ const App = defineComponent({
         ComponentA,
         ComponentB,
     },
-    template: `
+    ...compileToFunctions(`
         <div v-if="parentShow"><ComponentA v-if="show" /><ComponentB v-else /></div>
-    `,
+    `),
     setup() {
         currentAppInstance = getCurrentInstance();
         const show = ref(false);

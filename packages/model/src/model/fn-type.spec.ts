@@ -15,7 +15,6 @@ import { createClient } from '../clients';
 import fetchMock from 'jest-fetch-mock';
 import 'unfetch/polyfill'
 import { getCurrentInstance, ref } from '@vue/composition-api';
-import { type } from 'os';
 
 Vue.use(CompositionAPI);
 fetchMock.enableMocks();
