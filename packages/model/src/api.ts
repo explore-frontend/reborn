@@ -29,7 +29,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         throw new Error('There is no reborn-model store in your root vm!!');
     }
 
-    const storeModelInstance = store.registerModel<T>(ctor);
+    const storeModelInstance = store.addModel<T>(ctor);
 
     if (!storeModelInstance.count) {
         const creator = 'type' in ctor
@@ -50,6 +50,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
             storeModelInstance.scope.stop();
+            store.removeModel<T>(ctor);
         }
     });
     onServerPrefetch(() => {

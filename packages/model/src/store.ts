@@ -14,7 +14,7 @@ export function storeFactory() {
         return modelMap.get(constructor)?.instance?.model as unknown as RebornInstanceType<typeof constructor>;
     }
 
-    function registerModel<T>(constructor: ModelInfo<T>['constructor']) {
+    function addModel<T>(constructor: ModelInfo<T>['constructor']) {
         if (modelMap.has(constructor)) {
             return modelMap.get(constructor)! as ModelInfo<T>;
         }
@@ -30,6 +30,12 @@ export function storeFactory() {
         return storeModelInstance as ModelInfo<T>;
     }
 
+    function removeModel<T>(constructor: ModelInfo<T>['constructor']) {
+        if (modelMap.has(constructor)) {
+            modelMap.delete(constructor);
+        }
+    }
+
     function restore(data: Record<string, any>): void {
         cache.restore(data);
     }
@@ -40,7 +46,8 @@ export function storeFactory() {
 
     return {
         getModelInstance,
-        registerModel,
+        addModel,
+        removeModel,
         restore,
         exportStates,
     };

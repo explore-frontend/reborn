@@ -112,7 +112,8 @@ describe('transform model success', () => {
                 // 手动mock一下
                 vm.proxy.$root.rebornStore = {
                     getModelInstance: jest.fn(),
-                    registerModel: jest.fn(),
+                    addModel: jest.fn(),
+                    removeModel: jest.fn(),
                     restore: jest.fn(),
                     exportStates: jest.fn(),
                 };
