@@ -13,7 +13,7 @@ import {
     createRestMutation,
     createRestQuery,
 } from '../operations';
-import { getCurrentInstance } from '../dep';
+import { getCurrentInstance } from 'vue';
 
 
 let creatingModelCount = 0;
@@ -24,8 +24,8 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
-    const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const route = vm.proxy!.$route;
+    const client = vm.appContext.config.globalProperties.rebornClient;
 
     const query = createRestQuery<null, T>(options, null, route, client.rest);
     tempQueryList.push(query);
@@ -42,8 +42,8 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
         throw new Error(`You should use useGQLQuery with createModel context `);
     }
 
-    const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const route = vm.proxy!.$route;
+    const client = vm.appContext.config.globalProperties.rebornClient;
 
     const query = createGQLQuery<null, T>(options, null, route, client.rest);
     tempQueryList.push(query);
@@ -60,8 +60,8 @@ export const useRestMutation = <T>(options: RestMutationOptions) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestMutation with createModel context `);
     }
-    const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const route = vm.proxy!.$route;
+    const client = vm.appContext.config.globalProperties.rebornClient;
 
     return createRestMutation<null, T>(options, null, route, client.rest);
 }
@@ -70,8 +70,8 @@ export const useGQLMutation = <T>(options: GQLMutationOptions) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useGQLMutation with createModel context `);
     }
-    const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const route = vm.proxy!.$route;
+    const client = vm.appContext.config.globalProperties.rebornClient;
 
     return createGQLMutation<null, T>(options, null, route, client.rest);
 }
@@ -91,7 +91,7 @@ export function createModelFromCA<T>(
             const { model, queryList } = fn.creator();
 
             // 延迟初始化，保证query间依赖
-            if (queryList.length && !vm.proxy.$isServer) {
+            if (queryList.length && typeof window !== 'undefined') {
                 queryList.forEach(query => query.init());
             }
 
@@ -118,7 +118,7 @@ export function createModel<T>(fn: FNModelConstructor<T>) {
         creator: () => {
             creatingModelCount++;
             const vm = getCurrentInstance()!;
-            const store = vm.root.proxy.rebornStore;
+            const store = vm.appContext.config.globalProperties.rebornStore;
 
             const model = fn({
                 getModelInstance: store.getModelInstance,

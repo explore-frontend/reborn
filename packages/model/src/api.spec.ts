@@ -1,15 +1,11 @@
 /**
  * @jest-environment jsdom
  */
-import type { ComponentInternalInstance } from '@vue/composition-api';
+import type { ComponentInternalInstance } from 'Vue';
 
 import { createModel } from './model';
 import { useModel, createStore } from './api';
-import CompositionAPI, { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from '@vue/composition-api';
-import Vue from 'vue';
-import { compileToFunctions } from 'vue-template-compiler';
-
-Vue.use(CompositionAPI);
+import { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from 'vue';
 
 const testModel = createModel(() => {
     const a = ref(1);
@@ -24,7 +20,7 @@ const testModel = createModel(() => {
 
 let currentComponentAInstance: ComponentInternalInstance | null;
 const ComponentA = defineComponent({
-    ...compileToFunctions('<div>A: a: {{ model.a.value }} b: {{ model.b.value }}</div>'),
+    template: '<div>A: a: {{ model.a.value }} b: {{ model.b.value }}</div>',
     setup() {
         currentComponentAInstance = getCurrentInstance();
         const model = useModel(testModel);
@@ -42,8 +38,8 @@ const ComponentA = defineComponent({
 
 let currentComponentBInstance: ComponentInternalInstance | null;
 const ComponentB = defineComponent({
-    ...compileToFunctions('<div>B: a: {{ model.a.value }} b: {{ model.b.value }}</div>'),
-    setup() {
+    template: '<div>B: a: {{ model.a.value }} b: {{ model.b.value }}</div>',
+    setup(p, { expose }) {
         currentComponentBInstance = getCurrentInstance();
         const model = useModel(testModel);
 
@@ -52,6 +48,10 @@ const ComponentB = defineComponent({
         }
 
         const c = computed(() => model.b.value);
+
+        expose({
+            handleClick,
+        });
 
         return {
             model,
@@ -68,10 +68,10 @@ const App = defineComponent({
         ComponentA,
         ComponentB,
     },
-    ...compileToFunctions(`
+    template: `
         <div v-if="parentShow"><ComponentA v-if="show" /><ComponentB v-else /></div>
-    `),
-    setup() {
+    `,
+    setup(p, { expose }) {
         currentAppInstance = getCurrentInstance();
         const show = ref(false);
         const parentShow = ref(true);
@@ -83,6 +83,11 @@ const App = defineComponent({
         function toggle() {
             parentShow.value = !parentShow.value;
         }
+
+        expose({
+            change,
+            toggle,
+        });
 
         return {
             show,
@@ -100,43 +105,45 @@ describe(`model should has it's own effect scope`, () => {
             render: () => h(App),
         });
 
-        store.install(Vue, app);
+        app.use(store);
         const div = document.createElement('div');
         app.mount(div);
         (async () => {
-            expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>B: a: 1 b: 2</div>')
-            expect(currentComponentBInstance?.proxy.$el.innerHTML).toBe('B: a: 1 b: 2');
+            const model = app.config.globalProperties.rebornStore.getModelInstance(testModel);
+
+            expect(currentAppInstance?.proxy?.$el.innerHTML).toBe('<div>B: a: 1 b: 2</div>')
+            expect(currentComponentBInstance?.proxy?.$el.innerHTML).toBe('B: a: 1 b: 2');
+
             // @ts-ignore
             currentComponentBInstance?.proxy.handleClick();
             await nextTick();
-            expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>B: a: 2 b: 4</div>')
-            expect(currentComponentBInstance?.proxy.$el.innerHTML).toBe('B: a: 2 b: 4');
+            expect(currentAppInstance?.proxy?.$el.innerHTML).toBe('<div>B: a: 2 b: 4</div>')
+            expect(currentComponentBInstance?.proxy?.$el.innerHTML).toBe('B: a: 2 b: 4');
 
-            const model = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
-            expect(model?.a.value).toBe(2);
-            expect(model?.b.value).toBe(4);
-
-            // @ts-ignore
-            currentAppInstance?.proxy.change();
-            await nextTick();
-            expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>A: a: 2 b: 4</div>')
-            expect(currentComponentAInstance?.proxy.$el.innerHTML).toBe('A: a: 2 b: 4');
+            expect(model.a.value).toBe(2);
+            expect(model.b.value).toBe(4);
 
             // @ts-ignore
-            currentComponentAInstance?.proxy.handleClick();
+            currentAppInstance?.proxy?.change();
             await nextTick();
-            expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>A: a: 3 b: 6</div>')
-            expect(currentComponentAInstance?.proxy.$el.innerHTML).toBe('A: a: 3 b: 6');
+            expect(currentAppInstance?.proxy?.$el.innerHTML).toBe('<div>A: a: 1 b: 2</div>')
+            expect(currentComponentAInstance?.proxy?.$el.innerHTML).toBe('A: a: 1 b: 2');
 
-            const model1 = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
-            expect(model1?.a.value).toBe(3);
-            expect(model1?.b.value).toBe(6);
+            // @ts-ignore
+            currentComponentAInstance?.proxy?.handleClick();
+            await nextTick();
+            expect(currentAppInstance?.proxy?.$el.innerHTML).toBe('<div>A: a: 2 b: 4</div>')
+            expect(currentComponentAInstance?.proxy?.$el.innerHTML).toBe('A: a: 2 b: 4');
+
+            const model1 = app.config.globalProperties.rebornStore.getModelInstance(testModel);
+            expect(model1.a.value).toBe(2);
+            expect(model1.b.value).toBe(4);
 
             // @ts-ignore
             currentAppInstance?.proxy.toggle();
             await nextTick();
 
-            const model2 = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
+            const model2 = app.config.globalProperties.rebornStore.getModelInstance(testModel);
             expect(model2).toBe(undefined);
 
             done();

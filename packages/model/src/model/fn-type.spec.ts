@@ -3,20 +3,18 @@
  */
 import { useRestQuery, createModel, createModelFromCA } from './fn-type';
 import {
-    Vue,
-    CompositionAPI,
     defineComponent,
     onMounted,
     createApp,
     watch,
     h,
-} from '../dep';
+    getCurrentInstance,
+    ref,
+} from 'vue';
 import { createClient } from '../clients';
 import fetchMock from 'jest-fetch-mock';
 import 'unfetch/polyfill'
-import { getCurrentInstance, ref } from '@vue/composition-api';
 
-Vue.use(CompositionAPI);
 fetchMock.enableMocks();
 
 const restClient = createClient('REST', {
@@ -118,7 +116,7 @@ describe('transform model success', () => {
                 fetchMock.mockResponse(JSON.stringify({}));
 
                 // 手动mock一下
-                vm.proxy.$root.rebornStore = {
+                vm.appContext.config.globalProperties.rebornStore = {
                     getModelInstance: jest.fn(),
                     addModel: jest.fn(),
                     removeModel: jest.fn(),
@@ -126,7 +124,7 @@ describe('transform model success', () => {
                     exportStates: jest.fn(),
                 };
 
-                vm.proxy.$root.rebornClient = {
+                vm.appContext.config.globalProperties.rebornClient = {
                     rest: restClient,
                 };
 
@@ -242,7 +240,7 @@ describe('transform model with compose success', () => {
                 fetchMock.mockResponse(JSON.stringify({}));
 
                 // 手动mock一下
-                vm.proxy.$root.rebornStore = {
+                vm.appContext.config.globalProperties.rebornStore = {
                     getModelInstance: jest.fn(),
                     addModel: jest.fn(),
                     removeModel: jest.fn(),
@@ -250,7 +248,7 @@ describe('transform model with compose success', () => {
                     exportStates: jest.fn(),
                 };
 
-                vm.proxy.$root.rebornClient = {
+                vm.appContext.config.globalProperties.rebornClient = {
                     rest: restClient,
                 };
 

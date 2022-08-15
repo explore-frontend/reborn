@@ -5,20 +5,17 @@ import type { QueryResult } from '../operations/types';
 
 import { createModelFromClass, BaseModel } from './class-type';
 import {
-    Vue,
-    CompositionAPI,
     defineComponent,
     onMounted,
     createApp,
     watch,
     h,
-} from '../dep';
+} from 'vue';
 import { createClient } from '../clients';
 import fetchMock from 'jest-fetch-mock';
 import { restQuery } from '../operations/decorators';
 import 'unfetch/polyfill'
 
-Vue.use(CompositionAPI);
 fetchMock.enableMocks();
 class CustomModel extends BaseModel {
     private a = 1;

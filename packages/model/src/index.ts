@@ -28,14 +28,6 @@ export {
     createClient,
 };
 
-// Vue3里面就不需要这个了，可以挂在config.globalProperties上
-declare module 'vue/types/vue' {
-    interface Vue {
-        rebornStore: ReturnType<typeof storeFactory>;
-        rebornClient: RebornClient;
-    }
-}
-
 export type {
     QueryResult,
     MutationResult,

@@ -1,16 +1,15 @@
-import type { Constructor, RebornClient, ModelCotrInfo, OriginalModelInstance } from './types';
-import type { VueConstructor, createApp } from './dep';
+import type { Constructor, RebornClient, OriginalModelInstance } from './types';
+import { createApp, effectScope } from 'vue';
 import type { Client } from './operations/types';
 import type { FNModelCreator } from './model';
 
 import {
-    Vue,
     onBeforeUnmount,
     onServerPrefetch,
     getCurrentInstance,
-} from './dep';
+} from 'vue';
 import { storeFactory } from './store';
-import { createModelFromCA, createModelFromClass, BaseModel } from './model';
+import { createModelFromCA, createModelFromClass } from './model';
 
 export type MyCon<T> = FNModelCreator<T> | Constructor<T>;
 export type RebornInstanceType<T extends MyCon<any>> = T extends MyCon<infer U> ? U : never;
@@ -20,9 +19,11 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     if (!instance) {
         throw new Error('useModel must use in a setup context!');
     }
-    const root = instance.root.proxy;
+
+    // Vue3中通过globalProperties来拿
+    const root = instance.appContext.config.globalProperties;
     // TODO小程序的适配后面在做
-    const store = root.rebornStore;
+    const store = root.rebornStore as ReturnType<typeof storeFactory>;
     const client = root.rebornClient;
 
     if (!store) {
@@ -35,9 +36,10 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         const creator = 'type' in ctor
             ? createModelFromCA(ctor)
             : createModelFromClass(ctor);
+        storeModelInstance.scope = effectScope(true);
         const scope = storeModelInstance.scope;
 
-        scope.run(() => {
+        scope?.run(() => {
             const instance = creator.cotr(client) as OriginalModelInstance<T>;
             storeModelInstance.instance = instance;
         });
@@ -49,8 +51,8 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
-            storeModelInstance.scope.stop();
-            store.removeModel<T>(ctor);
+            storeModelInstance.scope?.stop();
+            storeModelInstance.scope = effectScope(true);
         }
     });
     onServerPrefetch(() => {
@@ -83,14 +85,9 @@ export function createStore() {
     }
 
     // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(VueConstructor: VueConstructor, app: ReturnType<typeof createApp>) {
-        app.mixin({
-            created(this: Vue) {
-                // Vue2里use拿不到app实例，也没有provide，所以只能先这么玩了
-                this.$root.rebornStore = this.$root.rebornStore || store;
-                this.$root.rebornClient = this.$root.rebornClient || rebornClient;
-            },
-        })
+    function install(app: ReturnType<typeof createApp>) {
+        app.config.globalProperties.rebornStore = store;
+        app.config.globalProperties.rebornClient = rebornClient;
     }
 
     const result = {

@@ -7,14 +7,14 @@ import type {
     RestMutationOptions,
 } from './operations/types';
 import type { Client } from './operations/types';
-import type { EffectScope } from './dep';
+import type { EffectScope } from 'vue';
 
 export type ModelInfo<T = unknown> = {
     constructor: FNModelCreator<T> | Constructor<T>;
     instance: OriginalModelInstance<T> | null;
     count: number;
     queryList: Array<ReturnType<typeof createRestQuery | typeof createGQLQuery>>;
-    scope: EffectScope;
+    scope: EffectScope | null;
 }
 
 export type ModelMap = Record<string, ModelInfo>
