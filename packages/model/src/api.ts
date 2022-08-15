@@ -98,14 +98,5 @@ export function createStore() {
         registerClient,
     } as const;
 
-
-    Object.defineProperty(result, 'storeInstance', {
-        get() {
-            return store;
-        },
-        enumerable: false,
-        configurable: false,
-    });
-
     return result;
 }

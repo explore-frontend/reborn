@@ -112,10 +112,9 @@ describe(`model should has it's own effect scope`, () => {
             expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>B: a: 2 b: 4</div>')
             expect(currentComponentBInstance?.proxy.$el.innerHTML).toBe('B: a: 2 b: 4');
 
-            // @ts-ignore
-            const model = store.storeInstance.getModelInstance(testModel);
-            expect(model.a.value).toBe(2);
-            expect(model.b.value).toBe(4);
+            const model = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
+            expect(model?.a.value).toBe(2);
+            expect(model?.b.value).toBe(4);
 
             // @ts-ignore
             currentAppInstance?.proxy.change();
@@ -129,17 +128,15 @@ describe(`model should has it's own effect scope`, () => {
             expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>A: a: 3 b: 6</div>')
             expect(currentComponentAInstance?.proxy.$el.innerHTML).toBe('A: a: 3 b: 6');
 
-            // @ts-ignore
-            const model1 = store.storeInstance.getModelInstance(testModel);
-            expect(model1.a.value).toBe(3);
-            expect(model1.b.value).toBe(6);
+            const model1 = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
+            expect(model1?.a.value).toBe(3);
+            expect(model1?.b.value).toBe(6);
 
             // @ts-ignore
             currentAppInstance?.proxy.toggle();
             await nextTick();
 
-            // @ts-ignore
-            const model2 = store.storeInstance.getModelInstance(testModel);
+            const model2 = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
             expect(model2).toBe(undefined);
 
             done();

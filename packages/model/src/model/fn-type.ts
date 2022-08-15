@@ -16,12 +16,12 @@ import {
 import { getCurrentInstance } from '../dep';
 
 
-let modelCreatingFlag = false;
+let creatingModelCount = 0;
 const tempQueryList: Array<ReturnType<typeof createRestQuery> | ReturnType<typeof createGQLQuery>> = [];
 
 export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     const vm = getCurrentInstance();
-    if (!modelCreatingFlag || !vm) {
+    if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
     const route = vm.proxy.$route;
@@ -38,7 +38,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
 };
 export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     const vm = getCurrentInstance();
-    if (!modelCreatingFlag || !vm) {
+    if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useGQLQuery with createModel context `);
     }
 
@@ -57,7 +57,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
 
 export const useRestMutation = <T>(options: RestMutationOptions) => {
     const vm = getCurrentInstance();
-    if (!modelCreatingFlag || !vm) {
+    if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestMutation with createModel context `);
     }
     const route = vm.proxy.$route;
@@ -67,7 +67,7 @@ export const useRestMutation = <T>(options: RestMutationOptions) => {
 }
 export const useGQLMutation = <T>(options: GQLMutationOptions) => {
     const vm = getCurrentInstance();
-    if (!modelCreatingFlag || !vm) {
+    if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useGQLMutation with createModel context `);
     }
     const route = vm.proxy.$route;
@@ -85,7 +85,7 @@ export function createModelFromCA<T>(
     fn: FNModelCreator<T>,
 ): ModelCotrInfo<T> {
     return {
-        type: 'FunctionlModel',
+        type: 'FunctionalModel',
         cotr: (client?: RebornClient) => {
             const vm = getCurrentInstance()!;
             const { model, queryList } = fn.creator();
@@ -116,7 +116,7 @@ export function createModel<T>(fn: FNModelConstructor<T>) {
     return {
         type: 'FN',
         creator: () => {
-            modelCreatingFlag = true;
+            creatingModelCount++;
             const vm = getCurrentInstance()!;
             const store = vm.root.proxy.rebornStore;
 
@@ -124,7 +124,7 @@ export function createModel<T>(fn: FNModelConstructor<T>) {
                 getModelInstance: store.getModelInstance,
             });
             const queryList = [...tempQueryList];
-            modelCreatingFlag = false;
+            creatingModelCount--;
             tempQueryList.length = 0;
 
             return {
