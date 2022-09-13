@@ -9,13 +9,13 @@ import type {
 import type { Route } from '../dep';
 
 import { reactive, computed } from '../dep';
-
+import { InfoDataType, useState } from './state';
 
 export function initDataType<DataType>() {
-    const data = {
-        data: undefined as DataType | undefined,
+    const data: InfoDataType<DataType> = {
+        data: undefined,
         loading: false,
-        error: undefined as any
+        error: undefined
     };
 
     // 手动绕过UnwrapRef的坑……
@@ -49,8 +49,11 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
+    const state = useState(info)
+
     return {
         info,
+        state,
         skip,
         pollInterval,
         variables,
