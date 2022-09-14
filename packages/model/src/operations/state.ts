@@ -210,13 +210,13 @@ export function assertRefreshErrorState<T>(v: State<T>): asserts v is RefreshErr
 export function useState<T>(info: InfoDataType<T>): Ref<State<T>> {
     return computed(() => {
         if (info.loading) {
-            if (!info.data) {
+            if (!isDef(info.data)) {
                 return { status: StateStatus.Loading, error: info.error }
             }
             return { status: StateStatus.Refresh, data: info.data, error: info.error }
         }
         if (isDef(info.error)) {
-            if (!info.data) {
+            if (!isDef(info.data)) {
                 return { status: StateStatus.Error, error: info.error }
             }
             return { status: StateStatus.RefreshError, data: info.data, error: info.error }
