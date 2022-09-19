@@ -8,8 +8,8 @@ import type {
 } from './types';
 import type { Route } from '../dep';
 
-import { reactive, computed } from '../dep';
-import { InfoDataType, useState } from './state';
+import { reactive, computed, toRefs } from '../dep';
+import { InfoDataType, useStatus } from './state';
 
 export function initDataType<DataType>() {
     const data: InfoDataType<DataType> = {
@@ -49,11 +49,16 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
-    const state = useState(info)
+    const state = useStatus(info);
+
+    const { data, error, loading } = toRefs(info);
 
     return {
         info,
         state,
+        data,
+        error,
+        loading,
         skip,
         pollInterval,
         variables,

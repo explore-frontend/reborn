@@ -1,7 +1,8 @@
-import { hash } from './hash';
+import { describe, it, expect } from 'vitest';
+import { hash } from '../src/cache/hash';
 
 describe('hash in the right way', () => {
-    test('primitive value', () => {
+    it('primitive value', () => {
         expect(hash(undefined)).toBe('undefined-undefined');
         expect(hash(null)).toBe('null-null');
         expect(hash(true)).toBe('boolean-true');
@@ -10,7 +11,7 @@ describe('hash in the right way', () => {
         expect(() => hash(() => {})).toThrow();
     });
 
-    test('primitive array', () => {
+    it('primitive array', () => {
         expect(hash([ undefined ])).toBe('array-undefined-undefined');
         expect(hash([ null ])).toBe('array-null-null');
         expect(hash([ true ])).toBe('array-boolean-true');
@@ -19,7 +20,7 @@ describe('hash in the right way', () => {
         expect(() => hash([ () => {} ])).toThrow();
     });
 
-    test('primitive object', () => {
+    it('primitive object', () => {
         expect(hash({ })).toBe('object-');
         expect(hash({ a: undefined })).toBe('object-a-undefined-undefined');
         expect(hash({ a: null })).toBe('object-a-null-null');
@@ -29,7 +30,7 @@ describe('hash in the right way', () => {
         expect(() => hash({a: () => {} })).toThrow();
     });
 
-    test('mix type and order', () => {
+    it('mix type and order', () => {
         expect(hash({ a: 1, b: 2 })).toBe(hash({ b: 2, a: 1 }));
         expect(hash({ a: [ 1, 2, 3, 4 ], b: 2 })).toBe(hash({ b: 2, a: [ 1, 2, 3, 4 ] }));
         expect(hash({ a: [ 1, { b: 2, c: 3 }, 4 ], b: 2 })).toBe(hash({ b: 2, a: [ 1, { c: 3, b: 2 }, 4 ] }));

@@ -1,17 +1,31 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "target": "es5",
-        "module": "es2015",
-        "strict": true,
+        "target": "ESNext",
+        "module": "ESNext",
+        // Required in Vue projects
         "jsx": "preserve",
+        // `"noImplicitThis": true` is part of `strict`
+        // Added again here in case some users decide to disable `strict`.
+        // This enables stricter inference for data properties on `this`.
+        "noImplicitThis": true,
+        "strict": true,
+        // Enforce using `import type` instead of `import` for types
+        "importsNotUsedAsValues": "error",
         "importHelpers": true,
-        "moduleResolution": "node",
+        "moduleResolution": "Node",
         "experimentalDecorators": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
+        "useDefineForClassFields": false,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": false,
+        "isolatedModules": false,
         "sourceMap": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "exactOptionalPropertyTypes": false,
         "baseUrl": ".",
         "lib": ["esnext", "dom"]
     }

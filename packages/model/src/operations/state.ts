@@ -1,5 +1,7 @@
-import { computed, Ref } from "vue"
-import { isDef } from "./core"
+import type { ComputedRef } from '../dep';
+
+import { computed } from '../dep';
+import { isDef } from './core';
 
 export interface InfoDataType<T> {
     data: T | undefined
@@ -46,84 +48,45 @@ export enum StateStatus {
     RefreshError = 'RefreshError',
 }
 
-export interface EmptyState {
-    status: StateStatus.Empty
+export type DoneLikeStatus =
+    | StateStatus.Done
+    | StateStatus.Refresh
+    | StateStatus.RefreshError;
+
+export type LoadingLikeStatus =
+    | StateStatus.Loading
+    | StateStatus.Refresh;
+
+export type ErrorLikeStatus =
+    | StateStatus.Error
+    | StateStatus.RefreshError;
+
+export function isEmptyState(v: StateStatus): v is StateStatus.Empty {
+    return v === StateStatus.Empty
 }
 
-export interface LoadingState {
-    status: StateStatus.Loading
-    error: unknown | undefined
+export function isLoadingState(v: StateStatus): v is StateStatus.Loading {
+    return v === StateStatus.Loading
 }
 
-export interface DoneState<T> {
-    status: StateStatus.Done
-    data: T
+export function isDoneState(v: StateStatus): v is StateStatus.Done {
+    return v === StateStatus.Done
 }
 
-export interface ErrorState {
-    status: StateStatus.Error
-    error: unknown
+export function isErrorState(v: StateStatus): v is StateStatus.Error {
+    return v === StateStatus.Error
 }
 
-export interface RefreshState<T> {
-    status: StateStatus.Refresh
-    data: T
-    error: unknown | undefined
+export function isRefreshState(v: StateStatus): v is StateStatus.Refresh {
+    return v === StateStatus.Refresh
 }
 
-export interface RefreshErrorState<T> {
-    status: StateStatus.RefreshError
-    data: T
-    error: unknown
+export function isRefreshErrorState(v: StateStatus): v is StateStatus.RefreshError {
+    return v === StateStatus.RefreshError
 }
 
-export type State<T> =
-    | EmptyState
-    | LoadingState
-    | DoneState<T>
-    | ErrorState
-    | RefreshState<T>
-    | RefreshErrorState<T>
-
-export type DoneLikeState<T> =
-    | DoneState<T>
-    | RefreshState<T>
-    | RefreshErrorState<T>
-
-export type LoadingLikeState<T> =
-    | LoadingState
-    | RefreshState<T>
-
-export type ErrorLikeState<T> =
-    | ErrorState
-    | RefreshErrorState<T>
-
-export function isEmptyState<T>(v: State<T>): v is EmptyState {
-    return v.status === StateStatus.Empty
-}
-
-export function isLoadingState<T>(v: State<T>): v is LoadingState {
-    return v.status === StateStatus.Loading
-}
-
-export function isDoneState<T>(v: State<T>): v is DoneState<T> {
-    return v.status === StateStatus.Done
-}
-
-export function isErrorState<T>(v: State<T>): v is ErrorState {
-    return v.status === StateStatus.Error
-}
-
-export function isRefreshState<T>(v: State<T>): v is RefreshState<T> {
-    return v.status === StateStatus.Refresh
-}
-
-export function isRefreshErrorState<T>(v: State<T>): v is RefreshErrorState<T> {
-    return v.status === StateStatus.RefreshError
-}
-
-export function isLoadingLikeState<T>(v: State<T>): v is LoadingLikeState<T> {
-    switch (v.status) {
+export function isLoadingLikeState(v: StateStatus): v is LoadingLikeStatus {
+    switch (v) {
         case StateStatus.Loading:
         case StateStatus.Refresh:
             return true
@@ -132,8 +95,8 @@ export function isLoadingLikeState<T>(v: State<T>): v is LoadingLikeState<T> {
     }
 }
 
-export function isDoneLikeState<T>(v: State<T>): v is DoneLikeState<T> {
-    switch (v.status) {
+export function isDoneLikeState<T>(v: StateStatus): v is DoneLikeStatus {
+    switch (v) {
         case StateStatus.Done:
         case StateStatus.Refresh:
         case StateStatus.RefreshError:
@@ -143,8 +106,8 @@ export function isDoneLikeState<T>(v: State<T>): v is DoneLikeState<T> {
     }
 }
 
-export function isErrorLikeState<T>(v: State<T>): v is ErrorLikeState<T> {
-    switch (v.status) {
+export function isErrorLikeState<T>(v: StateStatus): v is ErrorLikeStatus {
+    switch (v) {
         case StateStatus.Error:
         case StateStatus.RefreshError:
             return true;
@@ -153,78 +116,78 @@ export function isErrorLikeState<T>(v: State<T>): v is ErrorLikeState<T> {
     }
 }
 
-export function assertLoadingLikeState<T>(v: State<T>): asserts v is LoadingLikeState<T> {
+export function assertLoadingLikeState<T>(v: StateStatus): asserts v is LoadingLikeStatus {
     if (!isLoadingLikeState(v)) {
-        throw new Error(`Expected LoadingLikeState, but got ${v.status}`)
+        throw new Error(`Expected LoadingLikeState, but got ${v}`)
     }
 }
 
-export function assertDoneLikeState<T>(v: State<T>): asserts v is DoneLikeState<T> {
+export function assertDoneLikeState<T>(v: StateStatus): asserts v is DoneLikeStatus {
     if (!isDoneLikeState(v)) {
-        throw new Error(`Expected DoneLikeState, but got ${v.status}`)
+        throw new Error(`Expected DoneLikeState, but got ${v}`)
     }
 }
 
-export function assertErrorLikeState<T>(v: State<T>): asserts v is ErrorLikeState<T> {
+export function assertErrorLikeState<T>(v: StateStatus): asserts v is ErrorLikeStatus {
     if (!isErrorLikeState(v)) {
-        throw new Error(`Expected ErrorLikeState, but got ${v.status}`)
+        throw new Error(`Expected ErrorLikeState, but got ${v}`)
     }
 }
 
-export function assertEmptyState<T>(v: State<T>): asserts v is EmptyState {
+export function assertEmptyState<T>(v: StateStatus): asserts v is StateStatus.Empty {
     if (!isEmptyState(v)) {
-        throw new Error(`Expected EmptyState, but got ${v.status}`)
+        throw new Error(`Expected EmptyState, but got ${v}`)
     }
 }
 
-export function assertLoadingState<T>(v: State<T>): asserts v is LoadingState {
+export function assertLoadingState<T>(v: StateStatus): asserts v is StateStatus.Loading {
     if (!isLoadingState(v)) {
-        throw new Error(`Expected LoadingState, but got ${v.status}`)
+        throw new Error(`Expected LoadingState, but got ${v}`)
     }
 }
 
-export function assertDoneState<T>(v: State<T>): asserts v is DoneState<T> {
+export function assertDoneState<T>(v: StateStatus): asserts v is StateStatus.Done {
     if (!isDoneState(v)) {
-        throw new Error(`Expected DoneState, but got ${v.status}`)
+        throw new Error(`Expected DoneState, but got ${v}`)
     }
 }
 
-export function assertErrorState<T>(v: State<T>): asserts v is ErrorState {
+export function assertErrorState<T>(v: StateStatus): asserts v is StateStatus.Error {
     if (!isErrorState(v)) {
-        throw new Error(`Expected ErrorState, but got ${v.status}`)
+        throw new Error(`Expected ErrorState, but got ${v}`)
     }
 }
 
-export function assertRefreshState<T>(v: State<T>): asserts v is RefreshState<T> {
+export function assertRefreshState<T>(v: StateStatus): asserts v is StateStatus.Refresh {
     if (!isRefreshState(v)) {
-        throw new Error(`Expected RefreshState, but got ${v.status}`)
+        throw new Error(`Expected RefreshState, but got ${v}`)
     }
 }
 
-export function assertRefreshErrorState<T>(v: State<T>): asserts v is RefreshErrorState<T> {
+export function assertRefreshErrorState<T>(v: StateStatus): asserts v is StateStatus.RefreshError {
     if (!isRefreshErrorState(v)) {
-        throw new Error(`Expected RefreshErrorState, but got ${v.status}`)
+        throw new Error(`Expected RefreshErrorState, but got ${v}`)
     }
 }
 
-export function useState<T>(info: InfoDataType<T>): Ref<State<T>> {
+export function useStatus<T>(info: InfoDataType<T>): ComputedRef<StateStatus> {
     return computed(() => {
         if (info.loading) {
             if (!isDef(info.data)) {
-                return { status: StateStatus.Loading, error: info.error }
+                return StateStatus.Loading;
             }
-            return { status: StateStatus.Refresh, data: info.data, error: info.error }
+            return StateStatus.Refresh;
         }
         if (isDef(info.error)) {
             if (!isDef(info.data)) {
-                return { status: StateStatus.Error, error: info.error }
+                return StateStatus.Error;
             }
-            return { status: StateStatus.RefreshError, data: info.data, error: info.error }
+            return StateStatus.RefreshError;
         }
-    
+
         if (!isDef(info.data)) {
-            return { status: StateStatus.Empty }
+            return StateStatus.Empty;
         }
-        return { status: StateStatus.Done, data: info.data }
-    })
+        return StateStatus.Done;
+    });
 }

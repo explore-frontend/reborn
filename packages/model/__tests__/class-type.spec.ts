@@ -1,9 +1,9 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
-import type { QueryResult } from '../operations/types';
+import type { QueryResult } from '../src/operations/types';
 
-import { createModelFromClass, BaseModel } from './class-type';
+import { createModelFromClass, BaseModel } from '../src/model/class-type';
 import {
     Vue,
     CompositionAPI,
@@ -12,11 +12,15 @@ import {
     createApp,
     watch,
     h,
-} from '../dep';
-import { createClient } from '../clients';
-import fetchMock from 'jest-fetch-mock';
-import { restQuery } from '../operations/decorators';
+} from '../src/dep';
+import { createClient } from '../src/clients';
+import { restQuery } from '../src/operations/decorators';
 import 'unfetch/polyfill'
+
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import createFetchMock from 'vitest-fetch-mock';
+
+const fetchMock = createFetchMock(vi);
 
 Vue.use(CompositionAPI);
 fetchMock.enableMocks();
@@ -134,7 +138,7 @@ describe('transform model success', () => {
         fetchMock.doMock();
     });
 
-    it('transform class mode model', done => {
+    it('transform class mode model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
@@ -150,7 +154,7 @@ describe('transform model success', () => {
                         a: 1,
                         b: 1,
                     });
-                    done();
+                    resolve(true);
                 });
 
                 onMounted(async () => {
@@ -177,9 +181,9 @@ describe('transform model success', () => {
         createApp({
             render: () => h(App)
         }).mount(div);
-    });
+    }));
 
-    it('transform class mode model with extends', done => {
+    it('transform class mode model with extends', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
@@ -210,7 +214,7 @@ describe('transform model success', () => {
                     expect(model.b).toBe(result.b);
                     expect(model.c).toBe(result.c);
                     expect(model.d).toBe(result.d);
-                    done();
+                    resolve(true);
                 });
 
                 return () => null;
@@ -220,5 +224,5 @@ describe('transform model success', () => {
         createApp({
             render: () => h(App)
         }).mount(div)
-    });
+    }));
 });

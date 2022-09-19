@@ -1,10 +1,12 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
+
+import { describe, it, expect } from 'vitest';
 import type { ComponentInternalInstance } from '@vue/composition-api';
 
-import { createModel } from './model';
-import { useModel, createStore } from './api';
+import { createModel } from '../src/model';
+import { useModel, createStore } from '../src/api';
 import CompositionAPI, { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from '@vue/composition-api';
 import Vue from 'vue';
 import { compileToFunctions } from 'vue-template-compiler';
@@ -94,7 +96,7 @@ const App = defineComponent({
 });
 
 describe(`model should has it's own effect scope`, () => {
-    it('state between two component should has own effect scope', done => {
+    it('state between two component should has own effect scope', () => new Promise(resolve => {
         const store = createStore();
         const app = createApp({
             render: () => h(App),
@@ -139,8 +141,8 @@ describe(`model should has it's own effect scope`, () => {
             const model2 = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
             expect(model2).toBe(undefined);
 
-            done();
+            resolve(true);
         })();
-    });
+    }));
 });
 

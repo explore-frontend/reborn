@@ -1,4 +1,5 @@
-import { deepMerge } from './utils';
+import { describe, it, expect } from 'vitest';
+import { deepMerge } from '../src/utils';
 
 describe('utils', () => {
     it('deep merge', () => {

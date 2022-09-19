@@ -1,7 +1,8 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
-import { useRestQuery, createModel, createModelFromCA } from './fn-type';
+
+import { useRestQuery, createModel, createModelFromCA } from '../src/model/fn-type';
 import {
     Vue,
     CompositionAPI,
@@ -10,11 +11,15 @@ import {
     createApp,
     watch,
     h,
-} from '../dep';
-import { createClient } from '../clients';
-import fetchMock from 'jest-fetch-mock';
+} from '../src/dep';
+import { createClient } from '../src/clients';
 import 'unfetch/polyfill'
 import { getCurrentInstance, ref } from '@vue/composition-api';
+
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import createFetchMock from 'vitest-fetch-mock';
+
+const fetchMock = createFetchMock(vi);
 
 Vue.use(CompositionAPI);
 fetchMock.enableMocks();
@@ -107,7 +112,7 @@ describe('transform model success', () => {
         };
     });
 
-    it('transform fn type model', done => {
+    it('transform fn type model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
@@ -119,11 +124,11 @@ describe('transform model success', () => {
 
                 // 手动mock一下
                 vm.proxy.$root.rebornStore = {
-                    getModelInstance: jest.fn(),
-                    addModel: jest.fn(),
-                    removeModel: jest.fn(),
-                    restore: jest.fn(),
-                    exportStates: jest.fn(),
+                    getModelInstance: vi.fn(),
+                    addModel: vi.fn(),
+                    removeModel: vi.fn(),
+                    restore: vi.fn(),
+                    exportStates: vi.fn(),
                 };
 
                 vm.proxy.$root.rebornClient = {
@@ -144,7 +149,7 @@ describe('transform model success', () => {
                         expect(model.info.data?.b).toBe('23');
                     }
                     if (model.info.data?.a === '23') {
-                        done();
+                        resolve(true);
                     }
                 });
 
@@ -170,7 +175,7 @@ describe('transform model success', () => {
         createApp({
             render: () => h(App)
         }).mount(div);
-    });
+    }));
 });
 
 
@@ -231,7 +236,7 @@ describe('transform model with compose success', () => {
         };
     });
 
-    it('transform fn type model', done => {
+    it('transform fn type model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
@@ -243,11 +248,11 @@ describe('transform model with compose success', () => {
 
                 // 手动mock一下
                 vm.proxy.$root.rebornStore = {
-                    getModelInstance: jest.fn(),
-                    addModel: jest.fn(),
-                    removeModel: jest.fn(),
-                    restore: jest.fn(),
-                    exportStates: jest.fn(),
+                    getModelInstance: vi.fn(),
+                    addModel: vi.fn(),
+                    removeModel: vi.fn(),
+                    restore: vi.fn(),
+                    exportStates: vi.fn(),
                 };
 
                 vm.proxy.$root.rebornClient = {
@@ -270,7 +275,7 @@ describe('transform model with compose success', () => {
                         expect(model.model.info.data?.a).toBe('5');
                         expect(model.model.info.data?.b).toBe('5');
                         expect(model.info.data?.test).toBe('1');
-                        done();
+                        resolve(true);
                     }
                 });
 
@@ -290,5 +295,5 @@ describe('transform model with compose success', () => {
         createApp({
             render: () => h(App)
         }).mount(div);
-    });
+    }));
 });
