@@ -1,6 +1,6 @@
-import type { ComputedRef } from '../dep';
+import type { ComputedRef } from '@vue/composition-api';
 
-import { computed } from '../dep';
+import { computed } from '@vue/composition-api';
 import { isDef } from './core';
 
 export interface InfoDataType<T> {

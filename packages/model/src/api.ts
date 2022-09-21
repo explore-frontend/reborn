@@ -1,14 +1,14 @@
-import type { Constructor, RebornClient, ModelCotrInfo, OriginalModelInstance } from './types';
-import type { VueConstructor, createApp } from './dep';
+import type { Constructor, RebornClient, OriginalModelInstance } from './types';
+import type { VueConstructor } from 'vue';
+import type { createApp } from '@vue/composition-api';
 import type { Client } from './operations/types';
 import type { FNModelCreator } from './model';
 
 import {
-    Vue,
     onBeforeUnmount,
     onServerPrefetch,
     getCurrentInstance,
-} from './dep';
+} from '@vue/composition-api';
 import { storeFactory } from './store';
 import { createModelFromCA, createModelFromClass, BaseModel } from './model';
 

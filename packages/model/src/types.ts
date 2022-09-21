@@ -7,7 +7,7 @@ import type {
     RestMutationOptions,
 } from './operations/types';
 import type { Client } from './operations/types';
-import type { EffectScope } from './dep';
+import type { EffectScope } from '@vue/composition-api';
 
 export type ModelInfo<T = unknown> = {
     constructor: FNModelCreator<T> | Constructor<T>;

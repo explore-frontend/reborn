@@ -6,9 +6,9 @@ import type {
     RestMutationOptions,
     GQLMutationOptions,
 } from './types';
-import type { Route } from '../dep';
+import type { Route } from 'vue-router';
 
-import { reactive, computed, toRefs } from '../dep';
+import { reactive, computed, toRefs } from '@vue/composition-api';
 import { InfoDataType, useStatus } from './state';
 
 export function initDataType<DataType>() {

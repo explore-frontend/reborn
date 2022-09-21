@@ -7,7 +7,7 @@ import {
     createGQLQuery,
     createRestQuery,
 } from '../operations';
-import { computed, reactive, getCurrentInstance } from '../dep';
+import { computed, reactive, getCurrentInstance } from '@vue/composition-api';
 
 
 function registerProperty(obj: any, key: string, value: any) {

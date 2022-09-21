@@ -5,13 +5,13 @@
  */
 
 import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
-import type { Route } from '../dep';
+import type { Route } from 'vue-router';
 import type { Client } from './types';
 import type { Subscription } from 'xstream';
 
 import xstream from 'xstream';
 import { generateQueryOptions } from './utils';
-import { computed, watch, nextTick } from '../dep';
+import { computed, watch, nextTick } from '@vue/composition-api';
 import { deepMerge } from '../utils';
 
 

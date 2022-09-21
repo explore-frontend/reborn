@@ -1,13 +1,10 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "target": "es5",
-        "module": "es2015",
         "baseUrl": ".",
         "lib": ["esnext", "dom"],
         "rootDir": ".",
-        "outDir": "./dist",
-        "declarationDir": "."
+        "outDir": "./dist"
     },
     "exclude": [
         "node_modules",
@@ -15,6 +12,6 @@
     ],
     "include": [
         "src/**/*",
-        "__tests__/**/*",
+        "__tests__/**/*"
     ]
 }

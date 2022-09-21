@@ -9,8 +9,8 @@
     ],
     "license": "MIT",
     "scripts": {
-        "build": "rollup -c",
-        "watch": "rollup -c -w",
+        "build": "vite build",
+        "serve": "vite --host",
         "docs:dev": "vuepress dev docs",
         "docs:build": "vuepress build docs",
         "test": "vitest",
@@ -25,30 +25,30 @@
         "graphql": "^16.5.0"
     },
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^21.1.0",
-        "@rollup/plugin-node-resolve": "^13.3.0",
         "@rollup/plugin-typescript": "^8.3.4",
+        "@types/node": "^18.7.18",
+        "@typescript-eslint/parser": "^5.38.0",
         "@vitest/coverage-c8": "^0.23.1",
         "@vue/composition-api": "^1.1.0",
         "eslint": "^8.22.0",
         "jsdom": "^20.0.0",
-        "rollup": "^2.78.0",
+        "rollup": "~2.78.0",
         "tslib": "^2.4.0",
         "typescript": "^4.7.4",
         "unfetch": "^4.2.0",
         "vite": "^3.1.0",
         "vitest": "^0.23.1",
         "vitest-fetch-mock": "^0.2.1",
-        "vue": "^2.6.12",
-        "vue-router": "^3.5.1",
-        "vue-template-compiler": "^2.6.14",
+        "vue": "~2.6.12",
+        "vue-router": "~3.5.1",
+        "vue-template-compiler": "~2.6.14",
         "vuepress": "^1.8.2",
         "xstream": "^11.14.0"
     },
     "peerDependencies": {
         "@vue/composition-api": "^1.1.0",
-        "vue": "^2.6.12",
-        "vue-router": "^3.5.1",
+        "vue": "~2.6.12",
+        "vue-router": "~3.5.1",
         "xstream": "^11.14.0"
     }
 }

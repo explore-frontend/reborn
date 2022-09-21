@@ -1,5 +1,5 @@
-import { Stream, Listener, Subscription } from 'xstream';
-import { onServerPrefetch, onBeforeUnmount } from './dep';
+import type { Stream, Listener, Subscription } from 'xstream';
+import { onServerPrefetch, onBeforeUnmount } from '@vue/composition-api';
 
 export function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {
@@ -53,7 +53,7 @@ export function useXStream<T>(stream: Stream<T>, listener: Partial<Listener<T>>)
     });
 }
 
-export function deepMerge<T extends Record<string, any> | Array<T>>(origin: T, ...targets: Array<T>) {
+export function deepMerge<T extends any>(origin: T, ...targets: Array<T>) {
     for (const target of targets) {
         for (const key in target) {
             const originItem = origin[key];

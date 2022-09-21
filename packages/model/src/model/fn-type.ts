@@ -13,7 +13,7 @@ import {
     createRestMutation,
     createRestQuery,
 } from '../operations';
-import { getCurrentInstance } from '../dep';
+import { getCurrentInstance } from '@vue/composition-api';
 
 
 let creatingModelCount = 0;

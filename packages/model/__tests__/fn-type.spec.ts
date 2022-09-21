@@ -1,23 +1,22 @@
 /**
  * @vitest-environment jsdom
  */
-
-import { useRestQuery, createModel, createModelFromCA } from '../src/model/fn-type';
-import {
-    Vue,
-    CompositionAPI,
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import createFetchMock from 'vitest-fetch-mock';
+import Vue from 'vue';
+import CompositionAPI, {
     defineComponent,
     onMounted,
     createApp,
     watch,
     h,
-} from '../src/dep';
-import { createClient } from '../src/clients';
-import 'unfetch/polyfill'
-import { getCurrentInstance, ref } from '@vue/composition-api';
+    getCurrentInstance,
+    ref,
+} from '@vue/composition-api';
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import createFetchMock from 'vitest-fetch-mock';
+import { createClient } from '../src/clients';
+import { useRestQuery, createModel, createModelFromCA } from '../src/model/fn-type';
+import 'unfetch/polyfill'
 
 const fetchMock = createFetchMock(vi);
 

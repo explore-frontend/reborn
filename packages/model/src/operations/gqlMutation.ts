@@ -1,5 +1,5 @@
 import type { GQLMutationOptions, MutationVariablesFn } from './types';
-import type { Route } from '../dep';
+import type { Route } from 'vue-router';
 import type { Client } from './types';
 
 import { initDataType } from './utils';
@@ -26,7 +26,7 @@ export function createGQLMutation<ModelType, DataType>(
         return params;
     }
 
-    function url<T>(params: T) {
+    function url<T extends Record<string, any>>(params: T) {
         if (option.url && typeof option.url === 'function') {
             return option.url.call(
                 model,

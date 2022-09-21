@@ -1,6 +1,6 @@
 import type { DocumentNode } from 'graphql';
 import type { FetchPolicy } from '../types';
-import type { Route } from '../dep';
+import type { Route } from 'vue-router';
 import type { Method, HTTPHeaders } from '../clients/common';
 import type { createClient } from '../clients';
 

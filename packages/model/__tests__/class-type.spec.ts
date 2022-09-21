@@ -3,22 +3,21 @@
  */
 import type { QueryResult } from '../src/operations/types';
 
-import { createModelFromClass, BaseModel } from '../src/model/class-type';
-import {
-    Vue,
-    CompositionAPI,
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import createFetchMock from 'vitest-fetch-mock';
+import Vue from 'vue';
+import CompositionAPI, {
     defineComponent,
     onMounted,
     createApp,
     watch,
     h,
-} from '../src/dep';
+} from '@vue/composition-api';
+
+import { createModelFromClass, BaseModel } from '../src/model/class-type';
 import { createClient } from '../src/clients';
 import { restQuery } from '../src/operations/decorators';
 import 'unfetch/polyfill'
-
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import createFetchMock from 'vitest-fetch-mock';
 
 const fetchMock = createFetchMock(vi);
 

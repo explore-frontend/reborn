@@ -1,15 +1,15 @@
 /**
  * @vitest-environment jsdom
  */
-
-import { describe, it, expect } from 'vitest';
 import type { ComponentInternalInstance } from '@vue/composition-api';
 
-import { createModel } from '../src/model';
-import { useModel, createStore } from '../src/api';
+import { describe, it, expect } from 'vitest';
 import CompositionAPI, { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from '@vue/composition-api';
 import Vue from 'vue';
 import { compileToFunctions } from 'vue-template-compiler';
+
+import { createModel } from '../src/model';
+import { useModel, createStore } from '../src/api';
 
 Vue.use(CompositionAPI);
 
