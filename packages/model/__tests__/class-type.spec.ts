@@ -3,17 +3,16 @@
  */
 import type { QueryResult } from '../src/operations/types';
 
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import createFetchMock from 'vitest-fetch-mock';
-import Vue from 'vue';
-import CompositionAPI, {
+import Vue, {
     defineComponent,
     onMounted,
-    createApp,
     watch,
     h,
     provide,
-} from '@vue/composition-api';
+} from 'vue';
 
 import { createModelFromClass, BaseModel } from '../src/model/class-type';
 import { createClient } from '../src/clients';
@@ -23,7 +22,6 @@ import 'unfetch/polyfill'
 
 const fetchMock = createFetchMock(vi);
 
-Vue.use(CompositionAPI);
 fetchMock.enableMocks();
 class CustomModel extends BaseModel {
     private a = 1;
@@ -143,20 +141,6 @@ describe('transform model success', () => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
-                // 手动mock一下
-                provide(INJECT_KEY, {
-                    store: {
-                        getModelInstance: vi.fn(),
-                        addModel: vi.fn(),
-                        removeModel: vi.fn(),
-                        restore: vi.fn(),
-                        exportStates: vi.fn(),
-                    },
-                    rebornClient: {
-                        rest: restClient,
-                    }
-                });
-
                 const modelDesc = createModelFromClass(CustomModel);
                 const { model } = modelDesc.cotr({
                     rest: restClient,
@@ -193,17 +177,10 @@ describe('transform model success', () => {
             }
         });
 
-        createApp({
-            render: () => h(App)
-        }).mount(div);
-    }));
-
-    it('transform class mode model with extends', () => new Promise(resolve => {
-        const div = document.createElement('div');
-        const App = defineComponent({
-            setup() {
-                // 手动mock一下
-                provide(INJECT_KEY, {
+        const app = new Vue({
+            // 手动mock一下
+            provide: {
+                [INJECT_KEY]: {
                     store: {
                         getModelInstance: vi.fn(),
                         addModel: vi.fn(),
@@ -214,8 +191,17 @@ describe('transform model success', () => {
                     rebornClient: {
                         rest: restClient,
                     }
-                });
+                },
+            },
+            render: () => h(App)
+        });
+        app.$mount(div);
+    }));
 
+    it('transform class mode model with extends', () => new Promise(resolve => {
+        const div = document.createElement('div');
+        const App = defineComponent({
+            setup() {
                 const modelDesc = createModelFromClass(CustomClassWithExtends);
                 const { model } = modelDesc.cotr({
                     rest: restClient,
@@ -250,8 +236,24 @@ describe('transform model success', () => {
             }
         });
 
-        createApp({
+        const app = new Vue({
+            // 手动先mock一下
+            provide: {
+                [INJECT_KEY]: {
+                    store: {
+                        getModelInstance: vi.fn(),
+                        addModel: vi.fn(),
+                        removeModel: vi.fn(),
+                        restore: vi.fn(),
+                        exportStates: vi.fn(),
+                    },
+                    rebornClient: {
+                        rest: restClient,
+                    }
+                },
+            },
             render: () => h(App)
-        }).mount(div)
+        });
+        app.$mount(div);
     }));
 });

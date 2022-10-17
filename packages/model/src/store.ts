@@ -2,7 +2,7 @@ import type { ModelInfo } from './types';
 import type { RebornInstanceType } from './api';
 
 import { Cache } from './cache';
-import { effectScope } from '@vue/composition-api';
+import { effectScope } from 'vue';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 

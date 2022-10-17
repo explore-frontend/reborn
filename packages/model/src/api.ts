@@ -7,7 +7,7 @@ import {
     onBeforeUnmount,
     onServerPrefetch,
     getCurrentInstance,
-} from '@vue/composition-api';
+} from 'vue';
 import { storeFactory } from './store';
 import { createModelFromCA, createModelFromClass } from './model';
 import { INJECT_KEY, getRootStore } from './const';
@@ -20,7 +20,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     if (!instance) {
         throw new Error('useModel must use in a setup context!');
     }
-    const root = instance.root.proxy;
+    const root = instance.proxy.$root;
     // TODO小程序的适配后面在做
     const { store, rebornClient: client} = getRootStore();
 

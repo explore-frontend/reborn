@@ -1,19 +1,16 @@
 /**
  * @vitest-environment jsdom
  */
-import type { ComponentInternalInstance } from '@vue/composition-api';
 import type { storeFactory } from '../src/store';
 
 import { describe, it, expect } from 'vitest';
-import CompositionAPI, { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from '@vue/composition-api';
-import Vue from 'vue';
+import Vue, { defineComponent, ref, computed, h, getCurrentInstance, nextTick } from 'vue';
 import { compileToFunctions } from 'vue-template-compiler';
 
 import { createModel } from '../src/model';
 import { useModel, createStore } from '../src/api';
 import { getRootStore } from '../src/const';
 
-Vue.use(CompositionAPI);
 
 const testModel = createModel(() => {
     const a = ref(1);
@@ -26,7 +23,7 @@ const testModel = createModel(() => {
 });
 
 
-let currentComponentAInstance: ComponentInternalInstance | null;
+let currentComponentAInstance: ReturnType<typeof getCurrentInstance> | null;
 const ComponentA = defineComponent({
     ...compileToFunctions('<div>A: a: {{ model.a.value }} b: {{ model.b.value }}</div>'),
     setup() {
@@ -44,7 +41,7 @@ const ComponentA = defineComponent({
     },
 });
 
-let currentComponentBInstance: ComponentInternalInstance | null;
+let currentComponentBInstance: ReturnType<typeof getCurrentInstance> | null;
 const ComponentB = defineComponent({
     ...compileToFunctions('<div>B: a: {{ model.a.value }} b: {{ model.b.value }}</div>'),
     setup() {
@@ -65,7 +62,7 @@ const ComponentB = defineComponent({
     },
 });
 
-let currentAppInstance: ComponentInternalInstance | null;
+let currentAppInstance: ReturnType<typeof getCurrentInstance> | null;
 let currentStore: ReturnType<typeof storeFactory> | null;
 
 const App = defineComponent({
@@ -73,9 +70,7 @@ const App = defineComponent({
         ComponentA,
         ComponentB,
     },
-    ...compileToFunctions(`
-        <div v-if="parentShow"><ComponentA v-if="show" /><ComponentB v-else /></div>
-    `),
+    ...compileToFunctions(`<div v-if="parentShow"><ComponentA v-if="show" /><ComponentB v-else /></div>`),
     setup() {
         currentAppInstance = getCurrentInstance();
         currentStore = getRootStore().store;
@@ -102,13 +97,14 @@ const App = defineComponent({
 describe(`model should has it's own effect scope`, () => {
     it('state between two component should has own effect scope', () => new Promise(resolve => {
         const store = createStore();
-        const app = createApp({
-            render: () => h(App),
+        Vue.use(store);
+
+        const app = new Vue({
+            render: () => h(App)
         });
 
-        app.use(store);
         const div = document.createElement('div');
-        app.mount(div);
+        app.$mount(div);
         (async () => {
             expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>B: a: 1 b: 2</div>')
             expect(currentComponentBInstance?.proxy.$el.innerHTML).toBe('B: a: 1 b: 2');

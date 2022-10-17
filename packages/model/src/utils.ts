@@ -1,5 +1,5 @@
 import type { Stream, Listener, Subscription } from 'xstream';
-import { onServerPrefetch, onBeforeUnmount } from '@vue/composition-api';
+import { onServerPrefetch, onBeforeUnmount } from 'vue';
 
 export function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {

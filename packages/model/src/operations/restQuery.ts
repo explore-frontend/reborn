@@ -11,7 +11,7 @@ import type { Subscription } from 'xstream';
 
 import xstream from 'xstream';
 import { generateQueryOptions } from './utils';
-import { computed, watch, nextTick } from '@vue/composition-api';
+import { computed, watch, nextTick } from 'vue';
 import { deepMerge } from '../utils';
 
 

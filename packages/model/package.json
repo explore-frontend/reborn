@@ -1,6 +1,6 @@
 {
     "name": "vue-apollo-model",
-    "version": "0.9.0-alpha17",
+    "version": "0.10.0-alpha4",
     "main": "dist/vue-apollo-model.js",
     "module": "dist/vue-apollo-model.mjs",
     "typings": "dist/src/index.d.ts",
@@ -28,8 +28,8 @@
         "@rollup/plugin-typescript": "^8.3.4",
         "@types/node": "^18.7.18",
         "@typescript-eslint/parser": "^5.38.0",
+        "@vitejs/plugin-vue2": "^2.0.0",
         "@vitest/coverage-c8": "^0.23.1",
-        "@vue/composition-api": "^1.1.0",
         "eslint": "^8.22.0",
         "jsdom": "^20.0.0",
         "rollup": "~2.78.0",
@@ -39,16 +39,15 @@
         "vite": "^3.1.0",
         "vitest": "^0.23.1",
         "vitest-fetch-mock": "^0.2.1",
-        "vue": "~2.6.12",
-        "vue-router": "~3.5.1",
-        "vue-template-compiler": "~2.6.14",
+        "vue": "~2.7.0",
+        "vue-router": "~3.6.0",
+        "vue-template-compiler": "~2.7.0",
         "vuepress": "^1.8.2",
         "xstream": "^11.14.0"
     },
     "peerDependencies": {
-        "@vue/composition-api": "^1.1.0",
-        "vue": "~2.6.12",
-        "vue-router": "~3.5.1",
+        "vue": "~2.7.0",
+        "vue-router": "~3.6.0",
         "xstream": "^11.14.0"
     }
 }

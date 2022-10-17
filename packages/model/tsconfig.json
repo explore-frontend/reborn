@@ -6,12 +6,16 @@
         "rootDir": ".",
         "outDir": "./dist"
     },
+    "vueCompilerOptions": {
+        "experimentalCompatMode": 2
+    },
     "exclude": [
         "node_modules",
         "dist/**/*"
     ],
     "include": [
         "src/**/*",
+        "examples/**/*",
         "__tests__/**/*"
     ]
 }

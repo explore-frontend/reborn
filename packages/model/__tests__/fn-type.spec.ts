@@ -3,17 +3,14 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import createFetchMock from 'vitest-fetch-mock';
-import Vue from 'vue';
-import CompositionAPI, {
+import Vue, {
     defineComponent,
     onMounted,
-    createApp,
     watch,
-    h,
-    getCurrentInstance,
     ref,
+    h,
     provide,
-} from '@vue/composition-api';
+} from 'vue';
 
 import { createClient } from '../src/clients';
 import { useRestQuery, createModel, createModelFromCA } from '../src/model/fn-type';
@@ -35,7 +32,6 @@ import 'unfetch/polyfill'
 
 const fetchMock = createFetchMock(vi);
 
-Vue.use(CompositionAPI);
 fetchMock.enableMocks();
 
 const restClient = createClient('REST', {
@@ -136,23 +132,8 @@ describe('transform model success', () => {
             setup() {
 
                 const params = createModelFromCA(MockModel);
-                const vm = getCurrentInstance()!;
                 // TODO就是简单意思一下，实际mock在上头写的
                 fetchMock.mockResponse(JSON.stringify({}));
-
-                // 手动mock一下
-                provide(INJECT_KEY, {
-                    store: {
-                        getModelInstance: vi.fn(),
-                        addModel: vi.fn(),
-                        removeModel: vi.fn(),
-                        restore: vi.fn(),
-                        exportStates: vi.fn(),
-                    },
-                    rebornClient: {
-                        rest: restClient,
-                    }
-                });
 
                 const { model } = params.cotr();
 
@@ -206,9 +187,25 @@ describe('transform model success', () => {
             }
         });
 
-        createApp({
+        const app = new Vue({
+            // 手动mock一下
+            provide: {
+                [INJECT_KEY]: {
+                    store: {
+                        getModelInstance: vi.fn(),
+                        addModel: vi.fn(),
+                        removeModel: vi.fn(),
+                        restore: vi.fn(),
+                        exportStates: vi.fn(),
+                    },
+                    rebornClient: {
+                        rest: restClient,
+                    }
+                },
+            },
             render: () => h(App)
-        }).mount(div);
+        });
+        app.$mount(div);
     }));
 });
 
@@ -282,23 +279,8 @@ describe('transform model with compose success', () => {
             setup() {
 
                 const params = createModelFromCA(MockComposeModel);
-                const vm = getCurrentInstance()!;
                 // TODO就是简单意思一下，实际mock在上头写的
                 fetchMock.mockResponse(JSON.stringify({}));
-
-                // 手动mock一下
-                provide(INJECT_KEY, {
-                    store: {
-                        getModelInstance: vi.fn(),
-                        addModel: vi.fn(),
-                        removeModel: vi.fn(),
-                        restore: vi.fn(),
-                        exportStates: vi.fn(),
-                    },
-                    rebornClient: {
-                        rest: restClient,
-                    }
-                });
 
                 const { model } = params.cotr();
 
@@ -347,8 +329,24 @@ describe('transform model with compose success', () => {
             }
         });
 
-        createApp({
+        const app = new Vue({
+            // 手动mock一下
+            provide: {
+                [INJECT_KEY]: {
+                    store: {
+                        getModelInstance: vi.fn(),
+                        addModel: vi.fn(),
+                        removeModel: vi.fn(),
+                        restore: vi.fn(),
+                        exportStates: vi.fn(),
+                    },
+                    rebornClient: {
+                        rest: restClient,
+                    }
+                },
+            },
             render: () => h(App)
-        }).mount(div);
+        });
+        app.$mount(div);
     }));
 });
