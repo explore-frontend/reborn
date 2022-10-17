@@ -7,7 +7,8 @@ import {
     createGQLQuery,
     createRestQuery,
 } from '../operations';
-import { computed, reactive, getCurrentInstance } from '@vue/composition-api';
+import { getRootStore } from '../const';
+import { computed, reactive, getCurrentInstance, inject } from '@vue/composition-api';
 
 
 function registerProperty(obj: any, key: string, value: any) {
@@ -310,7 +311,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
             } = data();
 
             const vm = getCurrentInstance()!;
-            const store = vm.root.proxy.rebornStore;
+            const store = getRootStore().store;
             const decoratorList = getDecoratorList(original as unknown as RebornDecorators);
 
             const queryList = decoratorList.length

@@ -1,6 +1,5 @@
 import type { Constructor, RebornClient, OriginalModelInstance } from './types';
 import type { VueConstructor } from 'vue';
-import type { createApp } from '@vue/composition-api';
 import type { Client } from './operations/types';
 import type { FNModelCreator } from './model';
 
@@ -10,7 +9,8 @@ import {
     getCurrentInstance,
 } from '@vue/composition-api';
 import { storeFactory } from './store';
-import { createModelFromCA, createModelFromClass, BaseModel } from './model';
+import { createModelFromCA, createModelFromClass } from './model';
+import { INJECT_KEY, getRootStore } from './const';
 
 export type MyCon<T> = FNModelCreator<T> | Constructor<T>;
 export type RebornInstanceType<T extends MyCon<any>> = T extends MyCon<infer U> ? U : never;
@@ -22,8 +22,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     }
     const root = instance.root.proxy;
     // TODO小程序的适配后面在做
-    const store = root.rebornStore;
-    const client = root.rebornClient;
+    const { store, rebornClient: client} = getRootStore();
 
     if (!store) {
         throw new Error('There is no reborn-model store in your root vm!!');
@@ -83,14 +82,19 @@ export function createStore() {
     }
 
     // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(VueConstructor: VueConstructor, app: ReturnType<typeof createApp>) {
+    function install(app: VueConstructor<any>) {
         app.mixin({
-            created(this: Vue) {
-                // Vue2里use拿不到app实例，也没有provide，所以只能先这么玩了
-                this.$root.rebornStore = this.$root.rebornStore || store;
-                this.$root.rebornClient = this.$root.rebornClient || rebornClient;
-            },
-        })
+            provide(this: Vue) {
+                if (this === this.$root) {
+                    return {
+                        [INJECT_KEY]: {
+                            store,
+                            rebornClient,
+                        }
+                    };
+                }
+            }
+        });
     }
 
     const result = {

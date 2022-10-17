@@ -2,6 +2,7 @@
  * @vitest-environment jsdom
  */
 import type { ComponentInternalInstance } from '@vue/composition-api';
+import type { storeFactory } from '../src/store';
 
 import { describe, it, expect } from 'vitest';
 import CompositionAPI, { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from '@vue/composition-api';
@@ -10,6 +11,7 @@ import { compileToFunctions } from 'vue-template-compiler';
 
 import { createModel } from '../src/model';
 import { useModel, createStore } from '../src/api';
+import { getRootStore } from '../src/const';
 
 Vue.use(CompositionAPI);
 
@@ -64,6 +66,7 @@ const ComponentB = defineComponent({
 });
 
 let currentAppInstance: ComponentInternalInstance | null;
+let currentStore: ReturnType<typeof storeFactory> | null;
 
 const App = defineComponent({
     components: {
@@ -75,6 +78,11 @@ const App = defineComponent({
     `),
     setup() {
         currentAppInstance = getCurrentInstance();
+        currentStore = getRootStore().store;
+        if (!currentStore) {
+            console.error('找不到Store？？？？');
+            process.exit(1);
+        }
         const show = ref(false);
         const parentShow = ref(true);
 
@@ -102,7 +110,7 @@ describe(`model should has it's own effect scope`, () => {
             render: () => h(App),
         });
 
-        store.install(Vue, app);
+        app.use(store);
         const div = document.createElement('div');
         app.mount(div);
         (async () => {
@@ -114,7 +122,7 @@ describe(`model should has it's own effect scope`, () => {
             expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>B: a: 2 b: 4</div>')
             expect(currentComponentBInstance?.proxy.$el.innerHTML).toBe('B: a: 2 b: 4');
 
-            const model = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
+            const model = currentStore?.getModelInstance(testModel);
             expect(model?.a.value).toBe(2);
             expect(model?.b.value).toBe(4);
 
@@ -130,7 +138,7 @@ describe(`model should has it's own effect scope`, () => {
             expect(currentAppInstance?.proxy.$el.innerHTML).toBe('<div>A: a: 3 b: 6</div>')
             expect(currentComponentAInstance?.proxy.$el.innerHTML).toBe('A: a: 3 b: 6');
 
-            const model1 = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
+            const model1 = currentStore?.getModelInstance(testModel);
             expect(model1?.a.value).toBe(3);
             expect(model1?.b.value).toBe(6);
 
@@ -138,7 +146,7 @@ describe(`model should has it's own effect scope`, () => {
             currentAppInstance?.proxy.toggle();
             await nextTick();
 
-            const model2 = currentAppInstance?.proxy.$root.rebornStore.getModelInstance(testModel);
+            const model2 = currentStore?.getModelInstance(testModel);
             expect(model2).toBe(undefined);
 
             resolve(true);

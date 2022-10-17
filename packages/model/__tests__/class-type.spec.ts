@@ -12,11 +12,13 @@ import CompositionAPI, {
     createApp,
     watch,
     h,
+    provide,
 } from '@vue/composition-api';
 
 import { createModelFromClass, BaseModel } from '../src/model/class-type';
 import { createClient } from '../src/clients';
 import { restQuery } from '../src/operations/decorators';
+import { INJECT_KEY } from '../src/const';
 import 'unfetch/polyfill'
 
 const fetchMock = createFetchMock(vi);
@@ -141,6 +143,20 @@ describe('transform model success', () => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
+                // 手动mock一下
+                provide(INJECT_KEY, {
+                    store: {
+                        getModelInstance: vi.fn(),
+                        addModel: vi.fn(),
+                        removeModel: vi.fn(),
+                        restore: vi.fn(),
+                        exportStates: vi.fn(),
+                    },
+                    rebornClient: {
+                        rest: restClient,
+                    }
+                });
+
                 const modelDesc = createModelFromClass(CustomModel);
                 const { model } = modelDesc.cotr({
                     rest: restClient,
@@ -186,6 +202,20 @@ describe('transform model success', () => {
         const div = document.createElement('div');
         const App = defineComponent({
             setup() {
+                // 手动mock一下
+                provide(INJECT_KEY, {
+                    store: {
+                        getModelInstance: vi.fn(),
+                        addModel: vi.fn(),
+                        removeModel: vi.fn(),
+                        restore: vi.fn(),
+                        exportStates: vi.fn(),
+                    },
+                    rebornClient: {
+                        rest: restClient,
+                    }
+                });
+
                 const modelDesc = createModelFromClass(CustomClassWithExtends);
                 const { model } = modelDesc.cotr({
                     rest: restClient,

@@ -14,6 +14,7 @@ import {
     createRestQuery,
 } from '../operations';
 import { getCurrentInstance } from '@vue/composition-api';
+import { getRootStore } from '../const';
 
 
 let creatingModelCount = 0;
@@ -25,7 +26,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
     const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const { rebornClient: client } = getRootStore();
 
     const query = createRestQuery<null, T>(options, null, route, client.rest);
     tempQueryList.push(query);
@@ -43,7 +44,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     }
 
     const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const { rebornClient: client } = getRootStore();
 
     const query = createGQLQuery<null, T>(options, null, route, client.rest);
     tempQueryList.push(query);
@@ -61,7 +62,7 @@ export const useRestMutation = <T>(options: RestMutationOptions) => {
         throw new Error(`You should use useRestMutation with createModel context `);
     }
     const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const { rebornClient: client } = getRootStore();
 
     return createRestMutation<null, T>(options, null, route, client.rest);
 }
@@ -71,7 +72,7 @@ export const useGQLMutation = <T>(options: GQLMutationOptions) => {
         throw new Error(`You should use useGQLMutation with createModel context `);
     }
     const route = vm.proxy.$route;
-    const client = vm.root.proxy.rebornClient;
+    const { rebornClient: client } = getRootStore();
 
     return createGQLMutation<null, T>(options, null, route, client.rest);
 }
@@ -118,7 +119,7 @@ export function createModel<T>(fn: FNModelConstructor<T>) {
         creator: () => {
             creatingModelCount++;
             const vm = getCurrentInstance()!;
-            const store = vm.root.proxy.rebornStore;
+            const { store } = getRootStore();
 
             const model = fn({
                 getModelInstance: store.getModelInstance,

@@ -12,10 +12,12 @@ import CompositionAPI, {
     h,
     getCurrentInstance,
     ref,
+    provide,
 } from '@vue/composition-api';
 
 import { createClient } from '../src/clients';
 import { useRestQuery, createModel, createModelFromCA } from '../src/model/fn-type';
+import { INJECT_KEY } from '../src/const';
 import 'unfetch/polyfill'
 
 const fetchMock = createFetchMock(vi);
@@ -122,17 +124,18 @@ describe('transform model success', () => {
                 fetchMock.mockResponse(JSON.stringify({}));
 
                 // 手动mock一下
-                vm.proxy.$root.rebornStore = {
-                    getModelInstance: vi.fn(),
-                    addModel: vi.fn(),
-                    removeModel: vi.fn(),
-                    restore: vi.fn(),
-                    exportStates: vi.fn(),
-                };
-
-                vm.proxy.$root.rebornClient = {
-                    rest: restClient,
-                };
+                provide(INJECT_KEY, {
+                    store: {
+                        getModelInstance: vi.fn(),
+                        addModel: vi.fn(),
+                        removeModel: vi.fn(),
+                        restore: vi.fn(),
+                        exportStates: vi.fn(),
+                    },
+                    rebornClient: {
+                        rest: restClient,
+                    }
+                });
 
                 const { model } = params.cotr();
 
@@ -246,17 +249,18 @@ describe('transform model with compose success', () => {
                 fetchMock.mockResponse(JSON.stringify({}));
 
                 // 手动mock一下
-                vm.proxy.$root.rebornStore = {
-                    getModelInstance: vi.fn(),
-                    addModel: vi.fn(),
-                    removeModel: vi.fn(),
-                    restore: vi.fn(),
-                    exportStates: vi.fn(),
-                };
-
-                vm.proxy.$root.rebornClient = {
-                    rest: restClient,
-                };
+                provide(INJECT_KEY, {
+                    store: {
+                        getModelInstance: vi.fn(),
+                        addModel: vi.fn(),
+                        removeModel: vi.fn(),
+                        restore: vi.fn(),
+                        exportStates: vi.fn(),
+                    },
+                    rebornClient: {
+                        rest: restClient,
+                    }
+                });
 
                 const { model } = params.cotr();
 

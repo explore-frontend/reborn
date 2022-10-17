@@ -49,7 +49,7 @@ const store = createStore();
 store.registerClient('REST', restClient);
 
 // 绑定Store与app实例的关系
-store.install(Vue, app);
+app.use(store);
 
 app.mount('#app');
 ```
