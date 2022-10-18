@@ -79,10 +79,6 @@ const App = defineComponent({
     setup() {
         currentAppInstance = getCurrentInstance();
         currentStore = getRootStore().store;
-        if (!currentStore) {
-            console.error('找不到Store？？？？');
-            process.exit(1);
-        }
         const show = ref(false);
         const parentShow = ref(true);
 

@@ -18,6 +18,19 @@ import CompositionAPI, {
 import { createClient } from '../src/clients';
 import { useRestQuery, createModel, createModelFromCA } from '../src/model/fn-type';
 import { INJECT_KEY } from '../src/const';
+
+import {
+    // isEmptyState,
+    isLoadingState,
+    isDoneState,
+    // isErrorState,
+    isRefreshState,
+    // isRefreshErrorState,
+    isLoadingLikeState,
+    isDoneLikeState,
+    // isErrorLikeState,
+} from '../src/index';
+
 import 'unfetch/polyfill'
 
 const fetchMock = createFetchMock(vi);
@@ -107,6 +120,10 @@ describe('transform model success', () => {
 
         return {
             info: query.info,
+            loading: query.loading,
+            error: query.error,
+            data: query.data,
+            status: query.status,
             testVariablels,
             fetchMore: query.fetchMore,
             refetch: query1.refetch,
@@ -139,16 +156,29 @@ describe('transform model success', () => {
 
                 const { model } = params.cotr();
 
+                expect(isLoadingLikeState(model.status.value)).toBe(true);
+                expect(isLoadingState(model.status.value)).toBe(true);
+
                 watch(() => model.info.data?.b, () => {
+                    expect(isDoneState(model.status.value)).toBe(true);
+                    expect(isDoneLikeState(model.status.value)).toBe(true);
+
                     expect(typeof model.info.data?.a).toBe('string');
+                    expect(typeof model.data.value?.a).toBe('string');
                     if (count < 3) {
                         expect(model.info.data?.a).toBe(count + '');
+                        expect(model.data.value?.a).toBe(count + '');
+
                         expect(model.info.data?.b).toBe(count + '');
+                        expect(model.data.value?.b).toBe(count + '');
                         // 第二次变化
                         model.testVariablels.value = '';
                     } else {
                         expect(model.info.data?.a).toBe('23');
+                        expect(model.data.value?.a).toBe('23');
+
                         expect(model.info.data?.b).toBe('23');
+                        expect(model.data.value?.b).toBe('23');
                     }
                     if (model.info.data?.a === '23') {
                         resolve(true);
@@ -157,6 +187,7 @@ describe('transform model success', () => {
 
                 onMounted(() => {
                     expect(typeof model.info.data).toBe('undefined');
+                    expect(typeof model.data.value).toBe('undefined');
                     model.refetch();
 
                     setTimeout(() => {
@@ -168,6 +199,7 @@ describe('transform model success', () => {
                         model.fetchMore({
                             mockData: '12',
                         });
+                        expect(isRefreshState(model.status.value)).toBe(true);
                     }, 300);
                 })
                 return () => null;
@@ -213,6 +245,9 @@ describe('transform model with compose success', () => {
 
         return {
             info: query.info,
+            loading: query.loading,
+            error: query.error,
+            data: query.data,
             testVariablels,
             refetch: query.refetch,
         };
@@ -235,6 +270,9 @@ describe('transform model with compose success', () => {
             model,
             refetch: query.refetch,
             info: query.info,
+            data: query.data,
+            loading: query.loading,
+            error: query.error,
         };
     });
 
@@ -267,24 +305,38 @@ describe('transform model with compose success', () => {
                 watch(() => `${model.model.info.data?.b}-${model.info.data?.test}`, () => {
                     if (model.info.data?.test) {
                         expect(model.info.data?.test).toBe('1');
+                        expect(model.data.value?.test).toBe('1');
                     }
                     // TODO此处是按照执行时序手动控制的……后面再想想怎么优雅的测试吧
                     if (count < 5) {
                         expect(typeof model.model.info.data?.a).toBe('string');
+                        expect(typeof model.model.data.value?.a).toBe('string');
+
                         expect(model.model.info.data?.a).toBe('4');
+                        expect(model.model.data.value?.a).toBe('4');
+
                         expect(model.model.info.data?.b).toBe('4');
+                        expect(model.model.data.value?.b).toBe('4');
                         model.model.refetch();
                     } else {
                         expect(model.model.info.data?.a).toBe('5');
+                        expect(model.model.data.value?.a).toBe('5');
+
                         expect(model.model.info.data?.b).toBe('5');
+                        expect(model.model.data.value?.b).toBe('5');
+
                         expect(model.info.data?.test).toBe('1');
+                        expect(model.data.value?.test).toBe('1');
                         resolve(true);
                     }
                 });
 
                 onMounted(() => {
                     expect(typeof model.model.info.data).toBe('undefined');
+                    expect(typeof model.model.data.value).toBe('undefined');
+
                     expect(typeof model.info.data).toBe('undefined');
+                    expect(typeof model.data.value).toBe('undefined');
                     model.refetch();
 
                     setTimeout(() => {

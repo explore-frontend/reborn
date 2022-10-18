@@ -8,8 +8,8 @@ import {
     createRestQuery,
 } from '../operations';
 import { getRootStore } from '../const';
-import { computed, reactive, getCurrentInstance, inject } from '@vue/composition-api';
-
+import { computed, reactive, getCurrentInstance } from '@vue/composition-api';
+import { useStatus } from '../operations/status';
 
 function registerProperty(obj: any, key: string, value: any) {
     Object.defineProperty(obj, key, {
@@ -119,6 +119,9 @@ function initRebornDesc<T>(
                     rebornClient.rest,
                 )
             }
+
+            const status = useStatus(query.info);
+
             const value = {
                 get data() {
                     return query.info.data;
@@ -134,6 +137,9 @@ function initRebornDesc<T>(
                 },
                 get error() {
                     return query.info.error;
+                },
+                get status() {
+                    return status.value;
                 },
             };
             queryList.push(query);

@@ -13,8 +13,9 @@ import {
     createRestMutation,
     createRestQuery,
 } from '../operations';
-import { getCurrentInstance } from '@vue/composition-api';
+import { getCurrentInstance, toRefs } from '@vue/composition-api';
 import { getRootStore } from '../const';
+import { useStatus } from 'src/operations/status';
 
 
 let creatingModelCount = 0;
@@ -30,8 +31,13 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
 
     const query = createRestQuery<null, T>(options, null, route, client.rest);
     tempQueryList.push(query);
+
+    const status = useStatus(query.info);
+
     return {
         info: query.info,
+        status,
+        ...toRefs(query.info),
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,
@@ -48,8 +54,13 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
 
     const query = createGQLQuery<null, T>(options, null, route, client.rest);
     tempQueryList.push(query);
+
+    const status = useStatus(query.info);
+
     return {
         info: query.info,
+        status,
+        ...toRefs(query.info),
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,

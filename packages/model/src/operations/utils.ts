@@ -6,10 +6,10 @@ import type {
     RestMutationOptions,
     GQLMutationOptions,
 } from './types';
+import type { InfoDataType } from './status';
 import type { Route } from 'vue-router';
 
-import { reactive, computed, toRefs } from '@vue/composition-api';
-import { InfoDataType, useStatus } from './state';
+import { reactive, computed } from '@vue/composition-api';
 
 export function initDataType<DataType>() {
     const data: InfoDataType<DataType> = {
@@ -49,16 +49,8 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
-    const state = useStatus(info);
-
-    const { data, error, loading } = toRefs(info);
-
     return {
         info,
-        state,
-        data,
-        error,
-        loading,
         skip,
         pollInterval,
         variables,
