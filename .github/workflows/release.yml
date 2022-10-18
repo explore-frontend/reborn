@@ -17,6 +17,6 @@ jobs:
     - run: pnpm i
     - run: pnpm run --filter vue-apollo-model build
     - uses: JS-DevTools/npm-publish@v1
-      working-directory: ./packages/model
       with:
+        package: ./packages/model/package.json
         token: ${{ secrets.NPM_TOKEN }}
