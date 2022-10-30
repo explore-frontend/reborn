@@ -33,6 +33,7 @@ importers:
       graphql: ^16.5.0
       jsdom: ^20.0.0
       rollup: ~2.78.0
+      rxjs: ^7.5.7
       tslib: ^2.4.0
       typescript: ^4.7.4
       unfetch: ^4.2.0
@@ -43,7 +44,6 @@ importers:
       vue-router: ~3.6.0
       vue-template-compiler: ~2.7.0
       vuepress: ^1.8.2
-      xstream: ^11.14.0
     dependencies:
       graphql: 16.6.0
     devDependencies:
@@ -55,6 +55,7 @@ importers:
       eslint: 8.25.0
       jsdom: 20.0.1
       rollup: 2.78.1
+      rxjs: 7.5.7
       tslib: 2.4.0
       typescript: 4.8.4
       unfetch: 4.2.0
@@ -65,7 +66,6 @@ importers:
       vue-router: 3.6.5_vue@2.7.13
       vue-template-compiler: 2.7.13
       vuepress: 1.9.7
-      xstream: 11.14.0
 
 packages:
 
@@ -3704,7 +3704,7 @@ packages:
     dev: true
 
   /cliui/5.0.0:
-    resolution: {integrity: sha512-PYeGSEmmHM6zvoef2w8TPzlrnNpXIjTipYK780YswmIP9vjxmd6Y2a3CB2Ks6/AU8NHjZugXvo8w3oWM2qnwXA==}
+    resolution: {integrity: sha1-3u/P2y6AB4SqNPRvoI4GhRx7u8U=}
     dependencies:
       string-width: 3.1.0
       strip-ansi: 5.2.0
@@ -5049,11 +5049,11 @@ packages:
     dev: true
 
   /emoji-regex/7.0.3:
-    resolution: {integrity: sha512-CwBLREIQ7LvYFB0WyRvwhq5N5qPhc6PMjD6bYggFlI5YyDgl+0vxq5VHbMOFqLg7hfWzmu8T5Z1QofhmTIhItA==}
+    resolution: {integrity: sha1-kzoEBShgyF6DwSJHnEdIqOTHIVY=}
     dev: true
 
   /emoji-regex/8.0.0:
-    resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
+    resolution: {integrity: sha1-6Bj9ac5cz8tARZT4QpY79TFkzDc=}
     dev: true
 
   /emoji-regex/9.2.2:
@@ -6460,13 +6460,6 @@ packages:
       type-fest: 0.20.2
     dev: true
 
-  /globalthis/1.0.3:
-    resolution: {integrity: sha512-sFdI5LyBiNTHjRd7cGPWapiHWMOXKyuBNX/cWJ3NfzrZQVa8GI/8cofCl74AOVqq9W5kNmguTIzJ/1s2gyI9wA==}
-    engines: {node: '>= 0.4'}
-    dependencies:
-      define-properties: 1.1.4
-    dev: true
-
   /globby/11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
@@ -7473,7 +7466,7 @@ packages:
     dev: true
 
   /is-wsl/1.1.0:
-    resolution: {integrity: sha512-gfygJYZ2gLTDlmbWMI0CE2MwnFzSN/2SZfkMlItC4K/JBlsWVDB0bO6XhqcY13YXE7iMcAJnzTCJjPiTeJJ0Mw==}
+    resolution: {integrity: sha1-HxbkqiKwTRM2tmGIpmrzxgDDpm0=}
     engines: {node: '>=4'}
     dev: true
 
@@ -10700,7 +10693,7 @@ packages:
     dev: true
 
   /strip-ansi/5.2.0:
-    resolution: {integrity: sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA==}
+    resolution: {integrity: sha1-jJpTb+tq/JYr36WxBKUJHBrZwK4=}
     engines: {node: '>=6'}
     dependencies:
       ansi-regex: 4.1.1
@@ -10858,11 +10851,6 @@ packages:
       stable: 0.1.8
       unquote: 1.1.1
       util.promisify: 1.0.1
-    dev: true
-
-  /symbol-observable/2.0.3:
-    resolution: {integrity: sha512-sQV7phh2WCYAn81oAkakC5qjq2Ml0g8ozqz03wOGnx9dDlG1de6yrF+0RAzSJD8fPUow3PTSMf2SAbOGxb93BA==}
-    engines: {node: '>=0.10'}
     dev: true
 
   /symbol-tree/3.2.4:
@@ -11140,7 +11128,7 @@ packages:
     dev: true
 
   /tslib/1.14.1:
-    resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
+    resolution: {integrity: sha1-zy04vcNKE0vK8QkcQfZhni9nLQA=}
     dev: true
 
   /tslib/2.4.0:
@@ -12238,24 +12226,17 @@ packages:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
     dev: true
 
-  /xstream/11.14.0:
-    resolution: {integrity: sha512-1bLb+kKKtKPbgTK6i/BaoAn03g47PpFstlbe1BA+y3pNS/LfvcaghS5BFf9+EE1J+KwSQsEpfJvFN5GqFtiNmw==}
-    dependencies:
-      globalthis: 1.0.3
-      symbol-observable: 2.0.3
-    dev: true
-
   /xtend/4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
     dev: true
 
   /y18n/4.0.3:
-    resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}
+    resolution: {integrity: sha1-tfJZyCzW4zaSHv17/Yv1YN6e7t8=}
     dev: true
 
   /y18n/5.0.8:
-    resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
+    resolution: {integrity: sha1-f0k00PfKjFb5UxSTndzS3ZHOHVU=}
     engines: {node: '>=10'}
     dev: true
 

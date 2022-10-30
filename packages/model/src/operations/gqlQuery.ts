@@ -7,10 +7,10 @@
 import type { Client } from './types';
 import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { Route } from 'vue-router';
-import type { Subscription } from 'xstream';
+import type { Subscription } from 'rxjs';
 
 import { computed, nextTick } from 'vue';
-import xstream from 'xstream';
+import { interval } from 'rxjs';
 import { generateQueryOptions } from './utils';
 
 export function createGQLQuery<ModelType, DataType>(
@@ -60,8 +60,7 @@ export function createGQLQuery<ModelType, DataType>(
             if (!pollInterval.value) {
                 return;
             }
-            pollIntervalSub = xstream
-                .periodic(pollInterval.value)
+            pollIntervalSub = interval(pollInterval.value)
                 .subscribe({
                     next: () => refetch(),
                 });

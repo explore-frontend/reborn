@@ -1,4 +1,3 @@
-import type { Stream, Listener, Subscription } from 'xstream';
 import { onServerPrefetch, onBeforeUnmount } from 'vue';
 
 export function stringifyPrimitive(v: string | boolean | number) {
@@ -41,16 +40,6 @@ export function shimStringify(obj: any) {
 export function appendQueryStringToUrl(url: string, queryString: string) {
     url = url.indexOf('?') !== -1 ? `${url}&${queryString}` : `${url}?${queryString}`;
     return url;
-}
-
-export function useXStream<T>(stream: Stream<T>, listener: Partial<Listener<T>>) {
-    const sub: Subscription = stream.subscribe(listener);
-    onBeforeUnmount(() => {
-        sub.unsubscribe();
-    });
-    onServerPrefetch(() => {
-        sub.unsubscribe();
-    });
 }
 
 export function deepMerge<T extends any>(origin: T, ...targets: Array<T>) {
