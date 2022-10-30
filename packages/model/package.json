@@ -33,6 +33,7 @@
         "eslint": "^8.22.0",
         "jsdom": "^20.0.0",
         "rollup": "~2.78.0",
+        "rxjs": "^7.5.7",
         "tslib": "^2.4.0",
         "typescript": "^4.7.4",
         "unfetch": "^4.2.0",
@@ -42,12 +43,11 @@
         "vue": "~2.7.0",
         "vue-router": "~3.6.0",
         "vue-template-compiler": "~2.7.0",
-        "vuepress": "^1.8.2",
-        "xstream": "^11.14.0"
+        "vuepress": "^1.8.2"
     },
     "peerDependencies": {
+        "rxjs": "^7.0.0",
         "vue": "~2.7.0",
-        "vue-router": "~3.6.0",
-        "xstream": "^11.14.0"
+        "vue-router": "~3.6.0"
     }
 }

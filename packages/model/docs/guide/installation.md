@@ -3,11 +3,11 @@
 ### 1. 依赖安装
 ```shell
 // 使用npm
-npm i --save vue-apollo-model xstream
+npm i --save vue-apollo-model rxjs
 // 使用yarn
-yarn add vue-apollo-model xstream
+yarn add vue-apollo-model rxjs
 // 使用pnpm
-pnpm add vue-apollo-model xstream
+pnpm add vue-apollo-model rxjs
 ```
 
 :::tip

@@ -2,7 +2,6 @@ import { useModel, createStore } from './api';
 
 import { createClient } from './clients';
 
-export { useXStream } from './utils';
 export {
     BaseModel,
     createModel,

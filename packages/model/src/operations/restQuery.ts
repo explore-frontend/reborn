@@ -7,9 +7,9 @@
 import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
 import type { Route } from 'vue-router';
 import type { Client } from './types';
-import type { Subscription } from 'xstream';
+import type { Subscription } from 'rxjs';
 
-import xstream from 'xstream';
+import { interval } from 'rxjs';
 import { generateQueryOptions } from './utils';
 import { computed, watch, nextTick } from 'vue';
 import { deepMerge } from '../utils';
@@ -96,8 +96,7 @@ export function createRestQuery<ModelType, DataType>(
             if (!pollInterval.value) {
                 return;
             }
-            pollIntervalSub = xstream
-                .periodic(pollInterval.value)
+            pollIntervalSub = interval(pollInterval.value)
                 .subscribe({
                     next: () => refetch(),
                 });
