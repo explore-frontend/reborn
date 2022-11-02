@@ -5,7 +5,7 @@
  */
 
 import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
-import type { Route } from 'vue-router';
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Client } from './types';
 import type { Subscription } from 'rxjs';
 
@@ -18,7 +18,7 @@ import { deepMerge } from '../utils';
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
     model: ModelType,
-    route: Route,
+    route: RouteLocationNormalizedLoaded,
     client?: Client,
 ) {
     if (!client) {

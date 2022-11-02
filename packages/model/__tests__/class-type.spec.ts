@@ -2,11 +2,12 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from 'vitest';
-import Vue, {
+import {
     defineComponent,
     onMounted,
     watch,
     h,
+    createApp,
 } from 'vue';
 
 import { createModelFromClass } from '../src/model/class-type';
@@ -73,7 +74,7 @@ describe('transform model success', () => {
             }
         });
 
-        const app = new Vue({
+        const app = createApp({
             // 手动mock一下
             provide: {
                 [INJECT_KEY]: {
@@ -91,7 +92,7 @@ describe('transform model success', () => {
             },
             render: () => h(App)
         });
-        app.$mount(div);
+        app.mount(div);
     }));
 
     it('transform class mode model with extends', () => new Promise(resolve => {
@@ -132,7 +133,7 @@ describe('transform model success', () => {
             }
         });
 
-        const app = new Vue({
+        const app = createApp({
             // 手动先mock一下
             provide: {
                 [INJECT_KEY]: {
@@ -150,6 +151,6 @@ describe('transform model success', () => {
             },
             render: () => h(App)
         });
-        app.$mount(div);
+        app.mount(div);
     }));
 });

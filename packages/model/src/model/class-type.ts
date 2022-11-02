@@ -76,14 +76,14 @@ function initRebornDesc<T>(
                 mutation = createGQLMutation<T, any>(
                     meta.detail,
                     instance as unknown as T,
-                    vm.proxy.$route,
+                    vm.proxy!.$route,
                     rebornClient.gql,
                 );
             } else if (meta.type === 'restMutation') {
                 mutation = createRestMutation<T, any>(
                     meta.detail,
                     instance as unknown as T,
-                    vm.proxy.$route,
+                    vm.proxy!.$route,
                     rebornClient.rest,
                 )
             }
@@ -108,14 +108,14 @@ function initRebornDesc<T>(
                 query = createGQLQuery<T, any>(
                     meta.detail,
                     instance as unknown as T,
-                    vm.proxy.$route,
+                    vm.proxy!.$route,
                     rebornClient.gql,
                 );
             } else if (meta.type === 'restQuery') {
                 query = createRestQuery<T, any>(
                     meta.detail,
                     instance as unknown as T,
-                    vm.proxy.$route,
+                    vm.proxy!.$route,
                     rebornClient.rest,
                 )
             }
@@ -355,7 +355,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
             });
 
             // 延迟初始化，保证query间依赖
-            if (queryList.length && !vm.proxy.$isServer) {
+            if (queryList.length && typeof window !== 'undefined') {
                 queryList.forEach(query => query.init());
             }
 

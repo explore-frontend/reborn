@@ -1,6 +1,6 @@
 {
-    "name": "vue-apollo-model",
-    "version": "0.10.1-alpha2",
+    "name": "@kwai-explore/model",
+    "version": "0.1.0-alpha3",
     "main": "dist/vue-apollo-model.js",
     "module": "dist/vue-apollo-model.mjs",
     "typings": "dist/src/index.d.ts",
@@ -25,7 +25,7 @@
         "@rollup/plugin-typescript": "^8.3.4",
         "@types/node": "^18.7.18",
         "@typescript-eslint/parser": "^5.38.0",
-        "@vitejs/plugin-vue2": "^2.0.0",
+        "@vitejs/plugin-vue": "^3.1.2",
         "@vitest/coverage-c8": "^0.23.1",
         "eslint": "^8.22.0",
         "jsdom": "^20.0.0",
@@ -36,14 +36,13 @@
         "vite": "^3.1.0",
         "vitest": "^0.23.1",
         "vitest-fetch-mock": "^0.2.1",
-        "vue": "~2.7.0",
-        "vue-router": "~3.6.0",
-        "vue-template-compiler": "~2.7.0",
+        "vue": "^3.2.31",
+        "vue-router": "^4.0.14",
         "vuepress": "^1.8.2"
     },
     "peerDependencies": {
         "rxjs": "^7.0.0",
-        "vue": "~2.7.0",
-        "vue-router": "~3.6.0"
+        "vue": "^3.2.31",
+        "vue-router": "^4.0.14"
     }
 }

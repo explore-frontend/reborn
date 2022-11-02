@@ -2,11 +2,12 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from 'vitest';
-import Vue, {
+import {
     defineComponent,
     onMounted,
     watch,
     h,
+    createApp,
 } from 'vue';
 
 import { createClient } from '../src/clients';
@@ -26,6 +27,7 @@ import {
 } from '../src/index';
 
 import { MockModel, MockComposeModel } from './mock-models/fn-type';
+import 'unfetch/polyfill'
 
 const restClient = createClient('REST', {
     method: 'post',
@@ -145,7 +147,7 @@ describe('transform model success', () => {
             }
         });
 
-        const app = new Vue({
+        const app = createApp({
             // 手动mock一下
             provide: {
                 [INJECT_KEY]: {
@@ -163,7 +165,7 @@ describe('transform model success', () => {
             },
             render: () => h(App)
         });
-        app.$mount(div);
+        app.mount(div);
     }));
 });
 
@@ -225,7 +227,7 @@ describe('transform model with compose success', () => {
             }
         });
 
-        const app = new Vue({
+        const app = createApp({
             // 手动mock一下
             provide: {
                 [INJECT_KEY]: {
@@ -243,6 +245,6 @@ describe('transform model with compose success', () => {
             },
             render: () => h(App)
         });
-        app.$mount(div);
+        app.mount(div);
     }));
 });

@@ -14,7 +14,7 @@ export type ModelInfo<T = unknown> = {
     instance: OriginalModelInstance<T> | null;
     count: number;
     queryList: Array<ReturnType<typeof createRestQuery | typeof createGQLQuery>>;
-    scope: EffectScope;
+    scope: EffectScope | null;
 }
 
 export type ModelMap = Record<string, ModelInfo>

@@ -1,5 +1,5 @@
 import type { GQLMutationOptions, MutationVariablesFn } from './types';
-import type { Route } from 'vue-router';
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Client } from './types';
 
 import { initDataType } from './utils';
@@ -8,7 +8,7 @@ import { initDataType } from './utils';
 export function createGQLMutation<ModelType, DataType>(
     option: GQLMutationOptions<ModelType>,
     model: ModelType,
-    route: Route,
+    route: RouteLocationNormalizedLoaded,
     client?: Client,
 ) {
     if (!client) {

@@ -1,5 +1,5 @@
 import type { Constructor, RebornClient, OriginalModelInstance } from './types';
-import type { VueConstructor } from 'vue';
+import type { createApp } from 'vue';
 import type { Client } from './operations/types';
 import type { FNModelCreator } from './model';
 
@@ -7,6 +7,7 @@ import {
     onBeforeUnmount,
     onServerPrefetch,
     getCurrentInstance,
+    effectScope
 } from 'vue';
 import { storeFactory } from './store';
 import { createModelFromCA, createModelFromClass } from './model';
@@ -20,7 +21,9 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     if (!instance) {
         throw new Error('useModel must use in a setup context!');
     }
-    const root = instance.proxy.$root;
+
+    // Vue3中通过globalProperties来拿
+    const root = instance.appContext.config.globalProperties;
     // TODO小程序的适配后面在做
     const { store, rebornClient: client} = getRootStore();
 
@@ -34,9 +37,10 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         const creator = 'type' in ctor
             ? createModelFromCA(ctor)
             : createModelFromClass(ctor);
+        storeModelInstance.scope = effectScope(true);
         const scope = storeModelInstance.scope;
 
-        scope.run(() => {
+        scope?.run(() => {
             const instance = creator.cotr(client) as OriginalModelInstance<T>;
             storeModelInstance.instance = instance;
         });
@@ -48,8 +52,8 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
-            storeModelInstance.scope.stop();
-            store.removeModel<T>(ctor);
+            storeModelInstance.scope?.stop();
+            storeModelInstance.scope = effectScope(true);
         }
     });
     onServerPrefetch(() => {
@@ -82,18 +86,12 @@ export function createStore() {
     }
 
     // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(app: VueConstructor<any>) {
-        app.mixin({
-            provide(this: Vue) {
-                if (this === this.$root) {
-                    return {
-                        [INJECT_KEY]: {
-                            store,
-                            rebornClient,
-                        }
-                    };
-                }
-            }
+    function install(app: ReturnType<typeof createApp>) {
+        app.config.globalProperties.rebornStore = store;
+        app.config.globalProperties.rebornClient = rebornClient;
+        app.provide(INJECT_KEY, {
+            store,
+            rebornClient,
         });
     }
 

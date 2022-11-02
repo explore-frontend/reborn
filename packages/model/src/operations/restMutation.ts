@@ -5,14 +5,14 @@
  */
 import type { RestMutationOptions, MutationVariablesFn } from './types';
 import type { Client } from './types';
-import type { Route } from 'vue-router';
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 import { initDataType } from './utils';
 
 export function createRestMutation<ModelType, DataType>(
     option: RestMutationOptions<ModelType>,
     model: ModelType,
-    route: Route,
+    route: RouteLocationNormalizedLoaded,
     client?: Client,
 ){
 

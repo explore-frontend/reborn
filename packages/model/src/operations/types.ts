@@ -1,14 +1,14 @@
 import type { DocumentNode } from 'graphql';
 import type { FetchPolicy } from '../types';
-import type { Route } from 'vue-router';
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Method, HTTPHeaders } from '../clients/common';
 import type { createClient } from '../clients';
 
-export type VariablesFn<T> = (this: T, route: Route) => Record<string, any>;
-export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Record<string, any>
-export type BooleanFn<T> = (this: T, route: Route) => boolean;
-export type NumberFn<T> = (this: T, route: Route) => number;
-export type UrlFn<T> = (this: T, route: Route, variables: Record<string, any> | undefined) => string;
+export type VariablesFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => Record<string, any>;
+export type MutationVariablesFn<T> = (this: T, params: any, route: RouteLocationNormalizedLoaded) => Record<string, any>
+export type BooleanFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => boolean;
+export type NumberFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => number;
+export type UrlFn<T> = (this: T, route: RouteLocationNormalizedLoaded, variables: Record<string, any> | undefined) => string;
 
 // 和CreateQuery有关的参数部分
 type CommonQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {

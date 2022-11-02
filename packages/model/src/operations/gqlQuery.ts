@@ -6,7 +6,7 @@
 
 import type { Client } from './types';
 import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
-import type { Route } from 'vue-router';
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Subscription } from 'rxjs';
 
 import { computed, nextTick } from 'vue';
@@ -16,7 +16,7 @@ import { generateQueryOptions } from './utils';
 export function createGQLQuery<ModelType, DataType>(
     option: GQLQueryOptions<ModelType, DataType>,
     model: ModelType,
-    route: Route,
+    route: RouteLocationNormalizedLoaded,
     client?: Client,
 ) {
     if (!client) {

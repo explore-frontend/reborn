@@ -26,7 +26,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
-    const route = vm.proxy.$route;
+const route = vm.proxy!.$route;
     const { rebornClient: client } = getRootStore();
 
     const query = createRestQuery<null, T>(options, null, route, client.rest);
@@ -49,7 +49,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
         throw new Error(`You should use useGQLQuery with createModel context `);
     }
 
-    const route = vm.proxy.$route;
+    const route = vm.proxy!.$route;
     const { rebornClient: client } = getRootStore();
 
     const query = createGQLQuery<null, T>(options, null, route, client.rest);
@@ -72,7 +72,7 @@ export const useRestMutation = <T>(options: RestMutationOptions) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestMutation with createModel context `);
     }
-    const route = vm.proxy.$route;
+    const route = vm.proxy!.$route;
     const { rebornClient: client } = getRootStore();
 
     return createRestMutation<null, T>(options, null, route, client.rest);
@@ -82,7 +82,7 @@ export const useGQLMutation = <T>(options: GQLMutationOptions) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useGQLMutation with createModel context `);
     }
-    const route = vm.proxy.$route;
+    const route = vm.proxy!.$route;
     const { rebornClient: client } = getRootStore();
 
     return createGQLMutation<null, T>(options, null, route, client.rest);
@@ -103,7 +103,7 @@ export function createModelFromCA<T>(
             const { model, queryList } = fn.creator();
 
             // 延迟初始化，保证query间依赖
-            if (queryList.length && !vm.proxy.$isServer) {
+            if (queryList.length && typeof window !== 'undefined') {
                 queryList.forEach(query => query.init());
             }
 
