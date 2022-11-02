@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref } from '@vue/composition-api';
 import { useRestQuery, createModel, createModelFromCA } from '../../src/model/fn-type';
 
 export const MockModel = createModel(() => {

@@ -11,7 +11,7 @@ import type { Subscription } from 'rxjs';
 
 import { interval } from 'rxjs';
 import { generateQueryOptions } from './utils';
-import { computed, watch, nextTick } from 'vue';
+import { computed, watch, nextTick } from '@vue/composition-api';
 import { deepMerge } from '../utils';
 
 

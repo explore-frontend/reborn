@@ -29,6 +29,7 @@ importers:
       '@typescript-eslint/parser': ^5.38.0
       '@vitejs/plugin-vue2': ^2.0.0
       '@vitest/coverage-c8': ^0.23.1
+      '@vue/composition-api': ^1.1.0
       eslint: ^8.22.0
       graphql: ^16.5.0
       jsdom: ^20.0.0
@@ -39,9 +40,9 @@ importers:
       vite: ^3.1.0
       vitest: ^0.23.1
       vitest-fetch-mock: ^0.2.1
-      vue: ~2.7.0
-      vue-router: ~3.6.0
-      vue-template-compiler: ~2.7.0
+      vue: ~2.6.14
+      vue-router: ~3.5.1
+      vue-template-compiler: ~2.6.14
       vuepress: ^1.8.2
     dependencies:
       graphql: 16.6.0
@@ -49,8 +50,9 @@ importers:
       '@rollup/plugin-typescript': 8.5.0_hjjpfygmunulepk75ead4kovya
       '@types/node': 18.11.0
       '@typescript-eslint/parser': 5.40.1_z4bbprzjrhnsfa24uvmcbu7f5q
-      '@vitejs/plugin-vue2': 2.0.0_vite@3.1.8+vue@2.7.13
+      '@vitejs/plugin-vue2': 2.0.0_vite@3.1.8+vue@2.6.14
       '@vitest/coverage-c8': 0.23.4_jsdom@20.0.1
+      '@vue/composition-api': 1.7.1_vue@2.6.14
       eslint: 8.25.0
       jsdom: 20.0.1
       rxjs: 7.5.7
@@ -60,9 +62,9 @@ importers:
       vite: 3.1.8
       vitest: 0.23.4_jsdom@20.0.1
       vitest-fetch-mock: 0.2.1_vitest@0.23.4
-      vue: 2.7.13
-      vue-router: 3.6.5_vue@2.7.13
-      vue-template-compiler: 2.7.13
+      vue: 2.6.14
+      vue-router: 3.5.4_vue@2.6.14
+      vue-template-compiler: 2.6.14
       vuepress: 1.9.7
 
 packages:
@@ -1957,7 +1959,7 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@vitejs/plugin-vue2/2.0.0_vite@3.1.8+vue@2.7.13:
+  /@vitejs/plugin-vue2/2.0.0_vite@3.1.8+vue@2.6.14:
     resolution: {integrity: sha512-VJOCDtBNcRv7kYLQRbbERDP0OqW0EKgMQp6wwbqZRpU3kg38OP891avx6Xl3szntGkf9mK4i8k3TjsAlmkzWFg==}
     engines: {node: ^14.18.0 || >= 16.0.0}
     peerDependencies:
@@ -1965,7 +1967,7 @@ packages:
       vue: ^2.7.0-0
     dependencies:
       vite: 3.1.8
-      vue: 2.7.13
+      vue: 2.6.14
     dev: true
 
   /@vitest/coverage-c8/0.23.4_jsdom@20.0.1:
@@ -2213,6 +2215,14 @@ packages:
       - velocityjs
       - walrus
       - whiskers
+    dev: true
+
+  /@vue/composition-api/1.7.1_vue@2.6.14:
+    resolution: {integrity: sha512-xDWoEtxGXhH9Ku3ROYX/rzhcpt4v31hpPU5zF3UeVC/qxA3dChmqU8zvTUYoKh3j7rzpNsoFOwqsWG7XPMlaFA==}
+    peerDependencies:
+      vue: '>= 2.5 < 2.7'
+    dependencies:
+      vue: 2.6.14
     dev: true
 
   /@vuepress/core/1.9.7:
@@ -11124,7 +11134,7 @@ packages:
     dev: true
 
   /tslib/1.14.1:
-    resolution: {integrity: sha1-zy04vcNKE0vK8QkcQfZhni9nLQA=}
+    resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
     dev: true
 
   /tslib/2.4.0:
@@ -11689,6 +11699,14 @@ packages:
       - whiskers
     dev: true
 
+  /vue-router/3.5.4_vue@2.6.14:
+    resolution: {integrity: sha512-x+/DLAJZv2mcQ7glH2oV9ze8uPwcI+H+GgTgTmb5I55bCgY3+vXWIsqbYUzbBSZnwFHEJku4eoaH/x98veyymQ==}
+    peerDependencies:
+      vue: ^2
+    dependencies:
+      vue: 2.6.14
+    dev: true
+
   /vue-router/3.6.5_vue@2.7.13:
     resolution: {integrity: sha512-VYXZQLtjuvKxxcshuRAwjHnciqZVoXAjTjcqBTz4rKc8qih9g9pI3hbDjmqXaHdgL3v8pV6P8Z335XvHzESxLQ==}
     peerDependencies:
@@ -11717,6 +11735,13 @@ packages:
       loader-utils: 1.4.0
     dev: true
 
+  /vue-template-compiler/2.6.14:
+    resolution: {integrity: sha512-ODQS1SyMbjKoO1JBJZojSw6FE4qnh9rIpUZn2EUT86FKizx9uH5z6uXiIrm4/Nb/gwxTi/o17ZDEGWAXHvtC7g==}
+    dependencies:
+      de-indent: 1.0.2
+      he: 1.2.0
+    dev: true
+
   /vue-template-compiler/2.7.13:
     resolution: {integrity: sha512-jYM6TClwDS9YqP48gYrtAtaOhRKkbYmbzE+Q51gX5YDr777n7tNI/IZk4QV4l/PjQPNh/FVa/E92sh/RqKMrog==}
     dependencies:
@@ -11726,6 +11751,10 @@ packages:
 
   /vue-template-es2015-compiler/1.9.1:
     resolution: {integrity: sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==}
+    dev: true
+
+  /vue/2.6.14:
+    resolution: {integrity: sha512-x2284lgYvjOMj3Za7kqzRcUSxBboHqtgRE2zlos1qWaOye5yUmHn42LB1250NJBLRwEcdrB0JRwyPTEPhfQjiQ==}
     dev: true
 
   /vue/2.7.13:

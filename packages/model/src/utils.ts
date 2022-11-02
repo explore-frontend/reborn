@@ -1,4 +1,4 @@
-import { onServerPrefetch, onBeforeUnmount } from 'vue';
+import { onServerPrefetch, onBeforeUnmount } from '@vue/composition-api';
 
 export function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {

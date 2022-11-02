@@ -1,13 +1,15 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi } from 'vitest';
-import Vue, {
+import { describe, it, expect, vi, beforeAll } from 'vitest';
+import CompositionAPI, {
     defineComponent,
     onMounted,
     watch,
     h,
-} from 'vue';
+    provide,
+} from '@vue/composition-api';
+import Vue from 'vue';
 
 import { createModelFromClass } from '../src/model/class-type';
 import { createClient } from '../src/clients';
@@ -16,6 +18,10 @@ import { INJECT_KEY } from '../src/const';
 import { CustomModel, CustomClassWithExtends } from './mock-models/class-type';
 
 import 'unfetch/polyfill';
+
+beforeAll(() => {
+    Vue.use(CompositionAPI);
+});
 
 const restClient = createClient('REST', {
     method: 'get',

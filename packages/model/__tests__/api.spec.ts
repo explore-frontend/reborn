@@ -3,16 +3,18 @@
  */
 import type { storeFactory } from '../src/store';
 
-import { describe, it, expect } from 'vitest';
-import Vue, { defineComponent, ref, computed, h, getCurrentInstance, nextTick } from 'vue';
+import { describe, it, expect, beforeAll } from 'vitest';
+import CompositionAPI, { defineComponent, ref, computed, h, getCurrentInstance, nextTick } from '@vue/composition-api';
+import Vue from 'vue';
 import { compileToFunctions } from 'vue-template-compiler';
 
 import { createModel } from '../src/model';
 import { useModel, createStore } from '../src/api';
 import { getRootStore } from '../src/const';
 
-import 'unfetch/polyfill';
-
+beforeAll(() => {
+    Vue.use(CompositionAPI);
+});
 
 const testModel = createModel(() => {
     const a = ref(1);

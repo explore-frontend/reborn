@@ -7,7 +7,7 @@ import {
     onBeforeUnmount,
     onServerPrefetch,
     getCurrentInstance,
-} from 'vue';
+} from '@vue/composition-api';
 import { storeFactory } from './store';
 import { createModelFromCA, createModelFromClass } from './model';
 import { INJECT_KEY, getRootStore } from './const';

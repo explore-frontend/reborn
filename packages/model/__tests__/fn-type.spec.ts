@@ -1,13 +1,15 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi } from 'vitest';
-import Vue, {
+import { describe, it, expect, vi, beforeAll } from 'vitest';
+import CompositionAPi, {
     defineComponent,
     onMounted,
     watch,
     h,
-} from 'vue';
+    provide,
+} from '@vue/composition-api';
+import Vue from 'vue';
 
 import { createClient } from '../src/clients';
 import { createModelFromCA } from '../src/model/fn-type';
@@ -26,6 +28,10 @@ import {
 } from '../src/index';
 
 import { MockModel, MockComposeModel } from './mock-models/fn-type';
+
+beforeAll(() => {
+    Vue.use(CompositionAPi);
+})
 
 const restClient = createClient('REST', {
     method: 'post',

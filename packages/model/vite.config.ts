@@ -3,13 +3,13 @@ import typescript from '@rollup/plugin-typescript';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import { peerDependencies, dependencies } from './package.json';
-import vue from '@vitejs/plugin-vue2'
+// import vue from '@vitejs/plugin-vue2';
 
 
 export default defineConfig({
-    plugins: [
-        vue(),
-    ],
+    // plugins: [
+    //     vue(),
+    // ],
     test: {
         coverage: {
             provider: 'c8'

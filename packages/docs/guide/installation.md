@@ -2,11 +2,11 @@
 
 ### 1. 依赖安装
 ```shell
-npm i --save vue-apollo-model rxjs reflect-metadata
+npm i --save vue-apollo-model rxjs
 ```
 或
 ```shell
-yarn add vue-apollo-model rxjs reflect-metadata
+yarn add vue-apollo-model rxjs
 ```
 > 如果需要使用graphql相关功能，请记得安装以下依赖
 > ```shell

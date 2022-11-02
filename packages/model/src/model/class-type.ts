@@ -8,7 +8,7 @@ import {
     createRestQuery,
 } from '../operations';
 import { getRootStore } from '../const';
-import { computed, reactive, getCurrentInstance } from 'vue';
+import { computed, reactive, getCurrentInstance } from '@vue/composition-api';
 import { useStatus } from '../operations/status';
 
 function registerProperty(obj: any, key: string, value: any) {

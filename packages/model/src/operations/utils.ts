@@ -9,7 +9,7 @@ import type {
 import type { InfoDataType } from './status';
 import type { Route } from 'vue-router';
 
-import { reactive, computed } from 'vue';
+import { reactive, computed } from '@vue/composition-api';
 
 export function initDataType<DataType>() {
     const data: InfoDataType<DataType> = {

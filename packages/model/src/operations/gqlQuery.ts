@@ -9,7 +9,7 @@ import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { Route } from 'vue-router';
 import type { Subscription } from 'rxjs';
 
-import { computed, nextTick } from 'vue';
+import { computed, nextTick } from '@vue/composition-api';
 import { interval } from 'rxjs';
 import { generateQueryOptions } from './utils';
 

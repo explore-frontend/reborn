@@ -13,7 +13,7 @@ import {
     createRestMutation,
     createRestQuery,
 } from '../operations';
-import { getCurrentInstance, toRefs } from 'vue';
+import { getCurrentInstance, toRefs } from '@vue/composition-api';
 import { getRootStore } from '../const';
 import { useStatus } from '../operations/status';
 

@@ -4,9 +4,6 @@
     "main": "dist/index.js",
     "module": "dist/index.es.js",
     "typings": "dist/module.d.ts",
-    "sideEffects": [
-        "reflect-metadata"
-    ],
     "license": "MIT",
     "scripts": {
         "build": "vuepress build docs",
