@@ -1,5 +1,6 @@
 import type { HTTPHeaders, ClientOptions } from './common';
 import type { RestClientParams, GQLClientParams } from '../operations/types';
+import type { RequestInfo } from './types';
 
 import { deepMerge, shimStringify, appendQueryStringToUrl } from '../utils';
 
@@ -77,12 +78,6 @@ function generateCommonRequestInfo(
         timeout: timeout && timeout >= 0 ? timeout : 60 * 1000,
         requestInit,
     };
-}
-
-type RequestInfo = {
-    url: string;
-    timeout: number;
-    requestInit: RequestInit;
 }
 
 function generateRestRequestInfo(

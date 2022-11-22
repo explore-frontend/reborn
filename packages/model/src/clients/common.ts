@@ -1,7 +1,9 @@
 import type { RestClientParams, GQLClientParams, CommonClientParams } from '../operations/types';
 import type { generateRequestInfo } from './request-transform';
+import type { CommonResponse } from './interceptor';
 
 import { deepMerge } from '../utils';
+import { createInterceptor } from './interceptor';
 
 type MethodType<T extends string> = Lowercase<T> | Uppercase<T>;
 
@@ -27,12 +29,6 @@ export type HTTPHeaders = {
     'content-type'?: ContentType;
 } & Record<string, string>;
 
-type TransformRequest = (params: RestClientParams | GQLClientParams) => any;
-
-type TransformResponse = (result: CommonResponse | Record<string, any>) => any | Promise<any>;
-
-type TransformReject = (params: any) => any;
-
 export type ClientOptions = {
     url?: string;
     method: Method;
@@ -47,46 +43,6 @@ const DEFAULT_OPTIONS: ClientOptions = {
     timeout: 60 * 1000,
     credentials: 'include',
 };
-
-type Interceptor<T, P> = {
-    list: Array<{
-        onResolve: T | undefined;
-        onReject: P | undefined;
-    }>;
-    use(onResolve: T, onReject?: P): void;
-};
-
-
-function createInterceptor(type: 'request'): Interceptor<TransformRequest, TransformReject>;
-function createInterceptor(type: 'response'):  Interceptor<TransformResponse, TransformReject>;
-function createInterceptor(type: any) {
-    const list: Array<any>  = [];
-    function use(onResolve: (...params: any) => any, onReject?: (...params: any) => any) {
-        list.push({
-            onResolve,
-            onReject,
-        });
-    }
-
-    return {
-        list,
-        use,
-    };
-}
-
-export type RequestInfo = {
-    url: string;
-    timeout: number;
-    requestInit: RequestInit;
-}
-
-type CommonResponse = {
-    status: Response['status'];
-    statusText: Response['statusText'];
-    headers: Response['headers'];
-    config: RequestInfo;
-    data: any;
-}
 
 export function clientFactory(
     type: 'GQL' | 'REST',
@@ -105,8 +61,8 @@ export function clientFactory(
             throw new Error('create client need a fetch function to init');
         }
     }
-    const requestInterceptor = createInterceptor('request');
-    const responseInterceptor = createInterceptor('response');
+    const requestInterceptor = createInterceptor<RestClientParams | GQLClientParams>('request');
+    const responseInterceptor = createInterceptor<CommonResponse>('response');
 
     const interceptors = {
         request: {
@@ -121,51 +77,56 @@ export function clientFactory(
         // 处理前置拦截器
 
         const list = [...requestInterceptor.list];
+
+        // 后面再做benchmark看看一个tick会差出来多少性能
+        let promise = Promise.resolve(params);
+
         while (list.length) {
             const item = list.shift();
-            try {
-                item?.onResolve?.(params);
-            } catch (e) {
-                item?.onReject?.(e);
-                break;
-            }
+            promise = promise.then(item?.onResolve, item?.onReject);
         }
 
-        const config = createRequestInfo(type, opts, params);
+        return promise.then(params => {
+            const config = createRequestInfo(type, opts, params);
 
-        const {
-            url,
-            timeout,
-            requestInit,
-        } = config;
-
-        const fetchPromise = opts.fetch!(url, requestInit);
-
-        const timeoutPromise = new Promise<DOMException>((resolve) => {
-            setTimeout(
-                () => resolve(new DOMException('The request has been timeout')),
+            const {
+                url,
                 timeout,
-            );
-        });
+                requestInit,
+            } = config;
 
-        return Promise
-            .race([timeoutPromise, fetchPromise])
-            .then(res => {
+            const fetchPromise = opts.fetch!(url, requestInit).then(res => {
+                return {
+                    res,
+                    config,
+                };
+            });
+
+            const timeoutPromise = new Promise<DOMException>((resolve) => {
+                setTimeout(
+                    () => resolve(new DOMException('The request has been timeout')),
+                    timeout,
+                );
+            });
+            return Promise.race([timeoutPromise, fetchPromise]);
+        }).then((result) => {
                 // 浏览器断网情况下有可能会是null
-                if (res === null) {
-                    res = new DOMException('The request has been timeout');
+                if (result === null) {
+                    result = new DOMException('The request has been timeout');
                 }
 
                 const list = [...responseInterceptor.list];
 
-                if (res instanceof DOMException) {
-                    let promise: Promise<any> = Promise.reject(res);
+                if (result instanceof DOMException) {
+                    let promise: Promise<any> = Promise.reject(result);
                     while (list.length) {
                         const transform = list.shift();
                         promise = promise.then(transform?.onResolve, transform?.onReject);
                     }
                     return promise;
                 }
+
+                const { res, config } = result;
 
                 const receiveType = res.headers.get('Content-Type')
                     || (config.requestInit.headers as Record<string, string>)?.['Content-Type']

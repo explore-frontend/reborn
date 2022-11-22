@@ -9,7 +9,6 @@ import Vue, {
     watch,
     ref,
     h,
-    provide,
 } from 'vue';
 
 import { createClient } from '../src/clients';
@@ -43,16 +42,6 @@ const restClient = createClient('REST', {
 });
 
 let count = 0;
-
-restClient.interceptors.request.use((params) => {
-    if (params.url === '/') {
-        expect(params.headers?.['content-type']).toBe('application/x-www-form-urlencoded');
-    } else {
-        expect(params.headers?.['content-type']).toBe('application/json');
-    }
-
-    return params;
-});
 
 let composeCount = 0;
 restClient.interceptors.response.use(({ data, config }) => {

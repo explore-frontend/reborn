@@ -32,7 +32,6 @@ importers:
       eslint: ^8.22.0
       graphql: ^16.5.0
       jsdom: ^20.0.0
-      rollup: ~2.78.0
       rxjs: ^7.5.7
       tslib: ^2.4.0
       typescript: ^4.7.4
@@ -47,14 +46,13 @@ importers:
     dependencies:
       graphql: 16.6.0
     devDependencies:
-      '@rollup/plugin-typescript': 8.5.0_e2q5rqkwsas7xse3qcdo6zg4by
+      '@rollup/plugin-typescript': 8.5.0_hjjpfygmunulepk75ead4kovya
       '@types/node': 18.11.0
       '@typescript-eslint/parser': 5.40.1_z4bbprzjrhnsfa24uvmcbu7f5q
       '@vitejs/plugin-vue2': 2.0.0_vite@3.1.8+vue@2.7.13
       '@vitest/coverage-c8': 0.23.4_jsdom@20.0.1
       eslint: 8.25.0
       jsdom: 20.0.1
-      rollup: 2.78.1
       rxjs: 7.5.7
       tslib: 2.4.0
       typescript: 4.8.4
@@ -1638,7 +1636,7 @@ packages:
       fastq: 1.13.0
     dev: true
 
-  /@rollup/plugin-typescript/8.5.0_e2q5rqkwsas7xse3qcdo6zg4by:
+  /@rollup/plugin-typescript/8.5.0_hjjpfygmunulepk75ead4kovya:
     resolution: {integrity: sha512-wMv1/scv0m/rXx21wD2IsBbJFba8wGF3ErJIr6IKRfRj49S85Lszbxb4DCo8iILpluTjk2GAAu9CoZt4G3ppgQ==}
     engines: {node: '>=8.0.0'}
     peerDependencies:
@@ -1649,14 +1647,13 @@ packages:
       tslib:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 3.1.0_rollup@2.78.1
+      '@rollup/pluginutils': 3.1.0
       resolve: 1.22.1
-      rollup: 2.78.1
       tslib: 2.4.0
       typescript: 4.8.4
     dev: true
 
-  /@rollup/pluginutils/3.1.0_rollup@2.78.1:
+  /@rollup/pluginutils/3.1.0:
     resolution: {integrity: sha512-GksZ6pr6TpIjHm8h9lSQ8pi8BE9VeubNT0OMJ3B5uZJ8pz73NPiqOtCog/x2/QzM1ENChPKxMDhiQuRHsqc+lg==}
     engines: {node: '>= 8.0.0'}
     peerDependencies:
@@ -1665,7 +1662,6 @@ packages:
       '@types/estree': 0.0.39
       estree-walker: 1.0.1
       picomatch: 2.3.1
-      rollup: 2.78.1
     dev: true
 
   /@sindresorhus/is/0.14.0:

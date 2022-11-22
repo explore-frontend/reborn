@@ -1,9 +1,12 @@
 import Vue, { h } from 'vue';
 
-import { createStore } from '../src/api';
+import { createStore, createClient } from '../src/index';
 import App from './App.vue';
 
 const store = createStore();
+const restClient = createClient('REST');
+
+store.registerClient('REST', restClient);
 Vue.use(store);
 
 const app = new Vue({
