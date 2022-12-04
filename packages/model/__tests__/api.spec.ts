@@ -11,6 +11,8 @@ import { createModel } from '../src/model';
 import { useModel, createStore } from '../src/api';
 import { getRootStore } from '../src/const';
 
+import 'unfetch/polyfill';
+
 
 const testModel = createModel(() => {
     const a = ref(1);

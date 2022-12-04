@@ -1,8 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import createFetchMock from 'vitest-fetch-mock';
+import { describe, it, expect, vi } from 'vitest';
 import Vue, {
     defineComponent,
     onMounted,
@@ -27,12 +26,6 @@ import {
 } from '../src/index';
 
 import { MockModel, MockComposeModel } from './mock-models/fn-type';
-
-import 'unfetch/polyfill'
-
-const fetchMock = createFetchMock(vi);
-
-fetchMock.enableMocks();
 
 const restClient = createClient('REST', {
     method: 'post',
@@ -64,11 +57,6 @@ restClient.interceptors.response.use(({ data, config }) => {
 });
 
 describe('transform model success', () => {
-    beforeEach(() => {
-        fetchMock.resetMocks();
-        fetchMock.doMock();
-    });
-
     it('transform fn type model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({
@@ -154,11 +142,6 @@ describe('transform model success', () => {
 
 
 describe('transform model with compose success', () => {
-    beforeEach(() => {
-        fetchMock.resetMocks();
-        fetchMock.doMock();
-    });
-
     it('transform fn type model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({

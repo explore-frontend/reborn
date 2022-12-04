@@ -2,7 +2,6 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from 'vitest';
-import createFetchMock from 'vitest-fetch-mock';
 import Vue, {
     defineComponent,
     onMounted,
@@ -17,11 +16,6 @@ import { INJECT_KEY } from '../src/const';
 import { CustomModel, CustomClassWithExtends } from './mock-models/class-type';
 
 import 'unfetch/polyfill';
-
-const fetchMock = createFetchMock(vi);
-
-fetchMock.enableMocks();
-fetchMock.doMock();
 
 const restClient = createClient('REST', {
     method: 'get',
