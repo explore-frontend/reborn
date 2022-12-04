@@ -1,18 +1,16 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import createFetchMock from 'vitest-fetch-mock';
+import { describe, it, expect, vi } from 'vitest';
 import Vue, {
     defineComponent,
     onMounted,
     watch,
-    ref,
     h,
 } from 'vue';
 
 import { createClient } from '../src/clients';
-import { useRestQuery, createModel, createModelFromCA } from '../src/model/fn-type';
+import { createModelFromCA } from '../src/model/fn-type';
 import { INJECT_KEY } from '../src/const';
 
 import {
@@ -27,11 +25,7 @@ import {
     // isErrorLikeState,
 } from '../src/index';
 
-import 'unfetch/polyfill'
-
-const fetchMock = createFetchMock(vi);
-
-fetchMock.enableMocks();
+import { MockModel, MockComposeModel } from './mock-models/fn-type';
 
 const restClient = createClient('REST', {
     method: 'post',
@@ -63,58 +57,6 @@ restClient.interceptors.response.use(({ data, config }) => {
 });
 
 describe('transform model success', () => {
-    beforeEach(() => {
-        fetchMock.resetMocks();
-        fetchMock.doMock();
-    });
-
-    const MockModel = createModel(() => {
-        const testVariablels = ref('1');
-        const query = useRestQuery<{
-            a: string;
-            b: string;
-        }>({
-            url: '/',
-            method: 'POST',
-            variables() {
-                return {
-                    mockData: testVariablels.value,
-                };
-            },
-            skip() {
-                return !testVariablels.value;
-            },
-            updateQuery(before, after) {
-                return {
-                    a: '' + before?.a + after?.a,
-                    b: '' + before?.b + after?.b,
-                };
-            }
-        });
-
-        const query1 = useRestQuery<{
-            a: string;
-            b: string;
-        }>({
-            url: '/test',
-            headers: {
-                "content-type": 'application/json'
-            },
-            skip: true,
-        });
-
-        return {
-            info: query.info,
-            loading: query.loading,
-            error: query.error,
-            data: query.data,
-            status: query.status,
-            testVariablels,
-            fetchMore: query.fetchMore,
-            refetch: query1.refetch,
-        };
-    });
-
     it('transform fn type model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({
@@ -200,68 +142,6 @@ describe('transform model success', () => {
 
 
 describe('transform model with compose success', () => {
-    beforeEach(() => {
-        fetchMock.resetMocks();
-        fetchMock.doMock();
-    });
-
-    const MockModel = createModel(() => {
-        const testVariablels = ref('1');
-        const query = useRestQuery<{
-            a: string;
-            b: string;
-        }>({
-            url: '/',
-            method: 'POST',
-            variables() {
-                return {
-                    mockData: testVariablels.value,
-                };
-            },
-            skip() {
-                return !testVariablels.value;
-            },
-            updateQuery(before, after) {
-                return {
-                    a: '' + before?.a + after?.a,
-                    b: '' + before?.b + after?.b,
-                };
-            }
-        });
-
-        return {
-            info: query.info,
-            loading: query.loading,
-            error: query.error,
-            data: query.data,
-            testVariablels,
-            refetch: query.refetch,
-        };
-    });
-
-    const MockComposeModel = createModel(() => {
-        const { model } = createModelFromCA(MockModel).cotr();
-
-        const query = useRestQuery<{
-            test: string,
-        }>({
-            url: '/test-compose',
-            headers: {
-                "content-type": 'application/json'
-            },
-            skip: true,
-        });
-
-        return {
-            model,
-            refetch: query.refetch,
-            info: query.info,
-            data: query.data,
-            loading: query.loading,
-            error: query.error,
-        };
-    });
-
     it('transform fn type model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({

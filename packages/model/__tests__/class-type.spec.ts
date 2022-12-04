@@ -1,81 +1,21 @@
 /**
  * @vitest-environment jsdom
  */
-import type { QueryResult } from '../src/operations/types';
-
-
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import createFetchMock from 'vitest-fetch-mock';
+import { describe, it, expect, vi } from 'vitest';
 import Vue, {
     defineComponent,
     onMounted,
     watch,
     h,
-    provide,
 } from 'vue';
 
-import { createModelFromClass, BaseModel } from '../src/model/class-type';
+import { createModelFromClass } from '../src/model/class-type';
 import { createClient } from '../src/clients';
-import { restQuery } from '../src/operations/decorators';
 import { INJECT_KEY } from '../src/const';
-import 'unfetch/polyfill'
 
-const fetchMock = createFetchMock(vi);
+import { CustomModel, CustomClassWithExtends } from './mock-models/class-type';
 
-fetchMock.enableMocks();
-class CustomModel extends BaseModel {
-    private a = 1;
-
-    get b() {
-        return this.a + 1;
-    }
-
-    set b(value: number) {
-        this.a = value - 1;
-    }
-
-    add(num: number) {
-        this.a += num;
-    }
-
-    min = (num: number) => {
-        this.a -= num;
-    }
-
-    @restQuery<CustomModel>({
-        url: '/query',
-        variables() {
-            return {
-                a: this.a,
-            };
-        },
-        skip() {
-            return this.a === 1;
-        }
-    })
-    private query!: QueryResult<{
-        a: number;
-        b: number;
-    }>;
-
-    get data() {
-        return this.query.data;
-    }
-
-    get loading() {
-        return this.query.loading;
-    }
-
-    get error() {
-        return this.query.error;
-    }
-
-    refetch() {
-        return this.query.refetch();
-    }
-
-    c = 10;
-};
+import 'unfetch/polyfill';
 
 const restClient = createClient('REST', {
     method: 'get',
@@ -92,51 +32,7 @@ restClient.interceptors.response.use((params) => {
     return params;
 });
 
-const gqlClient = createClient('GQL', {
-    url: './',
-    method: 'post',
-});
-
-class CustomClassWithExtends extends CustomModel {
-    get d() {
-        return this.b + 10;
-    }
-
-    @restQuery<CustomClassWithExtends>({
-        url: '/query1',
-        variables() {
-            return {
-                d: this.d,
-            };
-        },
-        skip() {
-            return this.d === 12;
-        }
-    })
-    private query1!: QueryResult<{
-        a: number;
-        b: number;
-    }>;
-
-    get data1() {
-        return this.query1.data;
-    }
-
-    get loading1() {
-        return this.query1.loading;
-    }
-
-    get error1() {
-        return this.query1.error;
-    }
-}
-
 describe('transform model success', () => {
-    beforeEach(() => {
-        fetchMock.resetMocks();
-        fetchMock.doMock();
-    });
-
     it('transform class mode model', () => new Promise(resolve => {
         const div = document.createElement('div');
         const App = defineComponent({
