@@ -14,7 +14,10 @@ export default defineConfig({
         coverage: {
             provider: 'c8'
         },
-        root: resolve(__dirname, '__tests__')
+        root: resolve(__dirname, '__tests__'),
+        include: [
+            '**/*.spec.ts'
+        ]
     },
     build: {
         rollupOptions: {
