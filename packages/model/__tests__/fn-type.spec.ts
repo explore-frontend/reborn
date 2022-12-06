@@ -97,7 +97,7 @@ describe('transform model success', () => {
                         expect(model.info.data?.b).toBe(count + '');
                         expect(model.data.value?.b).toBe(count + '');
                         // 第二次变化
-                        model.testVariablels.value = '';
+                        model.testVariables.value = '';
                     } else {
                         expect(model.info.data?.a).toBe('23');
                         expect(model.data.value?.a).toBe('23');
@@ -116,7 +116,7 @@ describe('transform model success', () => {
                     model.refetch();
 
                     setTimeout(() => {
-                        model.testVariablels.value = '123';
+                        model.testVariables.value = '123';
                     }, 100);
 
                     setTimeout(() => {
@@ -204,7 +204,7 @@ describe('transform model with compose success', () => {
                     model.refetch();
 
                     setTimeout(() => {
-                        model.model.testVariablels.value = '123';
+                        model.model.testVariables.value = '123';
                     }, 100);
                 })
                 return () => null;
