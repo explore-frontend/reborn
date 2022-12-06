@@ -51,6 +51,7 @@ export function createRestMutation<ModelType, DataType>(
             credentials: option.credentials,
             method: option.method,
             variables: variables(params),
+            timeout: option.timeout,
         }).then(data => {
             info.error = null;
             if (data) {

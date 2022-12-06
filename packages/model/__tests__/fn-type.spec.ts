@@ -38,6 +38,19 @@ const restClient = createClient('REST', {
 let count = 0;
 
 let composeCount = 0;
+restClient.interceptors.request.use(data => {
+    expect(data.cache).toBe(undefined);
+    if (data.url === '/') {
+        expect(data.timeout).toBe(5000);
+        expect(data.headers?.['content-type']).toBe('application/x-www-form-urlencoded');
+    } else {
+        expect(data.timeout).toBe(10 * 1000);
+        expect(data.headers?.['content-type']).toBe('application/json');
+    }
+
+    return data;
+});
+
 restClient.interceptors.response.use(({ data, config }) => {
     if (config.url === '/') {
         ++count;

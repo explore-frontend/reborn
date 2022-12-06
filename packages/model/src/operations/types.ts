@@ -41,6 +41,8 @@ export type CommonClientParams = {
     headers?: HTTPHeaders;
     variables?: Record<string, any>;
     timeout?: number;
+    method?: Method;
+    cache?: RequestCache;
 }
 
 // 交给Client请求用的部分
@@ -58,7 +60,6 @@ export type GQLClientParams = QueryClientParams | MutationClientParams;
 
 export type RestClientParams = {
     url: string;
-    method?: Method;
 } & CommonClientParams;
 
 

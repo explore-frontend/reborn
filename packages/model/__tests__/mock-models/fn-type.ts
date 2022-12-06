@@ -9,6 +9,7 @@ export const MockModel = createModel(() => {
     }>({
         url: '/',
         method: 'POST',
+        timeout: 5000,
         variables() {
             return {
                 mockData: testVariablels.value,
@@ -34,6 +35,7 @@ export const MockModel = createModel(() => {
             "content-type": 'application/json'
         },
         skip: true,
+        timeout: 1000,
     });
 
     return {
