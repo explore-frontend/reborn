@@ -105,7 +105,7 @@ export function clientFactory(
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(
                     () => resolve(new DOMException('The request has been timeout')),
-                    timeout,
+                    params.timeout || timeout,
                 );
             });
             return Promise.race([timeoutPromise, fetchPromise]);
