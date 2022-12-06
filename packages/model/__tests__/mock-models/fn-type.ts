@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { useRestQuery, createModel, createModelFromCA } from '../../src/model/fn-type';
 
 export const MockModel = createModel(() => {
-    const testVariablels = ref('1');
+    const testVariables = ref('1');
     const query = useRestQuery<{
         a: string;
         b: string;
@@ -12,11 +12,11 @@ export const MockModel = createModel(() => {
         timeout: 5000,
         variables() {
             return {
-                mockData: testVariablels.value,
+                mockData: testVariables.value,
             };
         },
         skip() {
-            return !testVariablels.value;
+            return !testVariables.value;
         },
         updateQuery(before, after) {
             return {
@@ -44,7 +44,7 @@ export const MockModel = createModel(() => {
         error: query.error,
         data: query.data,
         status: query.status,
-        testVariablels,
+        testVariables,
         fetchMore: query.fetchMore,
         refetch: query1.refetch,
     };
