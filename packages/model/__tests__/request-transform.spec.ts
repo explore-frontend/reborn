@@ -9,7 +9,7 @@ const clientOptions = {
 describe('rest request transform should be correct', () => {
     const variables = { a: 1 };
     it('method "get" / "head" should not have body', () => {
-        const getRequest = generateRequestInfo('REST', clientOptions, {
+        const getRequest = generateRequestInfo('REST', {
             url: '/test',
             method: 'get',
             variables,
@@ -17,7 +17,7 @@ describe('rest request transform should be correct', () => {
 
         expect(getRequest.requestInit.body).toBe(undefined);
 
-        const headRequest = generateRequestInfo('REST', clientOptions, {
+        const headRequest = generateRequestInfo('REST', {
             url: '/test',
             method: 'head',
             variables,
@@ -27,7 +27,7 @@ describe('rest request transform should be correct', () => {
     });
 
     it('method "get" / "head" with "application/x-www-form-urlencoded" should append variables to url', () => {
-        const getRequest = generateRequestInfo('REST', clientOptions, {
+        const getRequest = generateRequestInfo('REST', {
             url: '/test',
             method: 'get',
             headers: {
@@ -39,7 +39,7 @@ describe('rest request transform should be correct', () => {
         expect(getRequest.requestInit.body).toBe(undefined);
         expect(getRequest.url).toBe('/test?a=1');
 
-        const headRequest = generateRequestInfo('REST', clientOptions, {
+        const headRequest = generateRequestInfo('REST', {
             url: '/test',
             method: 'head',
             headers: {
@@ -52,7 +52,7 @@ describe('rest request transform should be correct', () => {
         expect(headRequest.url).toBe('/test?a=1');
 
 
-        const getRequest1 = generateRequestInfo('REST', clientOptions, {
+        const getRequest1 = generateRequestInfo('REST', {
             url: '/test',
             method: 'get',
             headers: {
@@ -63,7 +63,7 @@ describe('rest request transform should be correct', () => {
         expect(getRequest1.requestInit.body).toBe(undefined);
         expect(getRequest1.url).toBe('/test');
 
-        const headRequest1 = generateRequestInfo('REST', clientOptions, {
+        const headRequest1 = generateRequestInfo('REST', {
             url: '/test',
             method: 'head',
             headers: {
@@ -76,7 +76,7 @@ describe('rest request transform should be correct', () => {
     });
 
     it('method other should have a body', () => {
-        const request = generateRequestInfo('REST', clientOptions, {
+        const request = generateRequestInfo('REST', {
             url: '/test',
             method: 'post',
             variables,

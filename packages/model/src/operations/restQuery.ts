@@ -22,7 +22,7 @@ export function createRestQuery<ModelType, DataType>(
     client?: Client,
 ) {
     if (!client) {
-        throw new Error('No Rest Client has been setted');
+        throw new Error('No Rest Client has been set');
     }
     const {
         info,

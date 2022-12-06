@@ -27,7 +27,7 @@ function transformRequestBody<T extends Record<string, any>>(data: T, headers?: 
         return data;
     }
 
-    // URLSerchParams
+    // URLSearchParams
     if (typeof URLSearchParams === 'function' && data instanceof URLSearchParams && headers) {
         headers['content-type'] = 'application/x-www-form-urlencoded';
         return data.toString();
@@ -51,43 +51,22 @@ function transformRequestBody<T extends Record<string, any>>(data: T, headers?: 
     return JSON.stringify(data);
 }
 
-function generateCommonRequestInfo(
-    clientOptions: ClientOptions,
-    params: RestClientParams,
-) {
-    let {
-        url,
-        timeout: originalTimeout,
-        fetch,
-        ...originalRequestInit
-    } = clientOptions;
-
-    const {
-        url: targetUrl,
-        timeout: targetTimeout,
-        ...targetRequestInit
-    } = params;
-
-    const requestInit: RequestInit = deepMerge({}, originalRequestInit, targetRequestInit);
-    const timeout = (targetTimeout || originalTimeout);
-
-    url = targetUrl || url || '';
-
-    return {
-        url,
-        timeout: timeout && timeout >= 0 ? timeout : 60 * 1000,
-        requestInit,
+function generateCommonRequestInfo(params: RestClientParams | GQLClientParams) {
+    const requestInit: RequestInit = {
+        method: params.method,
+        credentials: params.credentials,
+        headers: params.headers,
+        cache: params.cache,
     };
+
+    return  requestInit;
 }
 
-function generateRestRequestInfo(
-    clientOptions: ClientOptions,
-    params: RestClientParams,
-): RequestInfo {
-    let { url, timeout, requestInit } = generateCommonRequestInfo(clientOptions, params);
+function generateRestRequestInfo(params: RestClientParams): RequestInfo {
+    let requestInit = generateCommonRequestInfo(params);
     const headers: HTTPHeaders = requestInit.headers as Record<string, any> || {};
 
-    const { variables } = params;
+    let { variables, url } = params;
 
     let body = variables
         ? transformRequestBody(variables, headers)
@@ -115,16 +94,12 @@ function generateRestRequestInfo(
 
     return {
         url,
-        timeout,
         requestInit,
     };
 }
 
 // TODO GQL的部分后面再补充，尤其是SSR的部分，待定先
-function generateGQLRequestInfo(
-    clientOptions: ClientOptions,
-    params: GQLClientParams,
-): RequestInfo {
+function generateGQLRequestInfo(params: GQLClientParams): RequestInfo {
     let {
         url,
         timeout,
@@ -137,17 +112,15 @@ function generateGQLRequestInfo(
 
     return {
         url: url || '',
-        timeout: timeout || 60 * 1000,
         requestInit,
     };
 }
 
 export function generateRequestInfo(
     type: 'GQL' | 'REST',
-    clientOptions: ClientOptions,
     params: GQLClientParams | RestClientParams,
 ) {
     return type === 'GQL'
-        ? generateGQLRequestInfo(clientOptions, params as GQLClientParams)
-        : generateRestRequestInfo(clientOptions, params as RestClientParams);
+        ? generateGQLRequestInfo(params as GQLClientParams)
+        : generateRestRequestInfo(params as RestClientParams);
 }

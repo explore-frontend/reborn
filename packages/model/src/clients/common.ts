@@ -33,7 +33,7 @@ export type ClientOptions = {
     url?: string;
     method: Method;
     fetch?: typeof fetch,
-} & CommonClientParams;
+} & Omit<CommonClientParams, 'variables'>;
 
 const DEFAULT_OPTIONS: ClientOptions = {
     method: 'GET',
@@ -43,6 +43,28 @@ const DEFAULT_OPTIONS: ClientOptions = {
     timeout: 60 * 1000,
     credentials: 'include',
 };
+
+// TODO后续再优化下逻辑写法，比如对于method的定义，需要定义好client与options的边界，拆分通用merge和转换成requestInit的部分……
+function mergeClientOptionsToParams(options: ClientOptions, params: RestClientParams | GQLClientParams) {
+    const {
+        timeout,
+        headers,
+        method,
+        credentials,
+        cache,
+        url
+    } = options;
+
+    params.timeout = params.timeout || timeout;
+    params.headers = deepMerge({}, headers, params.headers);
+    params.credentials = params.credentials || credentials;
+    params.method = method;
+    params.cache = cache;
+    params.url = params.url || url || '';
+
+    return params;
+}
+
 
 export function clientFactory(
     type: 'GQL' | 'REST',
@@ -78,6 +100,8 @@ export function clientFactory(
 
         const list = [...requestInterceptor.list];
 
+        params = mergeClientOptionsToParams(opts, params);
+
         // 后面再做benchmark看看一个tick会差出来多少性能
         let promise = Promise.resolve(params);
 
@@ -87,11 +111,10 @@ export function clientFactory(
         }
 
         return promise.then(params => {
-            const config = createRequestInfo(type, opts, params);
+            const config = createRequestInfo(type, params);
 
             const {
                 url,
-                timeout,
                 requestInit,
             } = config;
 
@@ -105,7 +128,7 @@ export function clientFactory(
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(
                     () => resolve(new DOMException('The request has been timeout')),
-                    params.timeout || timeout,
+                    params.timeout,
                 );
             });
             return Promise.race([timeoutPromise, fetchPromise]);
