@@ -110,20 +110,18 @@ export function clientFactory(
             promise = promise.then(item?.onResolve, item?.onReject);
         }
 
+        let config: ReturnType<typeof createRequestInfo>;
+
         return promise.then(params => {
-            const config = createRequestInfo(type, params);
+            // TODO这里的
+            config = createRequestInfo(type, params);
 
             const {
                 url,
                 requestInit,
             } = config;
 
-            const fetchPromise = opts.fetch!(url, requestInit).then(res => {
-                return {
-                    res,
-                    config,
-                };
-            });
+            const fetchPromise = opts.fetch!(url, requestInit);
 
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(
@@ -132,24 +130,25 @@ export function clientFactory(
                 );
             });
             return Promise.race([timeoutPromise, fetchPromise]);
-        }).then((result) => {
+        }).then((res) => {
                 // 浏览器断网情况下有可能会是null
-                if (result === null) {
-                    result = new DOMException('The request has been timeout');
+                if (res === null) {
+                    res = new DOMException('The request has been timeout');
                 }
 
                 const list = [...responseInterceptor.list];
 
-                if (result instanceof DOMException) {
-                    let promise: Promise<any> = Promise.reject(result);
+                if (res instanceof DOMException) {
+                    let promise: Promise<any> = Promise.reject({
+                        res,
+                        config,
+                    });
                     while (list.length) {
                         const transform = list.shift();
                         promise = promise.then(transform?.onResolve, transform?.onReject);
                     }
                     return promise;
                 }
-
-                const { res, config } = result;
 
                 const receiveType = res.headers.get('Content-Type')
                     || (config.requestInit.headers as Record<string, string>)?.['Content-Type']
