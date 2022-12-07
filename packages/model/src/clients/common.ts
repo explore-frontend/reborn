@@ -58,8 +58,8 @@ function mergeClientOptionsToParams(options: ClientOptions, params: RestClientPa
     params.timeout = params.timeout || timeout;
     params.headers = deepMerge({}, headers, params.headers);
     params.credentials = params.credentials || credentials;
-    params.method = method;
-    params.cache = cache;
+    params.method = params.method || method;
+    params.cache = params.cache || cache;
     params.url = params.url || url || '';
 
     return params;
