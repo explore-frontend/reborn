@@ -174,7 +174,10 @@ export function clientFactory(
                 } else {
                     commonInfo.data = res.body;
                     // 其它类型就把body先扔回去……也许以后有用……
-                    promise = res.ok ? Promise.resolve(commonInfo) : Promise.reject(res)
+                    promise = res.ok ? Promise.resolve(commonInfo) : Promise.reject({
+                        res,
+                        config,
+                    });
                 }
                 while (list.length) {
                     const transform = list.shift();
