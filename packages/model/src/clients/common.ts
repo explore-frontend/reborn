@@ -170,7 +170,10 @@ export function clientFactory(
                             commonInfo.data = data;
                             return commonInfo;
                         })
-                        : Promise.reject(res)
+                        : Promise.reject({
+                            res,
+                            config,
+                        })
                 } else {
                     commonInfo.data = res.body;
                     // 其它类型就把body先扔回去……也许以后有用……
