@@ -16,7 +16,7 @@ export default defineConfig({
         },
         root: resolve(__dirname, '__tests__'),
         setupFiles: [
-            './__tests__/setup.ts'
+            'setup.ts'
         ],
         include: [
             '**/*.spec.ts'
