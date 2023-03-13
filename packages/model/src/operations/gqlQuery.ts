@@ -11,7 +11,7 @@ import type { Subscription } from 'rxjs';
 
 import { computed, nextTick } from 'vue';
 import { interval } from 'rxjs';
-import { generateQueryOptions } from './utils';
+import { generateQueryOptions } from './core';
 
 export function createGQLQuery<ModelType, DataType>(
     option: GQLQueryOptions<ModelType, DataType>,
@@ -20,7 +20,7 @@ export function createGQLQuery<ModelType, DataType>(
     client?: Client,
 ) {
     if (!client) {
-        throw new Error('No GQL Client has been setted');
+        throw new Error('No GQL Client has been set');
     }
     const {
         info,

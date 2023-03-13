@@ -2,7 +2,7 @@ import type { GQLMutationOptions, MutationVariablesFn } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Client } from './types';
 
-import { initDataType } from './utils';
+import { initDataType } from './core';
 
 
 export function createGQLMutation<ModelType, DataType>(
@@ -12,7 +12,7 @@ export function createGQLMutation<ModelType, DataType>(
     client?: Client,
 ) {
     if (!client) {
-        throw new Error('No GQL Client has been setted');
+        throw new Error('No GQL Client has been set');
     }
     const info = initDataType<DataType>();
     function variables<T>(params: T) {

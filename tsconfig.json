@@ -26,6 +26,9 @@
         "noUncheckedIndexedAccess": true,
         "noImplicitOverride": true,
         "exactOptionalPropertyTypes": false,
+        // For `<script setup>`
+        // See <https://devblogs.microsoft.com/typescript/announcing-typescript-4-5-beta/#preserve-value-imports>
+        "preserveValueImports": true,
         "baseUrl": ".",
         "lib": ["esnext", "dom"]
     }

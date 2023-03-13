@@ -10,7 +10,7 @@ import type { Client } from './types';
 import type { Subscription } from 'rxjs';
 
 import { interval } from 'rxjs';
-import { generateQueryOptions } from './utils';
+import { generateQueryOptions } from './core';
 import { computed, watch, nextTick } from 'vue';
 import { deepMerge } from '../utils';
 
