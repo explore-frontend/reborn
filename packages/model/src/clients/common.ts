@@ -75,12 +75,18 @@ export function clientFactory(
         ? deepMerge({} as ClientOptions, DEFAULT_OPTIONS, options)
         : deepMerge({} as ClientOptions, DEFAULT_OPTIONS);
     if (!opts.fetch) {
-        if (typeof typeof window !== 'undefined' && window.fetch) {
-            opts.fetch = window.fetch.bind(window);
-        } else if (typeof typeof global !== 'undefined' && global.fetch) {
-            opts.fetch = global.fetch.bind(global);
-        } else {
-            throw new Error('create client need a fetch function to init');
+        if (typeof window !== 'undefined') {
+            if (window.fetch) {
+                opts.fetch = window.fetch.bind(window);
+            } else {
+                throw new Error('create client need a fetch function to init');
+            }
+        } else if (typeof global !== 'undefined') {
+            if (global.fetch) {
+                opts.fetch = global.fetch.bind(global);
+            } else {
+                throw new Error('create client need a fetch function to init');
+            }
         }
     }
     const requestInterceptor = createInterceptor<RestClientParams | GQLClientParams>('request');

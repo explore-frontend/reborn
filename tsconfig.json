@@ -10,8 +10,7 @@
         // This enables stricter inference for data properties on `this`.
         "noImplicitThis": true,
         "strict": true,
-        // Enforce using `import type` instead of `import` for types
-        "importsNotUsedAsValues": "error",
+        "verbatimModuleSyntax": true,
         "importHelpers": true,
         "moduleResolution": "Node",
         "experimentalDecorators": true,
@@ -26,10 +25,8 @@
         "noUncheckedIndexedAccess": true,
         "noImplicitOverride": true,
         "exactOptionalPropertyTypes": false,
-        // For `<script setup>`
-        // See <https://devblogs.microsoft.com/typescript/announcing-typescript-4-5-beta/#preserve-value-imports>
-        "preserveValueImports": true,
         "baseUrl": ".",
-        "lib": ["esnext", "dom"]
+        "lib": ["esnext", "dom"],
+        "composite": true,
     }
 }

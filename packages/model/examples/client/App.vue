@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useModel } from '../src/api';
+import { useModel } from '../../src/api';
 import { TestModel } from './model';
 
 const { a, b } = useModel(TestModel);
