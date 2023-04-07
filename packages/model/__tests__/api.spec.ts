@@ -6,8 +6,8 @@ import type { storeFactory } from '../src/store';
 import { describe, it, expect } from 'vitest';
 import { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from 'vue';
 
-import { createModel } from '../src/model';
-import { useModel, createStore } from '../src/api';
+import { createModel, useModel } from '../src';
+import { createStore } from '../src/store/index';
 import { getRootStore } from '../src/const';
 
 import 'unfetch/polyfill';

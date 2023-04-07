@@ -1,4 +1,5 @@
-import { useModel, createStore } from './api';
+import { useModel } from './model';
+import { createStore } from './store';
 
 import { createClient } from './clients';
 

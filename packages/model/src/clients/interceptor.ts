@@ -1,9 +1,7 @@
-import type { RestClientParams, GQLClientParams } from '../operations/types';
 import type { RequestInfo } from './types';
 
 type Interceptor<T, P> = {
     list: Array<{
-        // TODO后面再写体操
         onResolve: (x: T) => any | null;
         onReject: (x: P) => any | null;
     }>;

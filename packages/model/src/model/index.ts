@@ -1,11 +1,78 @@
+import type { Constructor, OriginalModelInstance } from '../types';
+import type { FNModelCreator } from './fn-type';
+
+import {
+    onBeforeUnmount,
+    onServerPrefetch,
+    getCurrentInstance,
+    effectScope
+} from 'vue';
+
+import { createModelFromCA } from './fn-type'
+import { createModelFromClass } from './class-type';
+
+import { getRootStore } from '../const';
+
 export {
-    createModelFromCA,
+    createModel,
     useGQLMutation,
     useGQLQuery,
     useRestMutation,
     useRestQuery,
-    createModel,
 } from './fn-type';
-export { createModelFromClass, BaseModel } from './class-type';
 
-export type { FNModelCreator } from './fn-type';
+export { type FNModelCreator } from './fn-type';
+
+export { BaseModel } from './class-type';
+
+
+export type MyCon<T> = FNModelCreator<T> | Constructor<T>;
+export type RebornInstanceType<T extends MyCon<any>> = T extends MyCon<infer U> ? U : never;
+
+export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInstanceType<T> {
+    const instance = getCurrentInstance();
+    if (!instance) {
+        throw new Error('useModel must use in a setup context!');
+    }
+
+    // Vue3中通过globalProperties来拿
+    const root = instance.appContext.config.globalProperties;
+    // TODO小程序的适配后面在做
+    const { store, rebornClient: client} = getRootStore();
+
+    if (!store) {
+        throw new Error('There is no reborn-model store in your root vm!!');
+    }
+
+    const storeModelInstance = store.addModel<T>(ctor);
+
+    if (!storeModelInstance.count) {
+        const creator = 'type' in ctor
+            ? createModelFromCA(ctor)
+            : createModelFromClass(ctor);
+        storeModelInstance.scope = effectScope(true);
+        const scope = storeModelInstance.scope;
+
+        scope?.run(() => {
+            const instance = creator.cotr(client) as OriginalModelInstance<T>;
+            storeModelInstance.instance = instance;
+        });
+    }
+    storeModelInstance.count++;
+
+    onBeforeUnmount(() => {
+        storeModelInstance.count--;
+        if (storeModelInstance.count === 0 && storeModelInstance.instance) {
+            storeModelInstance.instance.destroy();
+            storeModelInstance.instance = null;
+            storeModelInstance.scope?.stop();
+            storeModelInstance.scope = effectScope(true);
+        }
+    });
+    onServerPrefetch(() => {
+        // return storeModelInstance.instance?.prefetch();
+    });
+
+    return storeModelInstance.instance!.model as RebornInstanceType<T>;
+}
+
