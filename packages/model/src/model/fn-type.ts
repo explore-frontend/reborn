@@ -27,7 +27,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
-const route = vm.proxy!.$route;
+    const route = vm.proxy!.$route;
     const { rebornClient: client } = getRootStore();
 
     const query = createRestQuery<null, T>(options, null, route, client.rest);
@@ -47,6 +47,7 @@ const route = vm.proxy!.$route;
         onNext: query.onNext,
     };
 };
+
 export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     const vm = getCurrentInstance();
     if (creatingModelCount <= 0 || !vm) {

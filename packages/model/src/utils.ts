@@ -1,5 +1,3 @@
-import { onServerPrefetch, onBeforeUnmount } from 'vue';
-
 export function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {
         case 'string':
