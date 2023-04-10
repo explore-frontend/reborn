@@ -1,4 +1,4 @@
-import type { RebornClient } from './types';
+import type { RebornClient } from './clients';
 import type { storeFactory } from './store';
 
 import { inject } from 'vue';

@@ -4,7 +4,7 @@
  * @author 天翔Skyline(skyline0705@gmail.com)
  */
 import type { RestMutationOptions, MutationVariablesFn } from './types';
-import type { Client } from './types';
+import type { Client } from '../clients';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 import { initDataType } from './core';

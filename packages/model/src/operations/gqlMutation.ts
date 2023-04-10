@@ -1,6 +1,6 @@
 import type { GQLMutationOptions, MutationVariablesFn } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Client } from './types';
+import type { Client } from '../clients';
 
 import { initDataType } from './core';
 

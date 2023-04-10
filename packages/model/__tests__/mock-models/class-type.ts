@@ -1,7 +1,7 @@
 import type { QueryResult } from '../../src/operations/types';
 
 import { BaseModel } from '../../src/model/class-type';
-import { restQuery } from '../../src/operations/decorators';
+import { restQuery } from '../../src/model/decorators';
 
 export class CustomModel extends BaseModel {
     private a = 1;

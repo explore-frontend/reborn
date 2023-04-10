@@ -1,4 +1,5 @@
-import type { ModelCotrInfo, RebornClient } from '../types';
+import type { ModelCotrInfo } from './types';
+import type { RebornClient } from '../clients';
 import type {
     GQLMutationOptions,
     GQLQueryOptions,

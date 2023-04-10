@@ -1,8 +1,7 @@
-import type { ModelInfo } from '../types';
+import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
 import type { createApp } from 'vue';
-import type { Client } from '../operations/types';
-import type { RebornClient } from '../types';
+import type { Client, RebornClient } from '../clients';
 
 import { Cache } from '../cache/index';
 import { INJECT_KEY } from '../const';

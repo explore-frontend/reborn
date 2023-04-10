@@ -1,11 +1,11 @@
-import type { ModelMetadata } from '../types';
+import type { ModelMetadata } from './types';
 
 import type {
     GQLQueryOptions,
     GQLMutationOptions,
     RestQueryOptions,
     RestMutationOptions,
-} from './types';
+} from '../operations/types';
 
 
 type OptionsDefine<T = Constructor> = ModelMetadata<T>['detail'];

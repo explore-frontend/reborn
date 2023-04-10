@@ -6,7 +6,7 @@
 
 import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Client } from './types';
+import type { Client } from '../clients';
 import type { Subscription } from 'rxjs';
 
 import { interval } from 'rxjs';

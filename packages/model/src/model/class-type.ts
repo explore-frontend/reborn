@@ -1,4 +1,5 @@
-import type { RebornClient, Constructor, ModelCotrInfo, ModelMetadata } from '../types';
+import type { Constructor, ModelCotrInfo, ModelMetadata } from './types';
+import type { RebornClient } from '../clients';
 import type { GetModelInstance } from '../store';
 
 import {
@@ -316,7 +317,6 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                 modelAccessor,
             } = data();
 
-            const vm = getCurrentInstance()!;
             const store = getRootStore().store;
             const decoratorList = getDecoratorList(original as unknown as RebornDecorators);
 

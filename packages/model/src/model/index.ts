@@ -1,4 +1,4 @@
-import type { Constructor, OriginalModelInstance } from '../types';
+import type { Constructor, OriginalModelInstance } from './types';
 import type { FNModelCreator } from './fn-type';
 
 import {
@@ -12,6 +12,8 @@ import { createModelFromCA } from './fn-type'
 import { createModelFromClass } from './class-type';
 
 import { getRootStore } from '../const';
+
+export type * from './types';
 
 export {
     createModel,
@@ -76,3 +78,9 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     return storeModelInstance.instance!.model as RebornInstanceType<T>;
 }
 
+export {
+    gqlQuery,
+    gqlMutation,
+    restQuery,
+    restMutation,
+} from './decorators';

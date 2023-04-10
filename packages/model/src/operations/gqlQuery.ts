@@ -4,7 +4,7 @@
  * @author 天翔Skyline(skyline0705@gmail.com)
  */
 
-import type { Client } from './types';
+import type { Client } from '../clients';
 import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Subscription } from 'rxjs';
