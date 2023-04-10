@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import express from 'express';
-import { fileURLToPath } from 'url';
-import { dirname, resolve} from 'path';
+import { resolve} from 'path';
 import { createServer } from 'vite';
+
 
 (async () => {
     const app = express()

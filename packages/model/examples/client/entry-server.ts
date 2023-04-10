@@ -1,8 +1,11 @@
 import { renderToString } from 'vue/server-renderer'
 import { createApp } from './main'
+import fetch from 'node-fetch';
 
 export async function render(url: string) {
-    const { app, router } = createApp()
+    // 妈的，fetch的Request类型不一致，所以还不能直接用……
+    // @ts-expect-error
+    const { app, router } = createApp(fetch);
 
     // set the router to the desired URL before rendering
     await router.push(url)

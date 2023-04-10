@@ -31,7 +31,7 @@ export type HTTPHeaders = {
 
 export type ClientOptions = {
     url?: string;
-    method: Method;
+    method?: Method;
     fetch?: typeof fetch,
 } & Omit<CommonClientParams, 'variables'>;
 

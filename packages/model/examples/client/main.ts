@@ -4,10 +4,15 @@ import { createStore, createClient } from '../../src/index';
 import App from './App.vue';
 import { createRouter } from './router';
 
-export function createApp() {
+type Fetch = typeof fetch
+
+export function createApp(customFetch?: Fetch) {
     const router = createRouter();
     const store = createStore();
-    const restClient = createClient('REST');
+    const f = customFetch || fetch;
+    const restClient = createClient('REST', {
+        fetch: f,
+    });
     store.registerClient('REST', restClient);
     const app = createSSRApp({
         render: () => h(App),
