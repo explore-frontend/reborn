@@ -11,7 +11,6 @@ import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './
 import type { Client } from '../clients';
 import type { Store } from '../store';
 
-import { interval, filter } from 'rxjs';
 import { generateQueryOptions } from './core';
 import { computed, watch, nextTick } from 'vue';
 import { deepMerge } from '../utils';
@@ -29,39 +28,17 @@ export function createRestQuery<ModelType, DataType>(
     const {
         info,
         skip,
-        pollInterval,
         variables,
+        fetchQuery$,
     } = generateQueryOptions<ModelType, DataType>(option, route, model);
+
+    const fetchPolicy = option.fetchPolicy || 'cache-and-network';
 
     const url = computed(() => {
         if (typeof option.url === 'function') {
             return option.url.call(model, route, variables.value);
         }
         return option.url;
-    });
-
-    const variablesComputed = computed(() => [variables.value, skip.value, url.value]);
-
-    let pollIntervalSub: Subscription | null = null;
-
-    function changeVariables() {
-        nextTick(() => {
-            if (skip.value) {
-                return;
-            }
-            if (pollIntervalSub) {
-                // 参数改变等待下次interval触发
-                return;
-            }
-            refetch();
-        });
-    }
-
-    const variablesWatcher = watch(() => variablesComputed.value, (newV, oldV) => {
-        // TODO短时间内大概率会触发两次判断，具体原因未知= =
-        if (newV.some((v, index) => oldV[index] !== v)) {
-            changeVariables();
-        }
     });
 
     function refetch() {
@@ -90,41 +67,22 @@ export function createRestQuery<ModelType, DataType>(
         });
     }
 
-    function changePollInterval() {
-        nextTick(() => {
-            if (pollIntervalSub) {
-                pollIntervalSub.unsubscribe();
-                pollIntervalSub = null;
-            }
-            if (!pollInterval.value) {
+    let sub: Subscription | null = null;
+
+    function init() {
+        sub = fetchQuery$.subscribe(() => {
+            if (skip.value) {
                 return;
             }
-            pollIntervalSub = interval(pollInterval.value)
-                .subscribe({
-                    next: () => refetch(),
-                });
+            refetch();
         });
     }
 
-    const intervalWatcher = watch(() => pollInterval.value, (newV, oldV) => {
-        // TODO短时间内大概率会触发两次判断，具体原因未知= =
-        if (newV !== oldV) {
-            changePollInterval();
-        }
-    });
-
-    function init() {
-        if (!skip.value) {
-            refetch();
-            changePollInterval();
-        }
-    }
-
     function destroy() {
-        intervalWatcher();
-        variablesWatcher();
-        pollIntervalSub?.unsubscribe();
-        pollIntervalSub = null;
+        if (sub) {
+            sub.unsubscribe();
+            sub = null;
+        }
     }
 
     function fetchMore(variables: RestFetchMoreOption['variables']) {

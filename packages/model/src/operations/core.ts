@@ -9,7 +9,9 @@ import type {
 import type { InfoDataType } from './status';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch } from 'vue';
+import { fromWatch } from '../utils';
+import { Observable, filter, merge, tap } from 'rxjs';
 
 export function isDef<T>(v: T): v is NonNullable<T> {
     return v !== undefined && v !== null;
@@ -53,11 +55,42 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
+    const variables$ = fromWatch(() => variables.value, { immediate: true, });
+    const pollInterval$ = new Observable<'action'>(subscriber => {
+        let timeout: ReturnType<typeof setTimeout>;
+        watch(() => pollInterval.value, (val, oldVal) => {
+            if (val === oldVal) {
+                return;
+            }
+            if (val <= 0) {
+                clearTimeout(timeout);
+                return;
+            }
+
+            poll();
+        }, { immediate: true })
+        const doInterval = () => {
+            subscriber.next('action');
+            poll();
+        }
+
+        const poll = () => {
+            clearTimeout(timeout);
+            setTimeout(doInterval, pollInterval.value);
+        }
+    });
+
+    const fetchQuery$ = merge(
+        variables$,
+        pollInterval$,
+    );
+
     return {
         info,
         skip,
         pollInterval,
         variables,
+        fetchQuery$,
     };
 }
 

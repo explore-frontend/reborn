@@ -29,9 +29,9 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
     const route = vm.proxy!.$route;
-    const { rebornClient: client } = getRootStore();
+    const { rebornClient: client, store } = getRootStore();
 
-    const query = createRestQuery<null, T>(options, null, route, client.rest);
+    const query = createRestQuery<null, T>(options, null, route, store, client.rest);
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
@@ -56,9 +56,9 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     }
 
     const route = vm.proxy!.$route;
-    const { rebornClient: client } = getRootStore();
+    const { rebornClient: client, store } = getRootStore();
 
-    const query = createGQLQuery<null, T>(options, null, route, client.rest);
+    const query = createGQLQuery<null, T>(options, null, route, store, client.rest);
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
@@ -108,7 +108,6 @@ export function createModelFromCA<T>(
     return {
         type: 'FunctionalModel',
         cotr: (client?: RebornClient) => {
-            const vm = getCurrentInstance()!;
             const { model, queryList } = fn.creator();
 
             // 延迟初始化，保证query间依赖
@@ -138,7 +137,6 @@ export function createModel<T>(fn: FNModelConstructor<T>) {
         type: 'FN',
         creator: () => {
             creatingModelCount++;
-            const vm = getCurrentInstance()!;
             const { store } = getRootStore();
 
             const model = fn({

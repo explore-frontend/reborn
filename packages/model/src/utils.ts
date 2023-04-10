@@ -1,3 +1,8 @@
+import type { WatchOptions, WatchSource } from 'vue';
+
+import { watch } from 'vue';
+import { Observable } from 'rxjs';
+
 export function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {
         case 'string':
@@ -86,4 +91,15 @@ export function deepMerge<T extends any>(origin: T, ...targets: Array<T>) {
         }
     }
     return origin;
+}
+
+export function fromWatch<T>(fn: WatchSource<T>, watchOptions?: WatchOptions) {
+    return new Observable<T>((subscriber) => {
+        watch(fn, (val, oldVal) => {
+            if (val !== oldVal) {
+                // 一层简单的过滤，避免频繁触发
+                subscriber.next(val);
+            }
+        }, watchOptions);
+    });
 }
