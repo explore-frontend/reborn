@@ -1,29 +1,38 @@
 import { deepMerge } from '../utils';
 
 // TODO 暂时不需要考虑normalize的情况，等到后续有复杂需求以后再考虑。
-export class Cache {
-    private data: Record<string, unknown> = {};
-    restore(data: Record<string, unknown>) {
-        this.data = data;
+export function createCache() {
+    let cacheData: Record<string, unknown> = {};
+    function restore(data: Record<string, unknown>) {
+        cacheData = data;
     }
 
-    put(key: string, value: unknown) {
-        this.data[key] = value;
+    function put(key: string, value: unknown) {
+        cacheData[key] = value;
     }
 
-    get<T>(key: string): T {
-        return this.data[key] as T;
+    function get<T>(key: string): T {
+        return cacheData[key] as T;
     }
 
-    update(key: string, value: unknown) {
-        this.data[key] = deepMerge(this.data[key], value);
+    function update(key: string, value: unknown) {
+        cacheData[key] = deepMerge(cacheData[key], value);
     }
 
-    delete(key: string) {
-        this.data[key] = undefined;
+    function remove(key: string) {
+        cacheData[key] = undefined;
     }
 
-    extract() {
-        return JSON.stringify(this.data);
+    function extract() {
+        return JSON.stringify(cacheData);
+    }
+
+    return {
+        restore,
+        put,
+        get,
+        update,
+        remove,
+        extract,
     }
 }

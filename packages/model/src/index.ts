@@ -2,6 +2,8 @@ export { createStore } from './store';
 
 export { createClient } from './clients';
 
+export { createCache } from './cache';
+
 export type {
     FNModelCreator,
 } from './model';

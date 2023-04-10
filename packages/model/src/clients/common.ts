@@ -1,6 +1,7 @@
 import type { RestClientParams, GQLClientParams, CommonClientParams } from '../operations/types';
 import type { generateRequestInfo } from './request-transform';
 import type { CommonResponse } from './interceptor';
+import { createCache } from '../cache';
 
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
@@ -32,7 +33,8 @@ export type HTTPHeaders = {
 export type ClientOptions = {
     url?: string;
     method?: Method;
-    fetch?: typeof fetch,
+    fetch?: typeof fetch;
+    cache?: ReturnType<typeof createCache>;
 } & Omit<CommonClientParams, 'variables'>;
 
 const DEFAULT_OPTIONS: ClientOptions = {
@@ -51,7 +53,6 @@ function mergeClientOptionsToParams(options: ClientOptions, params: RestClientPa
         headers,
         method,
         credentials,
-        cache,
         url
     } = options;
 
@@ -59,8 +60,9 @@ function mergeClientOptionsToParams(options: ClientOptions, params: RestClientPa
     params.headers = deepMerge({}, headers, params.headers);
     params.credentials = params.credentials || credentials;
     params.method = params.method || method;
-    params.cache = params.cache || cache;
     params.url = params.url || url || '';
+    // 写死Fetch请求的缓存策略，缓存接管由model中的cache模块管理，避免http cache引起的各种问题。
+    params.cache = 'no-store';
 
     return params;
 }
@@ -196,6 +198,9 @@ export function clientFactory(
                 return promise;
             });
     }
+
+    const cache = options?.cache || createCache();
+    // TODO差这里开始给request封装接口出来了
 
     return {
         interceptors,

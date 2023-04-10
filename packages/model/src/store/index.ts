@@ -3,7 +3,6 @@ import type { RebornInstanceType } from '../model';
 import type { createApp } from 'vue';
 import type { Client, RebornClient } from '../clients';
 
-import { Cache } from '../cache/index';
 import { INJECT_KEY } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
@@ -12,7 +11,6 @@ export type Store = ReturnType<typeof storeFactory>;
 
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
-    const cache = new Cache();
 
     function getModelInstance<T>(constructor: ModelInfo<T>['constructor']): RebornInstanceType<typeof constructor> | null{
         return modelMap.get(constructor)?.instance?.model as unknown as RebornInstanceType<typeof constructor>;
@@ -40,21 +38,10 @@ export function storeFactory() {
         }
     }
 
-    function restore(data: Record<string, any>): void {
-        cache.restore(data);
-    }
-
-    function exportStates(): string {
-        return cache.extract();
-    }
-
     return {
         getModelInstance,
         addModel,
         removeModel,
-        restore,
-        exportStates,
-        cache,
     };
 }
 
