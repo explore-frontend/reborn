@@ -8,6 +8,8 @@ import { INJECT_KEY } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
+export type Store = ReturnType<typeof storeFactory>;
+
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
     const cache = new Cache();
@@ -52,6 +54,7 @@ export function storeFactory() {
         removeModel,
         restore,
         exportStates,
+        cache,
     };
 }
 

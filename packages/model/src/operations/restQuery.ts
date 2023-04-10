@@ -4,21 +4,23 @@
  * @author 天翔Skyline(skyline0705@gmail.com)
  */
 
-import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Client } from '../clients';
 import type { Subscription } from 'rxjs';
 
-import { interval } from 'rxjs';
+import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
+import type { Client } from '../clients';
+import type { Store } from '../store';
+
+import { interval, filter } from 'rxjs';
 import { generateQueryOptions } from './core';
 import { computed, watch, nextTick } from 'vue';
 import { deepMerge } from '../utils';
-
 
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
     model: ModelType,
     route: RouteLocationNormalizedLoaded,
+    store: Store,
     client?: Client,
 ) {
     if (!client) {

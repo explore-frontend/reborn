@@ -1,6 +1,6 @@
 import type { Constructor, ModelCotrInfo, ModelMetadata } from './types';
 import type { RebornClient } from '../clients';
-import type { GetModelInstance } from '../store';
+import type { GetModelInstance, Store } from '../store';
 
 import {
     createRestMutation,
@@ -56,6 +56,7 @@ function initRebornDesc<T>(
     instance: T,
     instanceAccessor: Partial<T>,
     decoratorList: DecoratorInfoList,
+    store: Store,
     rebornClient: RebornClient,
 ) {
     const queryList = [];
@@ -110,6 +111,7 @@ function initRebornDesc<T>(
                     meta.detail,
                     instance as unknown as T,
                     vm.proxy!.$route,
+                    store,
                     rebornClient.gql,
                 );
             } else if (meta.type === 'restQuery') {
@@ -117,6 +119,7 @@ function initRebornDesc<T>(
                     meta.detail,
                     instance as unknown as T,
                     vm.proxy!.$route,
+                    store,
                     rebornClient.rest,
                 )
             }
@@ -325,6 +328,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                     model,
                     modelAccessor,
                     decoratorList,
+                    store,
                     client
                 )
                 : [];

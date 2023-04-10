@@ -4,10 +4,12 @@
  * @author 天翔Skyline(skyline0705@gmail.com)
  */
 
-import type { Client } from '../clients';
-import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Subscription } from 'rxjs';
+
+import type { Client } from '../clients';
+import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
+import type { Store } from '../store';
 
 import { computed, nextTick } from 'vue';
 import { interval } from 'rxjs';
@@ -17,6 +19,7 @@ export function createGQLQuery<ModelType, DataType>(
     option: GQLQueryOptions<ModelType, DataType>,
     model: ModelType,
     route: RouteLocationNormalizedLoaded,
+    store: Store,
     client?: Client,
 ) {
     if (!client) {
