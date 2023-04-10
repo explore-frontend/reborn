@@ -1,7 +1,7 @@
-import type { RestClientParams, GQLClientParams, CommonClientParams } from '../operations/types';
+import type { RestClientParams, GQLClientParams, CommonClientParams, FetchPolicy } from '../operations/types';
 import type { generateRequestInfo } from './request-transform';
 import type { CommonResponse } from './interceptor';
-import { createCache } from '../cache';
+import { createCache, hash } from '../cache';
 
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
@@ -67,7 +67,6 @@ function mergeClientOptionsToParams(options: ClientOptions, params: RestClientPa
     return params;
 }
 
-
 export function clientFactory(
     type: 'GQL' | 'REST',
     createRequestInfo: typeof generateRequestInfo,
@@ -77,6 +76,7 @@ export function clientFactory(
         ? deepMerge({} as ClientOptions, DEFAULT_OPTIONS, options)
         : deepMerge({} as ClientOptions, DEFAULT_OPTIONS);
     if (!opts.fetch) {
+        // 避免Node环境下的判断，所以没法简化写=。=
         if (typeof window !== 'undefined') {
             if (window.fetch) {
                 opts.fetch = window.fetch.bind(window);
@@ -139,71 +139,88 @@ export function clientFactory(
             });
             return Promise.race([timeoutPromise, fetchPromise]);
         }).then((res) => {
-                // 浏览器断网情况下有可能会是null
-                if (res === null) {
-                    res = new DOMException('The request has been timeout');
-                }
+            // 浏览器断网情况下有可能会是null
+            if (res === null) {
+                res = new DOMException('The request has been timeout');
+            }
 
-                const list = [...responseInterceptor.list];
+            const list = [...responseInterceptor.list];
 
-                if (res instanceof DOMException) {
-                    let promise: Promise<any> = Promise.reject({
-                        res,
-                        config,
-                    });
-                    while (list.length) {
-                        const transform = list.shift();
-                        promise = promise.then(transform?.onResolve, transform?.onReject);
-                    }
-                    return promise;
-                }
-
-                const receiveType = res.headers.get('Content-Type')
-                    || (config.requestInit.headers as Record<string, string>)?.['Content-Type']
-                    || (config.requestInit.headers as Record<string, string>)?.['content-type']
-                    || 'application/json';
-
-                const commonInfo: CommonResponse = {
-                    status: res.status,
-                    statusText: res.statusText,
-                    headers: res.headers,
+            if (res instanceof DOMException) {
+                let promise: Promise<any> = Promise.reject({
+                    res,
                     config,
-                    data: undefined,
-                };
-
-                let promise;
-                if (receiveType.indexOf('application/json') !== -1) {
-                    promise = res.ok
-                        ? res.json().then(data => {
-                            commonInfo.data = data;
-                            return commonInfo;
-                        })
-                        : Promise.reject({
-                            res,
-                            config,
-                        })
-                } else {
-                    commonInfo.data = res.body;
-                    // 其它类型就把body先扔回去……也许以后有用……
-                    promise = res.ok ? Promise.resolve(commonInfo) : Promise.reject({
-                        res,
-                        config,
-                    });
-                }
+                });
                 while (list.length) {
                     const transform = list.shift();
                     promise = promise.then(transform?.onResolve, transform?.onReject);
                 }
-
                 return promise;
-            });
+            }
+
+            const receiveType = res.headers.get('Content-Type')
+                || (config.requestInit.headers as Record<string, string>)?.['Content-Type']
+                || (config.requestInit.headers as Record<string, string>)?.['content-type']
+                || 'application/json';
+
+            const commonInfo: CommonResponse = {
+                status: res.status,
+                statusText: res.statusText,
+                headers: res.headers,
+                config,
+                data: undefined,
+            };
+
+            let promise;
+            if (receiveType.indexOf('application/json') !== -1) {
+                promise = res.ok
+                    ? res.json().then(data => {
+                        commonInfo.data = data;
+                        return commonInfo;
+                    })
+                    : Promise.reject({
+                        res,
+                        config,
+                    })
+            } else {
+                commonInfo.data = res.body;
+                // 其它类型就把body先扔回去……也许以后有用……
+                promise = res.ok ? Promise.resolve(commonInfo) : Promise.reject({
+                    res,
+                    config,
+                });
+            }
+            while (list.length) {
+                const transform = list.shift();
+                promise = promise.then(transform?.onResolve, transform?.onReject);
+            }
+
+            return promise;
+        });
     }
 
     const cache = options?.cache || createCache();
-    // TODO差这里开始给request封装接口出来了
+
+    // TODO还差第一次请求，也就是SSR的标记该如何消费
+    function requestWithCache(fetchPolicy: FetchPolicy = 'cache-and-network', params: Parameters<typeof request>[0]): ReturnType<typeof request> {
+        switch (fetchPolicy) {
+            case 'cache-and-network':
+                return request(params);
+            case 'cache-first':
+                return request(params);
+            case 'network-first':
+                return request(params);
+            case 'cache-only':
+                return request(params);
+            case 'network-only':
+                return request(params);
+            default:
+                throw new Error(`There is a wrong fetchPolicy: ${fetchPolicy}`);
+        }
+    }
 
     return {
         interceptors,
-        request,
+        request: requestWithCache,
     };
 }
