@@ -26,7 +26,7 @@ export default defineConfig({
         rollupOptions: {
             plugins: [
                 typescript({
-                    tsconfig: './tsconfig.json'
+                    tsconfig: './tsconfig.lib.json'
                 }),
             ],
             external: [

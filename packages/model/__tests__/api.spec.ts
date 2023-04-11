@@ -1,12 +1,12 @@
 /**
  * @vitest-environment jsdom
  */
-import type { storeFactory } from '../src/store';
+import type { Store } from '../src/store';
 
 import { describe, it, expect } from 'vitest';
 import { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from 'vue';
 
-import { createModel, useModel } from '../src';
+import { createModel, useModel } from '../src/index';
 import { createStore } from '../src/store/index';
 import { getRootStore } from '../src/const';
 
@@ -68,7 +68,7 @@ const ComponentB = defineComponent({
 });
 
 let currentAppInstance: ReturnType<typeof getCurrentInstance> | null;
-let currentStore: ReturnType<typeof storeFactory> | null;
+let currentStore: Store | null;
 
 const App = defineComponent({
     components: {
