@@ -7,8 +7,8 @@
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Subscription } from 'rxjs';
 
-import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
-import type { Client } from '../clients';
+import type { RestQueryOptions, RestFetchMoreOption } from './types';
+import type { Client, RestRequestConfig } from '../clients';
 import type { Store } from '../store';
 
 import { generateQueryOptions } from './core';
@@ -32,8 +32,6 @@ export function createRestQuery<ModelType, DataType>(
         fetchQuery$,
     } = generateQueryOptions<ModelType, DataType>(option, route, model);
 
-    const fetchPolicy = option.fetchPolicy || 'cache-and-network';
-
     const url = computed(() => {
         if (typeof option.url === 'function') {
             return option.url.call(model, route, variables.value);
@@ -48,8 +46,8 @@ export function createRestQuery<ModelType, DataType>(
             client!.request<DataType>({
                 url: url.value,
                 headers: option.headers,
-                credentials: option.credentials,
                 method: option.method,
+                fetchPolicy: option.fetchPolicy,
                 variables: variables.value,
                 timeout: option.timeout,
             }).then(data => {
@@ -88,7 +86,7 @@ export function createRestQuery<ModelType, DataType>(
     function fetchMore(variables: RestFetchMoreOption['variables']) {
         return new Promise(resolve => {
             info.loading = true;
-            const params: RestClientParams = {
+            const params: RestRequestConfig = {
                 url: url.value,
                 method: option.method,
                 variables,

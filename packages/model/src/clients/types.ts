@@ -50,24 +50,46 @@ export type ClientOptions = {
 
 
 // 交给Client请求用的部分
-type QueryClientParams = {
+export type GQLQueryParams = {
     url?: string;
     query: DocumentNode;
+
+    headers?: HTTPHeaders;
     variables?: Record<string, unknown>;
+    timeout?: number;
+    fetchPolicy?: FetchPolicy;
 }
 
-type MutationClientParams = {
+export type GQLMutationParams = {
     url?: string;
     mutation: DocumentNode;
-    variables?: Record<string, unknown>;
-}
 
-export type GQLParams = QueryClientParams | MutationClientParams;
-
-export type RestParams = {
-    url: string;
     headers?: HTTPHeaders;
-    method?: Method;
     variables?: Record<string, unknown>;
     timeout?: number;
 }
+
+export type RestParams = {
+    url: string;
+    method?: Method;
+
+    headers?: HTTPHeaders;
+    variables?: Record<string, unknown>;
+    timeout?: number;
+    fetchPolicy?: FetchPolicy;
+}
+
+export type FetchPolicy = 'cache-and-network'
+    | 'cache-first'
+    | 'network-first'
+    | 'network-only'
+    | 'cache-only';
+
+export type GQLQueryRequestConfig = GQLQueryParams & Omit<ClientOptions, 'fetch' | 'cache'>;
+export type GQLMutationRequestConfig = GQLMutationParams & Omit<ClientOptions, 'fetch' | 'cache'>;
+
+export type RestRequestConfig = RestParams & Omit<ClientOptions, 'fetch' | 'cache'>;
+
+export type RequestConfig = GQLQueryRequestConfig | GQLMutationRequestConfig | RestRequestConfig;
+
+export type Params = RestParams | GQLMutationParams | GQLQueryParams;

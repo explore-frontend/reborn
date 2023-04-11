@@ -48,7 +48,6 @@ export function createRestMutation<ModelType, DataType>(
         return client!.request<DataType>({
             url: url(variables(params)),
             headers: option.headers,
-            credentials: option.credentials,
             method: option.method,
             variables: variables(params),
             timeout: option.timeout,

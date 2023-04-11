@@ -1,7 +1,6 @@
-import type { FetchPolicy } from '../operations/types';
 import type { generateRequestInfo } from './request-transform';
 import type { CommonResponse } from './interceptor';
-import type { ClientOptions, RestParams, GQLParams, } from './types';
+import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
 
 import { createCache } from '../cache';
 
@@ -19,27 +18,47 @@ const DEFAULT_OPTIONS: ClientOptions = {
 };
 
 // TODO后续再优化下逻辑写法，比如对于method的定义，需要定义好client与options的边界，拆分通用merge和转换成requestInit的部分……
-function mergeClientOptionsToParams(options: ClientOptions, params: RestParams | GQLParams) {
-    const requestInit: RequestInit = {
-        
-    }
+function mergeClientOptionsAndParams(options: ClientOptions, params: Params): RequestConfig {
     const {
         timeout,
         headers,
         method,
         credentials,
-        url
+        url,
     } = options;
 
-    params.timeout = params.timeout || timeout;
-    params.headers = deepMerge({}, headers, params.headers);
-    params.credentials = params.credentials || credentials;
-    params.method = params.method || method;
-    params.url = params.url || url || '';
-    // 写死Fetch请求的缓存策略，缓存接管由model中的cache模块管理，避免http cache引起的各种问题。
-    params.cache = 'no-store';
+    const commonConfig = {
+        timeout: params.timeout || timeout,
+        headers: deepMerge({}, headers, params.headers),
+        credentials,
+        url: params.url || url || '',
+        variables: params.variables,
+    };
 
-    return params;
+    if ('method' in params) {
+        return {
+            ...commonConfig,
+            method: params.method || method,
+            fetchPolicy: params.fetchPolicy,
+        };
+    }
+
+    if ('query' in params) {
+        return {
+            ...commonConfig,
+            query: params.query,
+            fetchPolicy: params.fetchPolicy,
+        };
+    }
+
+    if ('mutation' in params) {
+        return {
+            ...commonConfig,
+            mutation: params.mutation,
+        }
+    }
+
+    return commonConfig;
 }
 
 export function clientFactory(
@@ -66,7 +85,7 @@ export function clientFactory(
             }
         }
     }
-    const requestInterceptor = createInterceptor<RestParams | GQLParams>('request');
+    const requestInterceptor = createInterceptor<Params>('request');
     const responseInterceptor = createInterceptor<CommonResponse>('response');
 
     const interceptors = {
@@ -78,38 +97,38 @@ export function clientFactory(
         },
     };
 
-    function request<T>(params: RestParams | GQLParams): Promise<T> {
+    function request<T>(params: Params): Promise<T> {
         // 处理前置拦截器
 
         const list = [...requestInterceptor.list];
 
-        params = mergeClientOptionsToParams(opts, params);
+        const config = mergeClientOptionsAndParams(opts, params);
 
         // 后面再做benchmark看看一个tick会差出来多少性能
-        let promise = Promise.resolve(params);
+        let promise = Promise.resolve(config);
 
         while (list.length) {
             const item = list.shift();
             promise = promise.then(item?.onResolve, item?.onReject);
         }
 
-        let config: ReturnType<typeof createRequestInfo>;
+        let request: ReturnType<typeof createRequestInfo>;
 
         return promise.then(params => {
             // TODO这里的
-            config = createRequestInfo(type, params);
+            request = createRequestInfo(type, params);
 
             const {
                 url,
                 requestInit,
-            } = config;
+            } = request;
 
             const fetchPromise = opts.fetch!(url, requestInit);
 
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(
                     () => resolve(new DOMException('The request has been timeout')),
-                    params.timeout,
+                    config.timeout,
                 );
             });
             return Promise.race([timeoutPromise, fetchPromise]);
@@ -124,7 +143,7 @@ export function clientFactory(
             if (res instanceof DOMException) {
                 let promise: Promise<any> = Promise.reject({
                     res,
-                    config,
+                    request,
                 });
                 while (list.length) {
                     const transform = list.shift();
@@ -134,15 +153,15 @@ export function clientFactory(
             }
 
             const receiveType = res.headers.get('Content-Type')
-                || (config.requestInit.headers as Record<string, string>)?.['Content-Type']
-                || (config.requestInit.headers as Record<string, string>)?.['content-type']
+                || (request.requestInit.headers as Record<string, string>)?.['Content-Type']
+                || (request.requestInit.headers as Record<string, string>)?.['content-type']
                 || 'application/json';
 
             const commonInfo: CommonResponse = {
                 status: res.status,
                 statusText: res.statusText,
                 headers: res.headers,
-                config,
+                config: request,
                 data: undefined,
             };
 
@@ -155,14 +174,14 @@ export function clientFactory(
                     })
                     : Promise.reject({
                         res,
-                        config,
+                        request,
                     })
             } else {
                 commonInfo.data = res.body;
                 // 其它类型就把body先扔回去……也许以后有用……
                 promise = res.ok ? Promise.resolve(commonInfo) : Promise.reject({
                     res,
-                    config,
+                    request,
                 });
             }
             while (list.length) {
