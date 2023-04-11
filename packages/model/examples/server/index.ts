@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import express from 'express';
 import { resolve} from 'path';
 import { createServer } from 'vite';
+import { mockAPI } from './mockAPI/index';
 
 
 (async () => {
@@ -17,6 +18,7 @@ import { createServer } from 'vite';
     })
     // Use vite's connect instance as middleware. If you use your own
     // express router (express.Router()), you should use router.use
+    app.use('/api', mockAPI);
     app.use(vite.middlewares);
     app.use('*', async (req, res, next) => {
         const url = req.originalUrl;

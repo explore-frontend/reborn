@@ -4,13 +4,16 @@
         "baseUrl": ".",
         "lib": ["esnext", "dom"],
         "rootDir": ".",
-        "outDir": "./dist"
+        "outDir": "./dist",
+        "resolveJsonModule": true,
     },
     "exclude": [
         "node_modules",
         "dist/**/*"
     ],
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "vite.config.ts",
+        "package.json"
     ]
 }
