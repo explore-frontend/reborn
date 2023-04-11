@@ -12,7 +12,7 @@ import type { Client } from '../clients';
 import type { Store } from '../store';
 
 import { generateQueryOptions } from './core';
-import { computed, watch, nextTick } from 'vue';
+import { computed } from 'vue';
 import { deepMerge } from '../utils';
 
 export function createRestQuery<ModelType, DataType>(

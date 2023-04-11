@@ -202,7 +202,7 @@ export function clientFactory(
     const cache = options?.cache || createCache();
 
     // TODO还差第一次请求，也就是SSR的标记该如何消费
-    function requestWithCache(fetchPolicy: FetchPolicy = 'cache-and-network', params: Parameters<typeof request>[0]): ReturnType<typeof request> {
+    function requestWithCache<T>(params: Parameters<typeof request>[0], fetchPolicy: FetchPolicy = 'cache-and-network'): ReturnType<typeof request<T>> {
         switch (fetchPolicy) {
             case 'cache-and-network':
                 return request(params);

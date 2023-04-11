@@ -55,8 +55,8 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
-    const variables$ = fromWatch(() => variables.value, { immediate: true, });
-    const pollInterval$ = new Observable<'action'>(subscriber => {
+    const variables$ = fromWatch(() => variables.value, { immediate: true });
+    const pollInterval$ = new Observable<'Interval'>(subscriber => {
         let timeout: ReturnType<typeof setTimeout>;
         watch(() => pollInterval.value, (val, oldVal) => {
             if (val === oldVal) {
@@ -70,7 +70,7 @@ export function generateQueryOptions<ModelType, DataType>(
             poll();
         }, { immediate: true })
         const doInterval = () => {
-            subscriber.next('action');
+            subscriber.next('Interval');
             poll();
         }
 
