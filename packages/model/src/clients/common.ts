@@ -1,41 +1,13 @@
-import type { RestClientParams, GQLClientParams, CommonClientParams, FetchPolicy } from '../operations/types';
+import type { FetchPolicy } from '../operations/types';
 import type { generateRequestInfo } from './request-transform';
 import type { CommonResponse } from './interceptor';
-import { createCache, hash } from '../cache';
+import type { ClientOptions, RestParams, GQLParams, } from './types';
+
+import { createCache } from '../cache';
 
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
 
-type MethodType<T extends string> = Lowercase<T> | Uppercase<T>;
-
-export type Method = MethodType<
-    'get'
-    | 'post'
-    | 'delete'
-    | 'put'
-    | 'patch'
-    | 'options'
-    | 'head'
-    | 'trace'
-    | 'connect'
->
-
-type ContentType = 'application/json'
-    | 'multipart/form-data'
-    | 'application/x-www-form-urlencoded'
-    | 'application/x-www-form-urlencoded;charset=UTF-8';
-
-
-export type HTTPHeaders = {
-    'content-type'?: ContentType;
-} & Record<string, string>;
-
-export type ClientOptions = {
-    url?: string;
-    method?: Method;
-    fetch?: typeof fetch;
-    cache?: ReturnType<typeof createCache>;
-} & Omit<CommonClientParams, 'variables'>;
 
 const DEFAULT_OPTIONS: ClientOptions = {
     method: 'GET',
@@ -47,7 +19,10 @@ const DEFAULT_OPTIONS: ClientOptions = {
 };
 
 // TODO后续再优化下逻辑写法，比如对于method的定义，需要定义好client与options的边界，拆分通用merge和转换成requestInit的部分……
-function mergeClientOptionsToParams(options: ClientOptions, params: RestClientParams | GQLClientParams) {
+function mergeClientOptionsToParams(options: ClientOptions, params: RestParams | GQLParams) {
+    const requestInit: RequestInit = {
+        
+    }
     const {
         timeout,
         headers,
@@ -91,7 +66,7 @@ export function clientFactory(
             }
         }
     }
-    const requestInterceptor = createInterceptor<RestClientParams | GQLClientParams>('request');
+    const requestInterceptor = createInterceptor<RestParams | GQLParams>('request');
     const responseInterceptor = createInterceptor<CommonResponse>('response');
 
     const interceptors = {
@@ -103,7 +78,7 @@ export function clientFactory(
         },
     };
 
-    function request<T>(params: RestClientParams | GQLClientParams): Promise<T> {
+    function request<T>(params: RestParams | GQLParams): Promise<T> {
         // 处理前置拦截器
 
         const list = [...requestInterceptor.list];

@@ -1,6 +1,6 @@
 import type { DocumentNode } from 'graphql';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Method, HTTPHeaders } from '../clients/common';
+import type { Method, HTTPHeaders, GQLParams } from '../clients';
 
 export type VariablesFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => Record<string, any>;
 export type MutationVariablesFn<T> = (this: T, params: any, route: RouteLocationNormalizedLoaded) => Record<string, any>
@@ -37,34 +37,8 @@ export type RestQueryOptions<ModelType extends unknown = unknown, DataType = unk
     method?: Method;
 } & CommonQueryOptions<ModelType, DataType>
 
-export type GQLFetchMoreOptions = Pick<CommonClientParams, 'variables'>;
-export type RestFetchMoreOption = Pick<CommonClientParams, 'variables'>;
-
-export type CommonClientParams = {
-    credentials?: RequestCredentials;
-    headers?: HTTPHeaders;
-    variables?: Record<string, any>;
-    timeout?: number;
-    method?: Method;
-    cache?: RequestCache;
-}
-
-// 交给Client请求用的部分
-type QueryClientParams = {
-    url?: string;
-    query: DocumentNode;
-} & CommonClientParams;
-
-type MutationClientParams = {
-    url?: string;
-    mutation: DocumentNode;
-} & CommonClientParams;
-
-export type GQLClientParams = QueryClientParams | MutationClientParams;
-
-export type RestClientParams = {
-    url: string;
-} & CommonClientParams;
+export type GQLFetchMoreOptions = Pick<GQLParams, 'variables'>;
+export type RestFetchMoreOption = Pick<GQLParams, 'variables'>;
 
 
 // 和createMutation有关的参数部分

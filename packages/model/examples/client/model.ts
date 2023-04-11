@@ -1,5 +1,5 @@
-import { createModel } from '../../src/model';
-import { ref, computed} from 'vue';
+import { createModel, useRestQuery } from '../../src';
+import { ref, computed } from 'vue';
 
 export const TestModel = createModel(() => {
     const a = ref(1);

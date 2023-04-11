@@ -1,8 +1,6 @@
-import type { HTTPHeaders, ClientOptions } from './common';
-import type { RestClientParams, GQLClientParams } from '../operations/types';
-import type { RequestInfo } from './types';
+import type { HTTPHeaders, RequestInfo, GQLParams, RestParams } from './types';
 
-import { deepMerge, shimStringify, appendQueryStringToUrl } from '../utils';
+import { shimStringify, appendQueryStringToUrl } from '../utils';
 
 function transformRequestBody<T extends Record<string, any>>(data: T, headers?: HTTPHeaders) {
     if (headers && headers['content-type'] === 'application/json') {
@@ -51,7 +49,7 @@ function transformRequestBody<T extends Record<string, any>>(data: T, headers?: 
     return JSON.stringify(data);
 }
 
-function generateCommonRequestInfo(params: RestClientParams | GQLClientParams) {
+function generateCommonRequestInfo(params: RestParams | GQLParams) {
     const requestInit: RequestInit = {
         method: params.method,
         credentials: params.credentials,
@@ -62,7 +60,7 @@ function generateCommonRequestInfo(params: RestClientParams | GQLClientParams) {
     return  requestInit;
 }
 
-function generateRestRequestInfo(params: RestClientParams): RequestInfo {
+function generateRestRequestInfo(params: RestParams): RequestInfo {
     let requestInit = generateCommonRequestInfo(params);
     const headers: HTTPHeaders = requestInit.headers as Record<string, any> || {};
 
@@ -99,7 +97,7 @@ function generateRestRequestInfo(params: RestClientParams): RequestInfo {
 }
 
 // TODO GQL的部分后面再补充，尤其是SSR的部分，待定先
-function generateGQLRequestInfo(params: GQLClientParams): RequestInfo {
+function generateGQLRequestInfo(params: GQLParams): RequestInfo {
     let {
         url,
         timeout,
@@ -118,9 +116,9 @@ function generateGQLRequestInfo(params: GQLClientParams): RequestInfo {
 
 export function generateRequestInfo(
     type: 'GQL' | 'REST',
-    params: GQLClientParams | RestClientParams,
+    params: GQLParams | RestParams,
 ) {
     return type === 'GQL'
-        ? generateGQLRequestInfo(params as GQLClientParams)
-        : generateRestRequestInfo(params as RestClientParams);
+        ? generateGQLRequestInfo(params as GQLParams)
+        : generateRestRequestInfo(params as RestParams);
 }
