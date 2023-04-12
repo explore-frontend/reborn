@@ -6,6 +6,7 @@ import type {
     RestQueryOptions,
 } from '../operations/types';
 import type { GetModelInstance } from '../store';
+import type { Ref } from 'vue';
 
 import {
     createGQLMutation,
@@ -33,11 +34,14 @@ const route = vm.proxy!.$route;
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
+    const { loading, error, data } = toRefs(query.info);
 
     return {
         info: query.info,
         status,
-        ...toRefs(query.info),
+        loading,
+        error,
+        data: data as Ref<T | undefined>,
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,
@@ -56,11 +60,14 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
+    const { loading, error, data } = toRefs(query.info);
 
     return {
         info: query.info,
         status,
-        ...toRefs(query.info),
+        loading,
+        error,
+        data: data as Ref<T | undefined>,
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,
