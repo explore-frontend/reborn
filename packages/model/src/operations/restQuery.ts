@@ -30,6 +30,7 @@ export function createRestQuery<ModelType, DataType>(
         skip,
         variables,
         fetchQuery$,
+        prefetch,
     } = generateQueryOptions<ModelType, DataType>(option, route, model);
 
     const url = computed(() => {
@@ -118,12 +119,8 @@ export function createRestQuery<ModelType, DataType>(
         });
     }
 
-    function prefetch() {
+    function onNext(sub: (params: { data: DataType; loading: boolean, error: any}) => void) {
         // TODO
-    }
-
-    function onNext() {
-
     }
 
     return {
@@ -132,7 +129,6 @@ export function createRestQuery<ModelType, DataType>(
         refetch,
         fetchMore,
         destroy,
-        prefetch,
         onNext,
     };
 }

@@ -10,7 +10,7 @@ export type UrlFn<T> = (this: T, route: RouteLocationNormalizedLoaded, variables
 
 // 和CreateQuery有关的参数部分
 type CommonQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {
-    prefetch?: BooleanFn<ModelType> | boolean;
+    prefetch?: boolean;
     fetchPolicy?: FetchPolicy;
     credentials?: RequestCredentials;
     headers?: HTTPHeaders;

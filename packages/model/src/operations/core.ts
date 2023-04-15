@@ -91,6 +91,7 @@ export function generateQueryOptions<ModelType, DataType>(
         pollInterval,
         variables,
         fetchQuery$,
+        prefetch: option.prefetch || true,
     };
 }
 

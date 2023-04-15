@@ -35,10 +35,6 @@ export function createGQLQuery<ModelType, DataType>(
         };
     });
 
-    function prefetch() {
-        // TODO待补充
-    }
-
     const optionsComputed = computed(() => [
         variables.value,
         skip.value,
@@ -101,7 +97,6 @@ export function createGQLQuery<ModelType, DataType>(
 
     return {
         info,
-        prefetch,
         init,
         destroy,
         fetchMore,

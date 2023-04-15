@@ -47,7 +47,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     }
 
     // 保证只注册一次
-    if (!store.hydrationStatus) {
+    if (store.hydrationStatus === 0) {
         store.hydrationStatus = 1;
         onMounted(() => {
             nextTick(() => {
@@ -71,6 +71,10 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         });
     }
     storeModelInstance.count++;
+
+    onServerPrefetch(() => {
+        // TODO
+    });
 
     onBeforeUnmount(() => {
         storeModelInstance.count--;
