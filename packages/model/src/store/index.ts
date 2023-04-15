@@ -9,6 +9,7 @@ export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance
 
 export type Store = ReturnType<typeof storeFactory>;
 
+// 0: 还未开始，1: 已注册，2: hydration完毕
 export type HydrationStatus = 0 | 1 | 2;
 
 export function storeFactory() {
@@ -40,7 +41,6 @@ export function storeFactory() {
         }
     }
 
-    // 0: 还未开始，1: 已注册，2: hydration完毕
     let hydrationStatus = 0 as HydrationStatus;
 
     return {

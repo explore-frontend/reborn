@@ -1,6 +1,7 @@
 import type { generateRequestInfo } from './request-transform';
 import type { CommonResponse } from './interceptor';
 import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
+import type { HydrationStatus } from '../store';
 
 import { createCache } from '../cache';
 
@@ -196,7 +197,11 @@ export function clientFactory(
     const cache = options?.cache || createCache();
 
     // TODO还差第一次请求，也就是SSR的标记该如何消费
-    function requestWithCache<T>(params: Parameters<typeof request>[0], fetchPolicy: FetchPolicy = 'cache-and-network'): ReturnType<typeof request<T>> {
+    function requestWithCache<T>(
+        params: Parameters<typeof request>[0],
+        fetchPolicy: FetchPolicy = 'cache-and-network',
+        hydrationStatus: HydrationStatus = 2,
+    ): ReturnType<typeof request<T>> {
         switch (fetchPolicy) {
             case 'cache-and-network':
                 return request(params);

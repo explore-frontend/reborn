@@ -41,16 +41,20 @@ export function createRestQuery<ModelType, DataType>(
 
     function refetch() {
         info.loading = true;
-        // TODO差缓存数据做SSR还原
         return new Promise(resolve => {
-            client!.request<DataType>({
+            const clientParams = {
                 url: url.value,
                 headers: option.headers,
                 method: option.method,
                 fetchPolicy: option.fetchPolicy,
                 variables: variables.value,
                 timeout: option.timeout,
-            }).then(data => {
+            };
+            client!.request<DataType>(
+                clientParams,
+                option.fetchPolicy,
+                hydrationStatus,
+            ).then(data => {
                 info.error = null;
                 if (data) {
                     info.data = data;
@@ -97,7 +101,11 @@ export function createRestQuery<ModelType, DataType>(
                 params.headers = deepMerge({}, params.headers || {}, option.headers);
             }
 
-            client!.request<DataType>(params).then(data => {
+            client!.request<DataType>(
+                params,
+                option.fetchPolicy,
+                hydrationStatus,
+            ).then(data => {
                 info.error = null;
                 info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
                 info.loading = false;
