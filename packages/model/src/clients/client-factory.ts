@@ -3,7 +3,7 @@ import type { CommonResponse } from './interceptor';
 import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
 import type { HydrationStatus } from '../store';
 
-import { createCache } from '../cache';
+import { createCache, hash } from '../cache';
 
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
@@ -196,23 +196,51 @@ export function clientFactory(
 
     const cache = options?.cache || createCache();
 
+    function getDataFromCache<T>(params: Parameters<typeof request>[0]) {
+        const data = cache.get<T>(`${params.url}_${hash(params.variables || {})}`);
+        return data;
+    }
+
+    function setDataToCache<T>(params: Parameters<typeof request>[0], data: T) {
+        const key = `${params.url}_${hash(params.variables || {})}`;
+        cache.put(key, data);
+    }
+
     // TODO还差第一次请求，也就是SSR的标记该如何消费
     function requestWithCache<T>(
         params: Parameters<typeof request>[0],
-        fetchPolicy: FetchPolicy = 'cache-and-network',
+        fetchPolicy: FetchPolicy = 'network-first',
         hydrationStatus: HydrationStatus = 2,
     ): ReturnType<typeof request<T>> {
+        // 处于Hydration阶段，一律先从缓存里面拿
+        if (hydrationStatus !== 2) {
+            const data = getDataFromCache<T>(params);
+            if (data) {
+                return Promise.resolve(data);
+            }
+        }
+        const data = getDataFromCache<T>(params);
         switch (fetchPolicy) {
             case 'cache-and-network':
-                return request(params);
+                // TODO后面看看要不要变成Subscribe订阅模式……
+                return data ? Promise.resolve(data) : request<T>(params).then(data => {
+                    setDataToCache(params, data);
+                    return data;
+                });
             case 'cache-first':
-                return request(params);
+                return data ? Promise.resolve(data) : request<T>(params).then(data => {
+                    setDataToCache(params, data);
+                    return data;
+                });
             case 'network-first':
-                return request(params);
+                return request<T>(params).then(data => {
+                    setDataToCache(params, data);
+                    return data;
+                });
             case 'cache-only':
-                return request(params);
+                return data ? Promise.resolve(data) : Promise.reject('No data in cache');
             case 'network-only':
-                return request(params);
+                return request<T>(params);
             default:
                 throw new Error(`There is a wrong fetchPolicy: ${fetchPolicy}`);
         }
