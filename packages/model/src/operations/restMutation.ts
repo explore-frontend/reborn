@@ -1,8 +1,3 @@
-/**
- * @file rest query
- *
- * @author 天翔Skyline(skyline0705@gmail.com)
- */
 import type { RestMutationOptions, MutationVariablesFn } from './types';
 import type { Client } from '../clients';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
@@ -17,7 +12,7 @@ export function createRestMutation<ModelType, DataType>(
 ){
 
     if (!client) {
-        throw new Error('No Rest Client has been setted');
+        throw new Error('No Rest Client has been set');
     }
     const info = initDataType<DataType>();
     function variables<T>(params: T) {

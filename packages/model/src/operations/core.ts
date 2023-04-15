@@ -11,7 +11,7 @@ import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 import { reactive, computed, watch } from 'vue';
 import { fromWatch } from '../utils';
-import { Observable, filter, merge, tap } from 'rxjs';
+import { Observable, merge } from 'rxjs';
 
 export function isDef<T>(v: T): v is NonNullable<T> {
     return v !== undefined && v !== null;

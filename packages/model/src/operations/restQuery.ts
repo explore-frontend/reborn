@@ -9,7 +9,7 @@ import type { Subscription } from 'rxjs';
 
 import type { RestQueryOptions, RestFetchMoreOption } from './types';
 import type { Client, RestRequestConfig } from '../clients';
-import type { Store } from '../store';
+import type { HydrationStatus } from '../store';
 
 import { generateQueryOptions } from './core';
 import { computed } from 'vue';
@@ -19,7 +19,7 @@ export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
     model: ModelType,
     route: RouteLocationNormalizedLoaded,
-    store: Store,
+    hydrationStatus: HydrationStatus,
     client?: Client,
 ) {
     if (!client) {

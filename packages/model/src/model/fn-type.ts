@@ -1,5 +1,4 @@
 import type { ModelCotrInfo } from './types';
-import type { RebornClient } from '../clients';
 import type {
     GQLMutationOptions,
     GQLQueryOptions,
@@ -31,7 +30,13 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     const route = vm.proxy!.$route;
     const { rebornClient: client, store } = getRootStore();
 
-    const query = createRestQuery<null, T>(options, null, route, store, client.rest);
+    const query = createRestQuery<null, T>(
+        options,
+        null,
+        route,
+        store.hydrationStatus,
+        client.rest
+    );
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
@@ -58,7 +63,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     const route = vm.proxy!.$route;
     const { rebornClient: client, store } = getRootStore();
 
-    const query = createGQLQuery<null, T>(options, null, route, store, client.rest);
+    const query = createGQLQuery<null, T>(options, null, route, store.hydrationStatus, client.rest);
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
