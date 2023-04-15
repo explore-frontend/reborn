@@ -11,7 +11,7 @@
         "dist/**/*"
     ],
     "include": [
-        "src/**/__test__/**/*.ts",
+        "src/**/*.ts",
         "setup.ts",
     ]
 }
