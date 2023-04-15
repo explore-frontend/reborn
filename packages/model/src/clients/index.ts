@@ -1,6 +1,6 @@
 import type { ClientOptions } from './types';
 
-import { clientFactory } from './common';
+import { clientFactory } from './client-factory';
 import { generateRequestInfo  } from './request-transform';
 
 export type * from './types';

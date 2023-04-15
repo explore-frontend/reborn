@@ -5,13 +5,15 @@ import {
     onBeforeUnmount,
     onServerPrefetch,
     getCurrentInstance,
-    effectScope
+    effectScope,
+    onMounted
 } from 'vue';
 
 import { createModelFromCA } from './fn-type'
 import { createModelFromClass } from './class-type';
 
 import { getRootStore } from '../const';
+import { nextTick } from 'process';
 
 export type * from './types';
 
@@ -37,13 +39,21 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         throw new Error('useModel must use in a setup context!');
     }
 
-    // Vue3中通过globalProperties来拿
-    const root = instance.appContext.config.globalProperties;
     // TODO小程序的适配后面在做
-    const { store, rebornClient: client} = getRootStore();
+    const { store, rebornClient: client } = getRootStore();
 
     if (!store) {
         throw new Error('There is no reborn-model store in your root vm!!');
+    }
+
+    // 保证只注册一次
+    if (!store.hydrationStatus) {
+        store.hydrationStatus = 1;
+        onMounted(() => {
+            nextTick(() => {
+                store.hydrationStatus = 2;
+            });
+        });
     }
 
     const storeModelInstance = store.addModel<T>(ctor);

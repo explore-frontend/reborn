@@ -9,6 +9,8 @@ export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance
 
 export type Store = ReturnType<typeof storeFactory>;
 
+type hydrationStatus = 0 | 1 | 2;
+
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
 
@@ -38,10 +40,14 @@ export function storeFactory() {
         }
     }
 
+    // 0: 还未开始，1: 已注册，2: hydration完毕
+    let hydrationStatus = 0 as hydrationStatus;
+
     return {
         getModelInstance,
         addModel,
         removeModel,
+        hydrationStatus,
     };
 }
 

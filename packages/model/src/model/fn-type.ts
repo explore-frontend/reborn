@@ -107,7 +107,7 @@ export function createModelFromCA<T>(
 ): ModelCotrInfo<T> {
     return {
         type: 'FunctionalModel',
-        cotr: (client?: RebornClient) => {
+        cotr: () => {
             const { model, queryList } = fn.creator();
 
             // 延迟初始化，保证query间依赖
