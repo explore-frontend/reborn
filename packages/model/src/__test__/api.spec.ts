@@ -1,14 +1,14 @@
 /**
  * @vitest-environment jsdom
  */
-import type { Store } from '../src/store';
+import type { Store } from '../store';
 
 import { describe, it, expect } from 'vitest';
 import { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from 'vue';
 
-import { createModel, useModel } from '../src/index';
-import { createStore } from '../src/store/index';
-import { getRootStore } from '../src/const';
+import { createModel, useModel } from '../index';
+import { createStore } from '../store';
+import { getRootStore } from '../const';
 
 import 'unfetch/polyfill';
 

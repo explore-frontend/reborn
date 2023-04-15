@@ -1,7 +1,7 @@
-import type { RestMutationOptions, RestQueryOptions } from '../src/operations/types';
+import type { RestMutationOptions, RestQueryOptions } from '../types';
 
 import { describe, it, expect } from 'vitest';
-import { initDataType, generateQueryOptions, generateMutationOptions, isDef } from '../src/operations/core';
+import { initDataType, generateQueryOptions, generateMutationOptions, isDef } from '../core';
 
 describe('isDef', () => {
     it('should return true for a defined value', () => {

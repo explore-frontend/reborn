@@ -6,14 +6,14 @@ import {
     onServerPrefetch,
     getCurrentInstance,
     effectScope,
-    onMounted
+    onMounted,
+    nextTick,
 } from 'vue';
 
 import { createModelFromCA } from './fn-type'
 import { createModelFromClass } from './class-type';
 
 import { getRootStore } from '../const';
-import { nextTick } from 'process';
 
 export type * from './types';
 

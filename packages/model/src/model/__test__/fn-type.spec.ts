@@ -10,9 +10,9 @@ import {
     createApp,
 } from 'vue';
 
-import { createClient } from '../src/clients';
-import { createModelFromCA } from '../src/model/fn-type';
-import { INJECT_KEY } from '../src/const';
+import { createClient } from '../../clients';
+import { createModelFromCA } from '../fn-type';
+import { INJECT_KEY } from '../../const';
 
 import {
     // isEmptyState,
@@ -24,7 +24,7 @@ import {
     isLoadingLikeState,
     isDoneLikeState,
     isErrorLikeState,
-} from '../src/index';
+} from '../../index';
 
 import { MockModel, MockComposeModel } from './mock-models/fn-type';
 import 'unfetch/polyfill'

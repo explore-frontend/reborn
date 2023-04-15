@@ -111,7 +111,7 @@ function initRebornDesc<T>(
                     meta.detail,
                     instance as unknown as T,
                     vm.proxy!.$route,
-                    store,
+                    store.hydrationStatus,
                     rebornClient.gql,
                 );
             } else if (meta.type === 'restQuery') {
@@ -119,7 +119,7 @@ function initRebornDesc<T>(
                     meta.detail,
                     instance as unknown as T,
                     vm.proxy!.$route,
-                    store,
+                    store.hydrationStatus,
                     rebornClient.rest,
                 )
             }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hash } from '../src/cache/hash';
+import { hash } from '../hash';
 
 describe('hash in the right way', () => {
     it('primitive value', () => {

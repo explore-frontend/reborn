@@ -9,7 +9,9 @@
     },
     "exclude": [
         "node_modules",
-        "dist/**/*"
+        "dist/**/*",
+        "src/**/*.spec.ts",
+        "setup.ts",
     ],
     "include": [
         "src/**/*",

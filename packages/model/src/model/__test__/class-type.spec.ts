@@ -10,9 +10,9 @@ import {
     createApp,
 } from 'vue';
 
-import { createModelFromClass } from '../src/model/class-type';
-import { createClient } from '../src/clients';
-import { INJECT_KEY } from '../src/const';
+import { createModelFromClass } from '../class-type';
+import { createClient } from '../../clients';
+import { INJECT_KEY } from '../../const';
 
 import { CustomModel, CustomClassWithExtends } from './mock-models/class-type';
 
