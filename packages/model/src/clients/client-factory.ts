@@ -125,6 +125,10 @@ export function clientFactory(
             } = request;
 
             const fetchPromise = opts.fetch!(url, requestInit);
+            fetchPromise.catch(e => {
+                console.error(222, e);
+                return Promise.reject(e);
+            });
 
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(

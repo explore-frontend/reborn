@@ -11,11 +11,21 @@ export function createApp(customFetch?: Fetch) {
     const store = createStore();
     const cache = createCache();
 
-    const f = customFetch || fetch;
+    const f = customFetch || window.fetch.bind(window);
     const restClient = createClient('REST', {
         fetch: f,
         cache,
     });
+
+    restClient.interceptors.request.use(req => {
+        req.url = `http://localhost:5173${req.url}`;
+        return req;
+    })
+
+    restClient.interceptors.response.use(res => {
+        return res.data;
+    });
+
     store.registerClient('REST', restClient);
     const app = createSSRApp({
         render: () => h(App),
@@ -24,5 +34,5 @@ export function createApp(customFetch?: Fetch) {
     app.use(store);
     app.use(router);
 
-    return { app, router }
+    return { app, router, cache };
 }

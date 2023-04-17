@@ -96,7 +96,7 @@ export function deepMerge<T extends any>(origin: T, ...targets: Array<T>) {
 export function fromWatch<T>(fn: WatchSource<T>, watchOptions?: WatchOptions) {
     return new Observable<T>((subscriber) => {
         watch(fn, (val, oldVal) => {
-            if (val !== oldVal) {
+            if (!val && oldVal === undefined || val !== oldVal) {
                 // 一层简单的过滤，避免频繁触发
                 subscriber.next(val);
             }
