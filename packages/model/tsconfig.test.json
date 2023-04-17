@@ -4,7 +4,7 @@
         "baseUrl": ".",
         "lib": ["esnext", "dom"],
         "rootDir": ".",
-        "outDir": "./dist"
+        "outDir": "./dist",
     },
     "exclude": [
         "node_modules",
@@ -12,6 +12,7 @@
     ],
     "include": [
         "src/**/*.ts",
+        "src/**/*.vue",
         "setup.ts",
     ]
 }
