@@ -13,6 +13,7 @@ export type ModelCotrInfo<T> = {
 
 export type OriginalModelInstance<T> = {
     model: T;
+    prefetch: () => Promise<unknown>;
     destroy: () => void;
 };
 

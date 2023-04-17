@@ -6,16 +6,11 @@ import type { Store } from '../store';
 import { describe, it, expect } from 'vitest';
 import { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from 'vue';
 
-import { useModel } from '../index';
-import { createStore } from '../store';
+import { createClient, useModel, createStore } from '../index';
 import { getRootStore } from '../const';
 import { TestModel } from './test-model';
 
 import 'unfetch/polyfill';
-
-
-
-
 
 let currentComponentAInstance: ReturnType<typeof getCurrentInstance> | null;
 const ComponentA = defineComponent({
@@ -102,6 +97,9 @@ const App = defineComponent({
 describe(`model should has it's own effect scope`, () => {
     it('state between two component should has own effect scope', () => new Promise(resolve => {
         const store = createStore();
+        const client = createClient('REST');
+
+        store.registerClient('REST', client);
 
         const app = createApp({
             render: () => h(App)

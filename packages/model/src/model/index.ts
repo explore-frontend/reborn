@@ -72,10 +72,6 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     }
     storeModelInstance.count++;
 
-    onServerPrefetch(() => {
-        // TODO
-    });
-
     onBeforeUnmount(() => {
         storeModelInstance.count--;
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
@@ -86,7 +82,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         }
     });
     onServerPrefetch(() => {
-        // return storeModelInstance.instance?.prefetch();
+        return storeModelInstance.instance?.prefetch();
     });
 
     return storeModelInstance.instance!.model as RebornInstanceType<T>;

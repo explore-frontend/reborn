@@ -7,31 +7,37 @@ import { renderToString } from 'vue/server-renderer'
 
 describe(`model should has it's own effect scope`, () => {
     it('state between two component should has own effect scope', async () => {
-        // const store = createStore();
-        // const cache = createCache();
-        // const client = createClient('REST', {
-        //     cache,
-        //     // @ts-expect-error
-        //     fetch: customFetch,
-        // });
-        // client.interceptors.request.use(data => {
-        //     console.error(1, data)
-        //     return data;
-        // });
+        fetchMock.mockResponse(JSON.stringify({
+            a: 2,
+            b: 4,
+        }));
+        const store = createStore();
+        const cache = createCache();
+        const client = createClient('REST', {
+            cache,
+            // @ts-expect-error
+            fetch: customFetch,
+        });
+        client.interceptors.request.use(data => {
+            console.error(1, data)
+            return data;
+        });
 
-        // client.interceptors.response.use(data => {
-        //     console.error(2, data)
-        //     return data;
-        // });
+        client.interceptors.response.use(data => {
+            console.error(2, data)
+            return data;
+        }, (err) => {
+            console.error(3, err)
+        });
 
-        // store.registerClient('REST', client);
+        store.registerClient('REST', client);
 
-        // const app = createSSRApp(App);
-        // app.use(store);
+        const app = createSSRApp(App);
+        app.use(store);
 
 
-        // const html = await renderToString(app, {});
-        // console.error(html)
+        const html = await renderToString(app, {});
+        console.error(html)
         expect(1).toBe(1);
     });
 });

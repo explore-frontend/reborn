@@ -120,6 +120,10 @@ export function createModelFromCA<T>(
                 queryList.forEach(query => query.init());
             }
 
+            function prefetch() {
+                return Promise.all(queryList.map(query => query.refetch()));
+            }
+
             function destroy() {
                 if (queryList) {
                     queryList.forEach(i => i.destroy());
@@ -129,6 +133,7 @@ export function createModelFromCA<T>(
 
             return {
                 model,
+                prefetch,
                 destroy,
             };
         },
