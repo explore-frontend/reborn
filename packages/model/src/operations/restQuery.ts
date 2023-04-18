@@ -65,6 +65,10 @@ export function createRestQuery<ModelType, DataType>(
                     info.loading = false;
                     resolve(undefined);
                 },
+                complete: () => {
+                    // TODO先临时搞一下，后面再看怎么串一下Observable
+                    subject.unsubscribe();
+                }
             });
         });
     }
