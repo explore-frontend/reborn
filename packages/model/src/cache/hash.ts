@@ -1,9 +1,18 @@
-export function hash(params: any): string {
-    if (Array.isArray(params)) {
-        return `array-${params.map(hash).join('-')}`;
+function encode(str: string) {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+        result += String.fromCharCode(str.charCodeAt(i) + 1);
     }
+    return result;
+}
+
+export function hash(params: any): string {
     if (params === null) {
-        return 'null-null';
+        return encode('null-null');
+    }
+
+    if (Array.isArray(params)) {
+        return encode(`array-${params.map(hash).join('-')}`);
     }
 
     if (typeof params === 'function') {
@@ -11,8 +20,8 @@ export function hash(params: any): string {
     }
 
     if (typeof params === 'object') {
-        return `object-${Object.keys(params).sort().map(key => `${key}-${hash(params[key])}`).join('-')}`
+        return encode(`object-${Object.keys(params).sort().map(key => `${key}-${hash(params[key])}`).join('-')}`);
     }
 
-    return `${typeof params}-${params}`;
+    return encode(`${typeof params}-${params}`);
 }

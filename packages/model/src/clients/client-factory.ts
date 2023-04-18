@@ -200,12 +200,12 @@ export function clientFactory(
     const cache = options?.cache || createCache();
 
     function getDataFromCache<T>(params: Parameters<typeof request>[0]) {
-        const data = cache.get<T>(`${params.url}_${hash(params.variables || {})}`);
+        const data = cache.get<T>(`${hash(params.url)}-${hash(params.variables || {})}`);
         return data;
     }
 
     function setDataToCache<T>(params: Parameters<typeof request>[0], data: T) {
-        const key = `${params.url}_${hash(params.variables || {})}`;
+        const key = `${hash(params.url)}-${hash(params.variables || {})}`;
         cache.put(key, data);
     }
 
