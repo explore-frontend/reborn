@@ -128,7 +128,6 @@ export function clientFactory(
                 requestInit,
             } = request;
             const fetchPromise = opts.fetch!(url, requestInit);
-            console.error(1234);
 
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(
@@ -221,7 +220,6 @@ export function clientFactory(
         if (hydrationStatus !== 2) {
             const data = getDataFromCache<T>(params);
             if (data) {
-                console.error('data hit cache');
                 subject.next(data);
                 subject.complete();
                 return subject;
