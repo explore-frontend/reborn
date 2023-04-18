@@ -40,7 +40,7 @@ export function createRestMutation<ModelType, DataType>(
     function mutate<T extends Record<string, any>>(params: T) {
         info.loading = true;
         info.error = null;
-        return client!.request<DataType>({
+        return client!.mutate<DataType>({
             url: url(variables(params)),
             headers: option.headers,
             method: option.method,

@@ -291,6 +291,7 @@ export function clientFactory(
 
     return {
         interceptors,
-        request: requestWithCache,
+        query: requestWithCache,
+        mutate: request,
     };
 }

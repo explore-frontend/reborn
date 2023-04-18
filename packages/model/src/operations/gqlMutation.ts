@@ -43,7 +43,7 @@ export function createGQLMutation<ModelType, DataType>(
             info.loading = true;
             info.error = null;
 
-            return client.request<DataType>({
+            return client.mutate<DataType>({
                 // TODO
                 mutation: '' as unknown as any,
                 variables: variables(params),

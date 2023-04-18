@@ -46,7 +46,7 @@ export function createRestQuery<ModelType, DataType>(
                 timeout: option.timeout,
             };
             // TODO后面再重写一下
-            const subject = client!.request<DataType>(
+            const subject = client!.query<DataType>(
                 clientParams,
                 option.fetchPolicy,
                 hydrationStatus,
@@ -101,7 +101,7 @@ export function createRestQuery<ModelType, DataType>(
                 params.headers = deepMerge({}, params.headers || {}, option.headers);
             }
 
-            const observable = client!.request<DataType>(
+            const observable = client!.query<DataType>(
                 params,
                 option.fetchPolicy,
                 hydrationStatus,
