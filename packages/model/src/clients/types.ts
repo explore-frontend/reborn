@@ -39,7 +39,7 @@ export type HTTPHeaders = {
 } & Record<string, string>;
 
 export type ClientOptions = {
-    url?: string;
+    baseUrl?: string;
     method?: Method;
     credentials?: RequestCredentials;
     headers?: HTTPHeaders;

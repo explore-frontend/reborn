@@ -25,14 +25,17 @@ function mergeClientOptionsAndParams(options: ClientOptions, params: Params): Re
         headers,
         method,
         credentials,
-        url,
+        baseUrl,
     } = options;
+    const url = baseUrl
+        ? new URL(params.url || '/', baseUrl).href
+        : params.url || '';
 
     const commonConfig = {
         timeout: params.timeout || timeout,
         headers: deepMerge({}, headers, params.headers),
         credentials,
-        url: params.url || url || '',
+        url: url || '',
         variables: params.variables,
     };
 
@@ -123,12 +126,7 @@ export function clientFactory(
                 url,
                 requestInit,
             } = request;
-
             const fetchPromise = opts.fetch!(url, requestInit);
-            fetchPromise.catch(e => {
-                console.error(222, e);
-                return Promise.reject(e);
-            });
 
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(

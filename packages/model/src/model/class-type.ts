@@ -363,8 +363,13 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                 queryList.forEach(query => query.init());
             }
 
+            function prefetch() {
+                return Promise.all(queryList.map(query => query.refetch()));
+            }
+
             return {
                 model: modelAccessor as T,
+                prefetch,
                 destroy,
             };
         },

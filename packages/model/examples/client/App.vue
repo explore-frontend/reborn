@@ -9,6 +9,6 @@ setInterval(() => {
 </script>
 <template>
     <div>
-        {{ a }}, {{ b }}, {{ data?.d }}
+        {{ a }}, {{ b }}, {{ data }}
     </div>
 </template>

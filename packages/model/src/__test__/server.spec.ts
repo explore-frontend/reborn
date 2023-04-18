@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { createSSRApp } from 'vue';
 import { createCache, createStore, createClient } from '../index';
 import App from './demo.vue';
-import customFetch from 'node-fetch';
 import { renderToString } from 'vue/server-renderer'
 
 describe(`model should has it's own effect scope`, () => {
@@ -14,20 +13,12 @@ describe(`model should has it's own effect scope`, () => {
         const store = createStore();
         const cache = createCache();
         const client = createClient('REST', {
+            baseUrl: 'http://localhost:5173',
             cache,
-            // @ts-expect-error
-            fetch: customFetch,
-        });
-        client.interceptors.request.use(data => {
-            console.error(1, data)
-            return data;
         });
 
         client.interceptors.response.use(data => {
-            console.error(2, data)
-            return data;
-        }, (err) => {
-            console.error(3, err)
+            return data.data;
         });
 
         store.registerClient('REST', client);

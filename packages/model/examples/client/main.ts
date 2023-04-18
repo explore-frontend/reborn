@@ -13,14 +13,10 @@ export function createApp(customFetch?: Fetch) {
 
     const f = customFetch || window.fetch.bind(window);
     const restClient = createClient('REST', {
+        baseUrl: 'http://localhost:5173',
         fetch: f,
         cache,
     });
-
-    restClient.interceptors.request.use(req => {
-        req.url = `http://localhost:5173${req.url}`;
-        return req;
-    })
 
     restClient.interceptors.response.use(res => {
         return res.data;
