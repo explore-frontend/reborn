@@ -13,6 +13,7 @@ function more() {
 }
 
 export async function mockAPI (req: Request, res: Response, next: NextFunction) {
+    console.error('Here comes a API call');
     if (req.params.action === 'add') {
         res.json({
             a: 1,

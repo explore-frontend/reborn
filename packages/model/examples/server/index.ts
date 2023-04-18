@@ -22,6 +22,7 @@ import { mockAPI } from './mockAPI/index';
     app.use(vite.middlewares);
     app.use('*', async (req, res, next) => {
         const url = req.originalUrl;
+        console.error(url)
         try {
             // serve index.html - we will tackle this next
             const htmlTemplate = readFileSync(

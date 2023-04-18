@@ -1,5 +1,5 @@
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Subscription } from 'rxjs';
+import { Observable, type Subscription } from 'rxjs';
 
 import type { RestQueryOptions, RestFetchMoreOption } from './types';
 import type { Client, RestRequestConfig } from '../clients';
@@ -45,21 +45,26 @@ export function createRestQuery<ModelType, DataType>(
                 variables: variables.value,
                 timeout: option.timeout,
             };
-            client!.request<DataType>(
+            // TODO后面再重写一下
+            const subject = client!.request<DataType>(
                 clientParams,
                 option.fetchPolicy,
                 hydrationStatus,
-            ).then(data => {
-                info.error = null;
-                if (data) {
-                    info.data = data;
-                }
-                info.loading = false;
-                resolve(undefined);
-            }).catch(e => {
-                info.error = e;
-                info.loading = false;
-                resolve(undefined);
+            );
+            subject.subscribe({
+                next: (data) => {
+                    info.error = null;
+                    if (data) {
+                        info.data = data;
+                    }
+                    info.loading = false;
+                    resolve(undefined);
+                },
+                error: (e) => {
+                    info.error = e;
+                    info.loading = false;
+                    resolve(undefined);
+                },
             });
         });
     }
@@ -96,19 +101,23 @@ export function createRestQuery<ModelType, DataType>(
                 params.headers = deepMerge({}, params.headers || {}, option.headers);
             }
 
-            client!.request<DataType>(
+            const observable = client!.request<DataType>(
                 params,
                 option.fetchPolicy,
                 hydrationStatus,
-            ).then(data => {
-                info.error = null;
-                info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
-                info.loading = false;
-                resolve(undefined);
-            }).catch(e => {
-                info.error = e;
-                info.loading = false;
-                resolve(undefined);
+            );
+            observable.subscribe({
+                next: (data) => {
+                    info.error = null;
+                    info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
+                    info.loading = false;
+                    resolve(undefined);
+                },
+                error: (e) => {
+                    info.error = e;
+                    info.loading = false;
+                    resolve(undefined);
+                },
             });
         });
     }

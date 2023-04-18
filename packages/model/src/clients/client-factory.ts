@@ -2,6 +2,7 @@ import type { generateRequestInfo } from './request-transform';
 import type { CommonResponse } from './interceptor';
 import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
 import type { HydrationStatus } from '../store';
+import { ReplaySubject } from 'rxjs';
 
 import { createCache, hash } from '../cache';
 
@@ -127,6 +128,7 @@ export function clientFactory(
                 requestInit,
             } = request;
             const fetchPromise = opts.fetch!(url, requestInit);
+            console.error(1234);
 
             const timeoutPromise = new Promise<DOMException>((resolve) => {
                 setTimeout(
@@ -208,44 +210,85 @@ export function clientFactory(
         cache.put(key, data);
     }
 
-    // TODO还差第一次请求，也就是SSR的标记该如何消费
     function requestWithCache<T>(
         params: Parameters<typeof request>[0],
         fetchPolicy: FetchPolicy = 'network-first',
         hydrationStatus: HydrationStatus = 2,
-    ): ReturnType<typeof request<T>> {
+    ): ReplaySubject<T> {
+        const subject = new ReplaySubject
+        <T>();
         // 处于Hydration阶段，一律先从缓存里面拿
         if (hydrationStatus !== 2) {
             const data = getDataFromCache<T>(params);
             if (data) {
-                return Promise.resolve(data);
+                console.error('data hit cache');
+                subject.next(data);
+                subject.complete();
+                return subject;
             }
         }
         const data = getDataFromCache<T>(params);
         switch (fetchPolicy) {
             case 'cache-and-network':
-                // TODO后面看看要不要变成Subscribe订阅模式……
-                return data ? Promise.resolve(data) : request<T>(params).then(data => {
+                if (data) {
+                    subject.next(data);
+                }
+                request<T>(params).then(data => {
+                    // TODO还差分发network status出去
                     setDataToCache(params, data);
-                    return data;
+                    subject.next(data);
+                    subject.complete();
+                }).catch(e => {
+                    subject.error(e);
+                    subject.complete();
                 });
+                break;
             case 'cache-first':
-                return data ? Promise.resolve(data) : request<T>(params).then(data => {
-                    setDataToCache(params, data);
-                    return data;
-                });
+                if (data) {
+                    subject.next(data);
+                } else {
+                    request<T>(params).then(data => {
+                        // TODO还差分发network status出去
+                        setDataToCache(params, data);
+                        subject.next(data);
+                        subject.complete();
+                    }).catch(e => subject.error(e));
+                }
+                break;
             case 'network-first':
-                return request<T>(params).then(data => {
+                request<T>(params).then(data => {
                     setDataToCache(params, data);
-                    return data;
+                    subject.next(data);
+                    subject.complete();
+                }).catch(e => {
+                    subject.error(e);
+                    subject.complete();
                 });
+                break;
             case 'cache-only':
-                return data ? Promise.resolve(data) : Promise.reject('No data in cache');
+                if (data) {
+                    subject.next(data);
+                    subject.complete();
+                } else {
+                    subject.error('No data in cache');
+                    subject.complete();
+                }
+                break;
             case 'network-only':
-                return request<T>(params);
+                request<T>(params)
+                    .then(data => {
+                        subject.next(data);
+                        subject.complete();
+                    })
+                    .catch(e => {
+                        subject.complete();
+                        subject.error(e);
+                    });
             default:
                 throw new Error(`There is a wrong fetchPolicy: ${fetchPolicy}`);
         }
+
+        return subject;
     }
 
     return {
