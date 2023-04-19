@@ -9,6 +9,7 @@ import { createCache, hash } from '../cache';
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
 
+const IS_SERVER = typeof window === 'undefined';
 
 const DEFAULT_OPTIONS: ClientOptions = {
     method: 'GET',
@@ -66,6 +67,13 @@ function mergeClientOptionsAndParams(options: ClientOptions, params: Params): Re
     return commonConfig;
 }
 
+class TimeoutError extends Error {
+    constructor(msg: string) {
+        super(msg)
+        this.message = msg;
+    }
+}
+
 export function clientFactory(
     type: 'GQL' | 'REST',
     createRequestInfo: typeof generateRequestInfo,
@@ -75,14 +83,14 @@ export function clientFactory(
         ? deepMerge({} as ClientOptions, DEFAULT_OPTIONS, options)
         : deepMerge({} as ClientOptions, DEFAULT_OPTIONS);
     if (!opts.fetch) {
-        // 避免Node环境下的判断，所以没法简化写=。=
-        if (typeof window !== 'undefined') {
+        // 避免Node环境下的判断，所以没法简化写=。=，因为window.fetch会触发一次RHS导致报错
+        if (!IS_SERVER) {
             if (window.fetch) {
                 opts.fetch = window.fetch.bind(window);
             } else {
                 throw new Error('create client need a fetch function to init');
             }
-        } else if (typeof global !== 'undefined') {
+        } else if (IS_SERVER) {
             if (global.fetch) {
                 opts.fetch = global.fetch.bind(global);
             } else {
@@ -129,9 +137,15 @@ export function clientFactory(
             } = request;
             const fetchPromise = opts.fetch!(url, requestInit);
 
-            const timeoutPromise = new Promise<DOMException>((resolve) => {
+            const timeoutPromise = new Promise<DOMException | TimeoutError>((resolve) => {
                 setTimeout(
-                    () => resolve(new DOMException('The request has been timeout')),
+                    () => {
+                        if (IS_SERVER) {
+                            resolve(new TimeoutError('The request has been timeout'))
+                        } else {
+                            resolve(new DOMException('The request has been timeout'))
+                        }
+                    },
                     config.timeout,
                 );
             });
@@ -139,12 +153,15 @@ export function clientFactory(
         }).then((res) => {
             // 浏览器断网情况下有可能会是null
             if (res === null) {
-                res = new DOMException('The request has been timeout');
+                res = IS_SERVER
+                    ? new TimeoutError('The request has been timeout')
+                    : new DOMException('The request has been timeout');
             }
 
             const list = [...responseInterceptor.list];
 
-            if (res instanceof DOMException) {
+            // 用duck type绕过类型判断
+            if (!('status' in res)) {
                 let promise: Promise<any> = Promise.reject({
                     res,
                     request,
