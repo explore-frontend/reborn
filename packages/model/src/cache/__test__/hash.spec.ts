@@ -1,32 +1,32 @@
 import { describe, it, expect } from 'vitest';
-import { hash } from '../hash';
+import { hash, encode } from '../hash';
 
 describe('hash in the right way', () => {
     it('primitive value', () => {
-        expect(hash(undefined)).toBe('undefined-undefined');
-        expect(hash(null)).toBe('null-null');
-        expect(hash(true)).toBe('boolean-true');
-        expect(hash(1)).toBe('number-1');
-        expect(hash('1')).toBe('string-1');
+        expect(hash(undefined)).toBe(encode('undefined-undefined'));
+        expect(hash(null)).toBe(encode('null-null'));
+        expect(hash(true)).toBe(encode('boolean-true'));
+        expect(hash(1)).toBe(encode('number-1'));
+        expect(hash('1')).toBe(encode('string-1'));
         expect(() => hash(() => {})).toThrow();
     });
 
     it('primitive array', () => {
-        expect(hash([ undefined ])).toBe('array-undefined-undefined');
-        expect(hash([ null ])).toBe('array-null-null');
-        expect(hash([ true ])).toBe('array-boolean-true');
-        expect(hash([ 1 ])).toBe('array-number-1');
-        expect(hash([ '1' ])).toBe('array-string-1');
+        expect(hash([ undefined ])).toBe(encode(`array-${encode('undefined-undefined')}`));
+        expect(hash([ null ])).toBe(encode(`array-${encode('null-null')}`));
+        expect(hash([ true ])).toBe(encode(`array-${encode('boolean-true')}`));
+        expect(hash([ 1 ])).toBe(encode(`array-${encode('number-1')}`));
+        expect(hash([ '1' ])).toBe(encode(`array-${encode('string-1')}`));
         expect(() => hash([ () => {} ])).toThrow();
     });
 
     it('primitive object', () => {
-        expect(hash({ })).toBe('object-');
-        expect(hash({ a: undefined })).toBe('object-a-undefined-undefined');
-        expect(hash({ a: null })).toBe('object-a-null-null');
-        expect(hash({ a: true })).toBe('object-a-boolean-true');
-        expect(hash({ a: 1 })).toBe('object-a-number-1');
-        expect(hash({ a: '1' })).toBe('object-a-string-1');
+        expect(hash({ })).toBe(encode('object-'));
+        expect(hash({ a: undefined })).toBe(encode(`object-a-${encode('undefined-undefined')}`));
+        expect(hash({ a: null })).toBe(encode(`object-a-${encode('null-null')}`));
+        expect(hash({ a: true })).toBe(encode(`object-a-${encode('boolean-true')}`));
+        expect(hash({ a: 1 })).toBe(encode(`object-a-${encode('number-1')}`));
+        expect(hash({ a: '1' })).toBe(encode(`object-a-${encode('string-1')}`));
         expect(() => hash({a: () => {} })).toThrow();
     });
 
