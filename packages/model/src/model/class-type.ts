@@ -1,5 +1,6 @@
-import type { RebornClient, Constructor, ModelCotrInfo, ModelMetadata } from '../types';
-import type { GetModelInstance } from '../store';
+import type { Constructor, ModelCotrInfo, ModelMetadata } from './types';
+import type { RebornClient } from '../clients';
+import type { GetModelInstance, Store } from '../store';
 
 import {
     createRestMutation,
@@ -55,6 +56,7 @@ function initRebornDesc<T>(
     instance: T,
     instanceAccessor: Partial<T>,
     decoratorList: DecoratorInfoList,
+    store: Store,
     rebornClient: RebornClient,
 ) {
     const queryList = [];
@@ -109,6 +111,7 @@ function initRebornDesc<T>(
                     meta.detail,
                     instance as unknown as T,
                     vm.proxy!.$route,
+                    store.hydrationStatus,
                     rebornClient.gql,
                 );
             } else if (meta.type === 'restQuery') {
@@ -116,6 +119,7 @@ function initRebornDesc<T>(
                     meta.detail,
                     instance as unknown as T,
                     vm.proxy!.$route,
+                    store.hydrationStatus,
                     rebornClient.rest,
                 )
             }
@@ -316,7 +320,6 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                 modelAccessor,
             } = data();
 
-            const vm = getCurrentInstance()!;
             const store = getRootStore().store;
             const decoratorList = getDecoratorList(original as unknown as RebornDecorators);
 
@@ -325,6 +328,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                     model,
                     modelAccessor,
                     decoratorList,
+                    store,
                     client
                 )
                 : [];
@@ -359,8 +363,13 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
                 queryList.forEach(query => query.init());
             }
 
+            function prefetch() {
+                return Promise.all(queryList.map(query => query.refetch()));
+            }
+
             return {
                 model: modelAccessor as T,
+                prefetch,
                 destroy,
             };
         },

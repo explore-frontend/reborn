@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { useRestQuery, createModel, createModelFromCA } from '../../src/model/fn-type';
+import { useRestQuery, createModel, createModelFromCA } from '../../fn-type';
 
 export const MockModel = createModel(() => {
     const testVariables = ref('1');

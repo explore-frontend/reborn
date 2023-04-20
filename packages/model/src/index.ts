@@ -1,15 +1,34 @@
-import { useModel, createStore } from './api';
+export { createStore } from './store';
 
-import { createClient } from './clients';
+export { createClient } from './clients';
+
+export { createCache } from './cache';
+
+export type {
+    FNModelCreator,
+} from './model';
 
 export {
     BaseModel,
+    gqlQuery,
+    gqlMutation,
+    restQuery,
+    restMutation,
+
     createModel,
     useGQLMutation,
     useRestMutation,
     useGQLQuery,
     useRestQuery,
+
+    useModel,
 } from './model';
+
+
+export type {
+    QueryResult,
+    MutationResult,
+} from './operations';
 
 export {
     isEmptyState,
@@ -30,26 +49,4 @@ export {
     assertErrorState,
     assertRefreshState,
     assertRefreshErrorState,
-} from './operations/status';
-
-export {
-    gqlQuery,
-    gqlMutation,
-    restQuery,
-    restMutation,
-} from './operations/decorators';
-
-export {
-    createStore,
-    useModel,
-    createClient,
-};
-
-export type {
-    QueryResult,
-    MutationResult,
-} from './operations/types';
-
-export type {
-    FNModelCreator,
-} from './model';
+} from './operations';

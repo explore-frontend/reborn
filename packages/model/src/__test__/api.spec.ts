@@ -1,35 +1,23 @@
 /**
  * @vitest-environment jsdom
  */
-import type { storeFactory } from '../src/store';
+import type { Store } from '../store';
 
 import { describe, it, expect } from 'vitest';
 import { defineComponent, ref, computed, createApp, h, getCurrentInstance, nextTick } from 'vue';
 
-import { createModel } from '../src/model';
-import { useModel, createStore } from '../src/api';
-import { getRootStore } from '../src/const';
+import { createClient, useModel, createStore } from '../index';
+import { getRootStore } from '../const';
+import { TestModel } from './test-model';
 
 import 'unfetch/polyfill';
-
-
-const testModel = createModel(() => {
-    const a = ref(1);
-    const b = computed(() => a.value * 2);
-
-    return {
-        a,
-        b,
-    };
-});
-
 
 let currentComponentAInstance: ReturnType<typeof getCurrentInstance> | null;
 const ComponentA = defineComponent({
     template: '<div>A: a: {{ model.a.value }} b: {{ model.b.value }}</div>',
     setup() {
         currentComponentAInstance = getCurrentInstance();
-        const model = useModel(testModel);
+        const model = useModel(TestModel);
 
         function handleClick() {
             model.a.value++;
@@ -47,7 +35,7 @@ const ComponentB = defineComponent({
     template: '<div>B: a: {{ model.a.value }} b: {{ model.b.value }}</div>',
     setup(p, { expose }) {
         currentComponentBInstance = getCurrentInstance();
-        const model = useModel(testModel);
+        const model = useModel(TestModel);
 
         function handleClick() {
             model.a.value++;
@@ -68,7 +56,7 @@ const ComponentB = defineComponent({
 });
 
 let currentAppInstance: ReturnType<typeof getCurrentInstance> | null;
-let currentStore: ReturnType<typeof storeFactory> | null;
+let currentStore: Store | null;
 
 const App = defineComponent({
     components: {
@@ -109,6 +97,9 @@ const App = defineComponent({
 describe(`model should has it's own effect scope`, () => {
     it('state between two component should has own effect scope', () => new Promise(resolve => {
         const store = createStore();
+        const client = createClient('REST');
+
+        store.registerClient('REST', client);
 
         const app = createApp({
             render: () => h(App)
@@ -128,7 +119,7 @@ describe(`model should has it's own effect scope`, () => {
             expect(currentAppInstance?.proxy?.$el.innerHTML).toBe('<div>B: a: 2 b: 4</div>')
             expect(currentComponentBInstance?.proxy?.$el.innerHTML).toBe('B: a: 2 b: 4');
 
-            const model = currentStore?.getModelInstance(testModel);
+            const model = currentStore?.getModelInstance(TestModel);
             expect(model?.a.value).toBe(2);
             expect(model?.b.value).toBe(4);
 
@@ -144,7 +135,7 @@ describe(`model should has it's own effect scope`, () => {
             expect(currentAppInstance?.proxy?.$el.innerHTML).toBe('<div>A: a: 2 b: 4</div>')
             expect(currentComponentAInstance?.proxy?.$el.innerHTML).toBe('A: a: 2 b: 4');
 
-            const model1 = currentStore?.getModelInstance(testModel);
+            const model1 = currentStore?.getModelInstance(TestModel);
             expect(model1?.a.value).toBe(2);
             expect(model1?.b.value).toBe(4);
 
@@ -152,7 +143,7 @@ describe(`model should has it's own effect scope`, () => {
             currentAppInstance?.proxy.toggle();
             await nextTick();
 
-            const model2 = currentStore?.getModelInstance(testModel);
+            const model2 = currentStore?.getModelInstance(TestModel);
             expect(model2).toBe(undefined);
 
             resolve(true);

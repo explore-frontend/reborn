@@ -1,0 +1,21 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "lib": ["esnext", "dom"],
+        "rootDir": ".",
+        "outDir": "./dist",
+        "resolveJsonModule": true,
+    },
+    "exclude": [
+        "node_modules",
+        "dist/**/*",
+        "src/**/*.spec.ts",
+        "setup.ts",
+    ],
+    "include": [
+        "src/**/*",
+        "vite.config.ts",
+        "package.json"
+    ]
+}

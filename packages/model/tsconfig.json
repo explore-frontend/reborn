@@ -1,18 +1,9 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "lib": ["esnext", "dom"],
-        "rootDir": ".",
-        "outDir": "./dist"
-    },
-    "exclude": [
-        "node_modules",
-        "dist/**/*"
-    ],
-    "include": [
-        "src/**/*",
-        "examples/**/*",
-        "__tests__/**/*"
-    ]
+    "references": [{
+        "path": "./tsconfig.lib.json"
+    }, {
+        "path": "./tsconfig.examples.json",
+    }, {
+        "path": "./tsconfig.test.json",
+    }]
 }

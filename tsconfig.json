@@ -10,8 +10,7 @@
         // This enables stricter inference for data properties on `this`.
         "noImplicitThis": true,
         "strict": true,
-        // Enforce using `import type` instead of `import` for types
-        "importsNotUsedAsValues": "error",
+        "verbatimModuleSyntax": true,
         "importHelpers": true,
         "moduleResolution": "Node",
         "experimentalDecorators": true,
@@ -27,6 +26,7 @@
         "noImplicitOverride": true,
         "exactOptionalPropertyTypes": false,
         "baseUrl": ".",
-        "lib": ["esnext", "dom"]
+        "lib": ["esnext", "dom"],
+        "composite": true,
     }
 }

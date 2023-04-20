@@ -1,8 +1,6 @@
 import type { DocumentNode } from 'graphql';
-import type { FetchPolicy } from '../types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Method, HTTPHeaders } from '../clients/common';
-import type { createClient } from '../clients';
+import type { Method, HTTPHeaders, RestParams, GQLQueryParams, FetchPolicy } from '../clients';
 
 export type VariablesFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => Record<string, any>;
 export type MutationVariablesFn<T> = (this: T, params: any, route: RouteLocationNormalizedLoaded) => Record<string, any>
@@ -12,7 +10,7 @@ export type UrlFn<T> = (this: T, route: RouteLocationNormalizedLoaded, variables
 
 // 和CreateQuery有关的参数部分
 type CommonQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {
-    prefetch?: BooleanFn<ModelType> | boolean;
+    prefetch?: boolean;
     fetchPolicy?: FetchPolicy;
     credentials?: RequestCredentials;
     headers?: HTTPHeaders;
@@ -33,34 +31,8 @@ export type RestQueryOptions<ModelType extends unknown = unknown, DataType = unk
     method?: Method;
 } & CommonQueryOptions<ModelType, DataType>
 
-export type GQLFetchMoreOptions = Pick<CommonClientParams, 'variables'>;
-export type RestFetchMoreOption = Pick<CommonClientParams, 'variables'>;
-
-export type CommonClientParams = {
-    credentials?: RequestCredentials;
-    headers?: HTTPHeaders;
-    variables?: Record<string, any>;
-    timeout?: number;
-    method?: Method;
-    cache?: RequestCache;
-}
-
-// 交给Client请求用的部分
-type QueryClientParams = {
-    url?: string;
-    query: DocumentNode;
-} & CommonClientParams;
-
-type MutationClientParams = {
-    url?: string;
-    mutation: DocumentNode;
-} & CommonClientParams;
-
-export type GQLClientParams = QueryClientParams | MutationClientParams;
-
-export type RestClientParams = {
-    url: string;
-} & CommonClientParams;
+export type GQLFetchMoreOptions = Pick<GQLQueryParams, 'variables'>;
+export type RestFetchMoreOption = Pick<RestParams, 'variables'>;
 
 
 // 和createMutation有关的参数部分
@@ -95,5 +67,3 @@ export type MutationResult<T, P> = {
     mutate(args0: T, args1?: any): Promise<void>;
     error: any;
 }
-
-export type Client = ReturnType<typeof createClient>;

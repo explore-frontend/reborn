@@ -14,9 +14,9 @@ export default defineConfig({
         coverage: {
             provider: 'c8'
         },
-        root: resolve(__dirname, '__tests__'),
+        root: resolve(__dirname, '.'),
         setupFiles: [
-            './__tests__/setup.ts'
+            'setup.ts'
         ],
         include: [
             '**/*.spec.ts'
@@ -26,7 +26,7 @@ export default defineConfig({
         rollupOptions: {
             plugins: [
                 typescript({
-                    tsconfig: './tsconfig.json'
+                    tsconfig: './tsconfig.lib.json'
                 }),
             ],
             external: [

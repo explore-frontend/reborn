@@ -1,4 +1,4 @@
-import type { ModelCotrInfo, RebornClient } from '../types';
+import type { ModelCotrInfo } from './types';
 import type {
     GQLMutationOptions,
     GQLQueryOptions,
@@ -27,10 +27,16 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
-const route = vm.proxy!.$route;
-    const { rebornClient: client } = getRootStore();
+    const route = vm.proxy!.$route;
+    const { rebornClient: client, store } = getRootStore();
 
-    const query = createRestQuery<null, T>(options, null, route, client.rest);
+    const query = createRestQuery<null, T>(
+        options,
+        null,
+        route,
+        store.hydrationStatus,
+        client.rest
+    );
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
@@ -47,6 +53,7 @@ const route = vm.proxy!.$route;
         onNext: query.onNext,
     };
 };
+
 export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     const vm = getCurrentInstance();
     if (creatingModelCount <= 0 || !vm) {
@@ -54,9 +61,9 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     }
 
     const route = vm.proxy!.$route;
-    const { rebornClient: client } = getRootStore();
+    const { rebornClient: client, store } = getRootStore();
 
-    const query = createGQLQuery<null, T>(options, null, route, client.rest);
+    const query = createGQLQuery<null, T>(options, null, route, store.hydrationStatus, client.rest);
     tempQueryList.push(query);
 
     const status = useStatus(query.info);
@@ -105,13 +112,16 @@ export function createModelFromCA<T>(
 ): ModelCotrInfo<T> {
     return {
         type: 'FunctionalModel',
-        cotr: (client?: RebornClient) => {
-            const vm = getCurrentInstance()!;
+        cotr: () => {
             const { model, queryList } = fn.creator();
 
             // 延迟初始化，保证query间依赖
             if (queryList.length && typeof window !== 'undefined') {
                 queryList.forEach(query => query.init());
+            }
+
+            function prefetch() {
+                return Promise.all(queryList.map(query => query.refetch()));
             }
 
             function destroy() {
@@ -123,6 +133,7 @@ export function createModelFromCA<T>(
 
             return {
                 model,
+                prefetch,
                 destroy,
             };
         },
@@ -136,7 +147,6 @@ export function createModel<T>(fn: FNModelConstructor<T>) {
         type: 'FN',
         creator: () => {
             creatingModelCount++;
-            const vm = getCurrentInstance()!;
             const { store } = getRootStore();
 
             const model = fn({

@@ -1,26 +1,23 @@
-/**
- * @file apollo query
- *
- * @author 天翔Skyline(skyline0705@gmail.com)
- */
-
-import type { Client } from './types';
-import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Subscription } from 'rxjs';
 
+import type { Client } from '../clients';
+import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
+import type { HydrationStatus } from '../store';
+
 import { computed, nextTick } from 'vue';
 import { interval } from 'rxjs';
-import { generateQueryOptions } from './utils';
+import { generateQueryOptions } from './core';
 
 export function createGQLQuery<ModelType, DataType>(
     option: GQLQueryOptions<ModelType, DataType>,
     model: ModelType,
     route: RouteLocationNormalizedLoaded,
+    hydrationStatus: HydrationStatus,
     client?: Client,
 ) {
     if (!client) {
-        throw new Error('No GQL Client has been setted');
+        throw new Error('No GQL Client has been set');
     }
     const {
         info,
@@ -37,10 +34,6 @@ export function createGQLQuery<ModelType, DataType>(
             pollInterval: pollInterval.value,
         };
     });
-
-    function prefetch() {
-        // TODO待补充
-    }
 
     const optionsComputed = computed(() => [
         variables.value,
@@ -104,7 +97,6 @@ export function createGQLQuery<ModelType, DataType>(
 
     return {
         info,
-        prefetch,
         init,
         destroy,
         fetchMore,

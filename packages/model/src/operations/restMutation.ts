@@ -1,13 +1,8 @@
-/**
- * @file rest query
- *
- * @author 天翔Skyline(skyline0705@gmail.com)
- */
 import type { RestMutationOptions, MutationVariablesFn } from './types';
-import type { Client } from './types';
+import type { Client } from '../clients';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
-import { initDataType } from './utils';
+import { initDataType } from './core';
 
 export function createRestMutation<ModelType, DataType>(
     option: RestMutationOptions<ModelType>,
@@ -17,7 +12,7 @@ export function createRestMutation<ModelType, DataType>(
 ){
 
     if (!client) {
-        throw new Error('No Rest Client has been setted');
+        throw new Error('No Rest Client has been set');
     }
     const info = initDataType<DataType>();
     function variables<T>(params: T) {
@@ -45,10 +40,9 @@ export function createRestMutation<ModelType, DataType>(
     function mutate<T extends Record<string, any>>(params: T) {
         info.loading = true;
         info.error = null;
-        return client!.request<DataType>({
+        return client!.mutate<DataType>({
             url: url(variables(params)),
             headers: option.headers,
-            credentials: option.credentials,
             method: option.method,
             variables: variables(params),
             timeout: option.timeout,

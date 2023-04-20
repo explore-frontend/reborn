@@ -1,8 +1,8 @@
 import type { GQLMutationOptions, MutationVariablesFn } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Client } from './types';
+import type { Client } from '../clients';
 
-import { initDataType } from './utils';
+import { initDataType } from './core';
 
 
 export function createGQLMutation<ModelType, DataType>(
@@ -12,7 +12,7 @@ export function createGQLMutation<ModelType, DataType>(
     client?: Client,
 ) {
     if (!client) {
-        throw new Error('No GQL Client has been setted');
+        throw new Error('No GQL Client has been set');
     }
     const info = initDataType<DataType>();
     function variables<T>(params: T) {
@@ -43,7 +43,7 @@ export function createGQLMutation<ModelType, DataType>(
             info.loading = true;
             info.error = null;
 
-            return client.request<DataType>({
+            return client.mutate<DataType>({
                 // TODO
                 mutation: '' as unknown as any,
                 variables: variables(params),

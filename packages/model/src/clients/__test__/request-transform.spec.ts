@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateRequestInfo } from '../src/clients/request-transform';
+import { generateRequestInfo } from '../request-transform';
 
 const clientOptions = {
     method: 'get',

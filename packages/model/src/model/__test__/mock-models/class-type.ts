@@ -1,7 +1,7 @@
-import type { QueryResult } from '../../src/operations/types';
+import type { QueryResult } from '../../../operations/types';
 
-import { BaseModel } from '../../src/model/class-type';
-import { restQuery } from '../../src/operations/decorators';
+import { BaseModel } from '../../class-type';
+import { restQuery } from '../../decorators';
 
 export class CustomModel extends BaseModel {
     private a = 1;

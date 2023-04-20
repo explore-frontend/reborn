@@ -1,24 +1,19 @@
-/**
- * @file rest query
- *
- * @author 天翔Skyline(skyline0705@gmail.com)
- */
-
-import type { RestQueryOptions, RestFetchMoreOption, RestClientParams } from './types';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import type { Client } from './types';
-import type { Subscription } from 'rxjs';
+import { Observable, type Subscription } from 'rxjs';
 
-import { interval } from 'rxjs';
-import { generateQueryOptions } from './utils';
-import { computed, watch, nextTick } from 'vue';
+import type { RestQueryOptions, RestFetchMoreOption } from './types';
+import type { Client, RestRequestConfig } from '../clients';
+import type { HydrationStatus, Store } from '../store';
+
+import { generateQueryOptions } from './core';
+import { computed } from 'vue';
 import { deepMerge } from '../utils';
-
 
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
     model: ModelType,
     route: RouteLocationNormalizedLoaded,
+    hydrationStatus: HydrationStatus,
     client?: Client,
 ) {
     if (!client) {
@@ -27,8 +22,9 @@ export function createRestQuery<ModelType, DataType>(
     const {
         info,
         skip,
-        pollInterval,
         variables,
+        fetchQuery$,
+        prefetch,
     } = generateQueryOptions<ModelType, DataType>(option, route, model);
 
     const url = computed(() => {
@@ -38,97 +34,67 @@ export function createRestQuery<ModelType, DataType>(
         return option.url;
     });
 
-    const variablesComputed = computed(() => [variables.value, skip.value, url.value]);
-
-    let pollIntervalSub: Subscription | null = null;
-
-    function changeVariables() {
-        nextTick(() => {
-            if (skip.value) {
-                return;
-            }
-            if (pollIntervalSub) {
-                // 参数改变等待下次interval触发
-                return;
-            }
-            refetch();
-        });
-    }
-
-    const variablesWatcher = watch(() => variablesComputed.value, (newV, oldV) => {
-        // TODO短时间内大概率会触发两次判断，具体原因未知= =
-        if (newV.some((v, index) => oldV[index] !== v)) {
-            changeVariables();
-        }
-    });
-
     function refetch() {
         info.loading = true;
-        // TODO差缓存数据做SSR还原
         return new Promise(resolve => {
-            client!.request<DataType>({
+            const clientParams = {
                 url: url.value,
                 headers: option.headers,
-                credentials: option.credentials,
                 method: option.method,
+                fetchPolicy: option.fetchPolicy,
                 variables: variables.value,
                 timeout: option.timeout,
-            }).then(data => {
-                info.error = null;
-                if (data) {
-                    info.data = data;
+            };
+            // TODO后面再重写一下
+            const subject = client!.query<DataType>(
+                clientParams,
+                option.fetchPolicy,
+                hydrationStatus,
+            );
+            subject.subscribe({
+                next: (data) => {
+                    info.error = null;
+                    if (data) {
+                        info.data = data;
+                    }
+                    info.loading = false;
+                    resolve(undefined);
+                },
+                error: (e) => {
+                    info.error = e;
+                    info.loading = false;
+                    resolve(undefined);
+                },
+                complete: () => {
+                    // TODO先临时搞一下，后面再看怎么串一下Observable
+                    subject.unsubscribe();
                 }
-                info.loading = false;
-                resolve(undefined);
-            }).catch(e => {
-                info.error = e;
-                info.loading = false;
-                resolve(undefined);
             });
         });
     }
 
-    function changePollInterval() {
-        nextTick(() => {
-            if (pollIntervalSub) {
-                pollIntervalSub.unsubscribe();
-                pollIntervalSub = null;
-            }
-            if (!pollInterval.value) {
+    let sub: Subscription | null = null;
+
+    function init() {
+        sub = fetchQuery$.subscribe(() => {
+            if (skip.value) {
                 return;
             }
-            pollIntervalSub = interval(pollInterval.value)
-                .subscribe({
-                    next: () => refetch(),
-                });
+            refetch();
         });
     }
 
-    const intervalWatcher = watch(() => pollInterval.value, (newV, oldV) => {
-        // TODO短时间内大概率会触发两次判断，具体原因未知= =
-        if (newV !== oldV) {
-            changePollInterval();
-        }
-    });
-
-    function init() {
-        if (!skip.value) {
-            refetch();
-            changePollInterval();
-        }
-    }
-
     function destroy() {
-        intervalWatcher();
-        variablesWatcher();
-        pollIntervalSub?.unsubscribe();
-        pollIntervalSub = null;
+        if (sub) {
+            sub.unsubscribe();
+            sub = null;
+        }
     }
 
     function fetchMore(variables: RestFetchMoreOption['variables']) {
         return new Promise(resolve => {
             info.loading = true;
-            const params: RestClientParams = {
+            const params: RestRequestConfig = {
                 url: url.value,
                 method: option.method,
                 variables,
@@ -139,25 +105,29 @@ export function createRestQuery<ModelType, DataType>(
                 params.headers = deepMerge({}, params.headers || {}, option.headers);
             }
 
-            client!.request<DataType>(params).then(data => {
-                info.error = null;
-                info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
-                info.loading = false;
-                resolve(undefined);
-            }).catch(e => {
-                info.error = e;
-                info.loading = false;
-                resolve(undefined);
+            const observable = client!.query<DataType>(
+                params,
+                option.fetchPolicy,
+                hydrationStatus,
+            );
+            observable.subscribe({
+                next: (data) => {
+                    info.error = null;
+                    info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
+                    info.loading = false;
+                    resolve(undefined);
+                },
+                error: (e) => {
+                    info.error = e;
+                    info.loading = false;
+                    resolve(undefined);
+                },
             });
         });
     }
 
-    function prefetch() {
+    function onNext(sub: (params: { data: DataType; loading: boolean, error: any}) => void) {
         // TODO
-    }
-
-    function onNext() {
-
     }
 
     return {
@@ -166,7 +136,6 @@ export function createRestQuery<ModelType, DataType>(
         refetch,
         fetchMore,
         destroy,
-        prefetch,
         onNext,
     };
 }
