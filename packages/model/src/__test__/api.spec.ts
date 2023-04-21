@@ -25,22 +25,22 @@ describe(`model should has it's own effect scope`, () => {
         app.use(store);
 
         const div = document.createElement('div');
-        app.mount(div);
+        const appEl = app.mount(div).$el as HTMLDivElement;
 
         (async () => {
-            expect(div.innerHTML).toBe('<div class="app"><div class="b">B: a: 1 b: 2</div></div>')
+            expect(appEl.outerHTML).toBe('<div class="app"><div class="b">B: a: 1 b: 2</div></div>')
 
             div.querySelector('.b')?.dispatchEvent(new Event('click'));
             await nextTick();
-            expect(div.innerHTML).toBe('<div class="app"><div class="b">B: a: 2 b: 4</div></div>');
+            expect(appEl.outerHTML).toBe('<div class="app"><div class="b">B: a: 2 b: 4</div></div>');
 
             div.querySelector('.app')?.dispatchEvent(new Event('click'));
             await nextTick();
-            expect(div.innerHTML).toBe('<div class="app"><div class="a">A: a: 1 b: 2</div></div>')
+            expect(appEl.outerHTML).toBe('<div class="app"><div class="a">A: a: 1 b: 2</div></div>')
 
             div.querySelector('.a')?.dispatchEvent(new Event('click'));
             await nextTick();
-            expect(div.innerHTML).toBe('<div class="app"><div class="a">A: a: 2 b: 4</div></div>')
+            expect(appEl.outerHTML).toBe('<div class="app"><div class="a">A: a: 2 b: 4</div></div>')
 
             div.querySelector('.app')?.dispatchEvent(new Event('keypress'));
             await nextTick();
