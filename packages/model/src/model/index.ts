@@ -78,11 +78,21 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
             storeModelInstance.scope?.stop();
-            storeModelInstance.scope = effectScope(true);
+            storeModelInstance.scope = null;
+            store.removeModel<T>(ctor);
         }
     });
-    onServerPrefetch(() => {
-        return storeModelInstance.instance?.prefetch();
+    onServerPrefetch(async () => {
+        await storeModelInstance.instance?.prefetch();
+        storeModelInstance.count--;
+        if (storeModelInstance.count === 0 && storeModelInstance.instance) {
+            storeModelInstance.instance.destroy();
+            storeModelInstance.instance = null;
+            storeModelInstance.scope?.stop();
+            storeModelInstance.scope = null;
+            store.removeModel<T>(ctor);
+        }
+        return;
     });
 
     return storeModelInstance.instance!.model as RebornInstanceType<T>;
