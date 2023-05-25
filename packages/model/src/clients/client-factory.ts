@@ -86,13 +86,13 @@ export function clientFactory(
         // 避免Node环境下的判断，所以没法简化写=。=，因为window.fetch会触发一次RHS导致报错
         if (!IS_SERVER) {
             if (window.fetch) {
-                opts.fetch = window.fetch.bind(window);
+                opts.fetch = (resource, options) => window.fetch(resource, options);
             } else {
                 throw new Error('create client need a fetch function to init');
             }
         } else if (IS_SERVER) {
             if (global.fetch) {
-                opts.fetch = global.fetch.bind(global);
+                opts.fetch = (resource, options) => global.fetch(resource, options);
             } else {
                 throw new Error('create client need a fetch function to init');
             }
