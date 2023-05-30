@@ -1,9 +1,0 @@
-{
-    "extends": "./tsconfig.lib.json",
-    "compilerOptions": {
-        "verbatimModuleSyntax": false,
-        "moduleResolution": "node",
-        "module": "CommonJS",
-        "outDir": "./types/cjs"
-    }
-}

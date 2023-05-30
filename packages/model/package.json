@@ -1,31 +1,24 @@
 {
     "name": "@kwai-explore/model",
     "version": "0.2.0-alpha1",
-    "main": "dist/model.js",
-    "module": "dist/model.mjs",
-    "typings": "dist/src/index.d.ts",
+    "main": "dist/index.cjs",
+    "module": "dist/index.mjs",
+    "typings": "dist/index.d.cts",
     "license": "MIT",
     "exports": {
         ".": {
-            "import": {
-                "types": "./types/esm/index.d.ts",
-                "default": "./dist/model.mjs"
-            },
-            "require": {
-                "types": "./types/cjs/index.d.ts",
-                "default": "./dist/model.js"
-            }
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
         }
     },
     "files": [
         "dist",
-        "types",
         "src",
         "README.md"
     ],
     "scripts": {
-        "type-check": "vue-tsc --project ./tsconfig.test.json && vue-tsc --project ./tsconfig.examples.json",
-        "build": "shx rm -rf dist types && vite build && tsc --project ./tsconfig.lib.cjs.json && tsc --project ./tsconfig.lib.esm.json && ts-add-js-extension --dir=./types/esm && shx rm ./types/esm/*.js ./types/esm/**/*.js && shx cp ./src/package.json ./types/esm/package.json",
+        "type-check": "tsc --project ./tsconfig.lib.json --skipLibCheck && vue-tsc --project ./tsconfig.test.json && vue-tsc --project ./tsconfig.examples.json",
+        "build": "rollup -c ./rollup.config.mjs",
         "serve": "ts-node --project ./tsconfig.examples.json examples/server/index.ts",
         "docs:dev": "vuepress dev docs",
         "docs:build": "vuepress build docs",
@@ -52,9 +45,10 @@
         "jsdom": "^22.1.0",
         "node-fetch": "^3.3.1",
         "prettier": "^2.8.8",
+        "rollup": "3.21.7",
+        "rollup-plugin-dts": "5.3.0",
+        "rollup-plugin-typescript2": "^0.34.1",
         "rxjs": "^7.8.1",
-        "shx": "^0.3.4",
-        "ts-add-js-extension": "^1.5.0",
         "ts-node": "^10.9.1",
         "tslib": "^2.5.2",
         "typescript": "^5.0.4",

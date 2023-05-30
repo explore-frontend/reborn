@@ -2,6 +2,8 @@
     "extends": "@kwai-explore/tsconfig",
     "compilerOptions": {
         "lib": ["esnext", "dom"],
+        "module": "CommonJS",
+        "moduleResolution": "node",
         "noEmit": true,
         "verbatimModuleSyntax": false
     },
