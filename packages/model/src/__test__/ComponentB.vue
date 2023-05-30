@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed } from 'vue-demi';
 import { TestModel } from './test-model';
 import { useModel } from '../index';
 
