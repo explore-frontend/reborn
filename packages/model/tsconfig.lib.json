@@ -3,9 +3,9 @@
     "compilerOptions": {
         "lib": ["esnext", "dom"],
         "rootDir": "./src",
-        "outDir": "./dist",
-        "declaration": true,
-        "emitDeclarationOnly": true
+        "useDefineForClassFields": false,
+        "experimentalDecorators": true,
+        "noEmit": true
     },
     "exclude": ["./src/**/__test__/**/*", "./src/**/*.spec.ts"],
     "include": ["./src/**/*"]

@@ -1,8 +1,6 @@
 {
     "extends": "./tsconfig.lib.json",
     "compilerOptions": {
-        "emitDeclarationOnly": false,
-        "noEmit": true,
         "verbatimModuleSyntax": false,
         "paths": {
             "vite/types/hot": ["./node_modules/vite/types/hot.d.ts"] // FIXME: 临时修复 vite 的类型错误
