@@ -1,18 +1,12 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "./tsconfig.lib.json",
     "compilerOptions": {
-        "baseUrl": ".",
-        "lib": ["esnext", "dom"],
-        "rootDir": ".",
-        "outDir": "./dist",
+        "emitDeclarationOnly": false,
+        "noEmit": true,
+        "verbatimModuleSyntax": false,
+        "paths": {
+            "vite/types/hot": ["./node_modules/vite/types/hot.d.ts"] // FIXME: 临时修复 vite 的类型错误
+        }
     },
-    "exclude": [
-        "node_modules",
-        "dist/**/*"
-    ],
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.vue",
-        "setup.ts",
-    ]
+    "exclude": []
 }

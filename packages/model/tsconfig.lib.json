@@ -1,21 +1,12 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "@kwai-explore/tsconfig",
     "compilerOptions": {
-        "baseUrl": ".",
         "lib": ["esnext", "dom"],
-        "rootDir": ".",
+        "rootDir": "./src",
         "outDir": "./dist",
-        "resolveJsonModule": true,
+        "declaration": true,
+        "emitDeclarationOnly": true
     },
-    "exclude": [
-        "node_modules",
-        "dist/**/*",
-        "src/**/*.spec.ts",
-        "setup.ts",
-    ],
-    "include": [
-        "src/**/*",
-        "vite.config.ts",
-        "package.json"
-    ]
+    "exclude": ["./src/**/__test__/**/*", "./src/**/*.spec.ts"],
+    "include": ["./src/**/*"]
 }

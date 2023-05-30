@@ -91,8 +91,8 @@ export function clientFactory(
                 throw new Error('create client need a fetch function to init');
             }
         } else if (IS_SERVER) {
-            if (global.fetch) {
-                opts.fetch = (resource, options) => global.fetch(resource, options);
+            if (globalThis.fetch) {
+                opts.fetch = (resource, options) => globalThis.fetch(resource, options);
             } else {
                 throw new Error('create client need a fetch function to init');
             }

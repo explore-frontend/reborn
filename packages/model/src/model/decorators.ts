@@ -15,7 +15,7 @@ type DecoratorType<T = Constructor> = ModelMetadata<T>['type'];
 type Constructor = new (...args: any[]) => any;
 
 function createDecorator<ModelType>(type: DecoratorType<ModelType>, detail: OptionsDefine<ModelType>) {
-    return function decorator(target: any, key: string) {
+    return function decorator(target: any, key: any) {
         target.constructor.rebornDecorators = target.rebornDecorators || [];
         target.constructor.rebornDecorators.push({
             key,

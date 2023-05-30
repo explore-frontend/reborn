@@ -1,0 +1,8 @@
+{
+    "extends": "./tsconfig.lib.json",
+    "compilerOptions": {
+        "emitDeclarationOnly": false, // waiting for ts-add-js-extension #41
+        "verbatimModuleSyntax": false,
+        "outDir": "./types/esm"
+    }
+}

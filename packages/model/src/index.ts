@@ -4,11 +4,9 @@ export { createClient } from './clients';
 
 export { createCache } from './cache';
 
-export type {
-    FNModelCreator,
-} from './model';
-
 export {
+    type FNModelCreator,
+
     BaseModel,
     gqlQuery,
     gqlMutation,
@@ -24,13 +22,10 @@ export {
     useModel,
 } from './model';
 
-
-export type {
-    QueryResult,
-    MutationResult,
-} from './operations';
-
 export {
+    type QueryResult,
+    type MutationResult,
+
     isEmptyState,
     isLoadingState,
     isDoneState,
