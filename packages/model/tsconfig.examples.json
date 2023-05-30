@@ -1,20 +1,9 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "@kwai-explore/tsconfig",
     "compilerOptions": {
-        "baseUrl": ".",
-        "verbatimModuleSyntax": false,
-        "esModuleInterop": true,
-        "module": "CommonJS",
         "lib": ["esnext", "dom"],
-        "rootDir": ".",
-        "outDir": "./dist"
+        "noEmit": true,
+        "verbatimModuleSyntax": false
     },
-    "exclude": [
-        "node_modules",
-        "dist/**/*"
-    ],
-    "include": [
-        "examples/**/*",
-        "src/**/*"
-    ]
+    "include": ["./examples/**/*"]
 }
