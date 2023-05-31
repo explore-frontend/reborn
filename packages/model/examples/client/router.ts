@@ -9,6 +9,7 @@ import VueRouter from 'vue-router';
 
 const routes: RouteConfig[]  = [{
     path: '/*',
+    // @ts-expect-error
     component: () => import('./pages/index.vue'),
 }];
 
