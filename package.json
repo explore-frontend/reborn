@@ -16,5 +16,10 @@
     },
     "gitHooks": {
         "commit-msg": "commitlint -E GIT_PARAMS"
+    },
+    "pnpm": {
+        "patchedDependencies": {
+            "@vue/composition-api@1.1.0": "patches/@vue__composition-api@1.1.0.patch"
+        }
     }
 }
