@@ -1,18 +1,18 @@
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
+import type { Route } from 'vue-router';
 import type { Subscription } from 'rxjs';
 
 import type { Client } from '../clients';
 import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { HydrationStatus } from '../store';
 
-import { computed, nextTick } from 'vue';
+import { computed, nextTick } from 'vue-demi';
 import { interval } from 'rxjs';
 import { generateQueryOptions } from './core';
 
 export function createGQLQuery<ModelType, DataType>(
     option: GQLQueryOptions<ModelType, DataType>,
     model: ModelType,
-    route: RouteLocationNormalizedLoaded,
+    route: Route,
     hydrationStatus: HydrationStatus,
     client?: Client,
 ) {

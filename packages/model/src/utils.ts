@@ -1,6 +1,6 @@
-import type { WatchOptions, WatchSource } from 'vue';
+import type { WatchOptions, WatchSource } from 'vue-demi';
 
-import { watch } from 'vue';
+import { watch } from 'vue-demi';
 import { Observable } from 'rxjs';
 
 export function stringifyPrimitive(v: string | boolean | number) {

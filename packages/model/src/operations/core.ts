@@ -7,9 +7,9 @@ import type {
     GQLMutationOptions,
 } from './types';
 import type { InfoDataType } from './status';
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
+import type { Route } from 'vue-router';
 
-import { reactive, computed, watch } from 'vue';
+import { reactive, computed, watch } from 'vue-demi';
 import { fromWatch } from '../utils';
 import { Observable, merge } from 'rxjs';
 
@@ -30,7 +30,7 @@ export function initDataType<DataType>() {
 
 export function generateQueryOptions<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType> | GQLQueryOptions<ModelType, DataType>,
-    route: RouteLocationNormalizedLoaded,
+    route: Route,
     model: ModelType,
 ) {
     const info = initDataType<DataType>();
@@ -97,7 +97,7 @@ export function generateQueryOptions<ModelType, DataType>(
 
 export function generateMutationOptions<ModelType, DataType>(
     option: RestMutationOptions<ModelType> | GQLMutationOptions<ModelType>,
-    route: RouteLocationNormalizedLoaded,
+    route: Route,
     model: ModelType,
 ) {
     const info = initDataType<DataType>();

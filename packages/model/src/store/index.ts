@@ -1,6 +1,7 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
-import type { createApp } from 'vue';
+import type { VueConstructor } from 'vue';
+import Vue from 'vue';
 import type { Client, RebornClient } from '../clients';
 
 import { INJECT_KEY } from '../const';
@@ -74,12 +75,18 @@ export function createStore() {
     }
 
     // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(app: ReturnType<typeof createApp>) {
-        app.config.globalProperties.rebornStore = store;
-        app.config.globalProperties.rebornClient = rebornClient;
-        app.provide(INJECT_KEY, {
-            store,
-            rebornClient,
+    function install(app: VueConstructor<any>) {
+        app.mixin({
+            provide(this: Vue) {
+                if (this === this.$root) {
+                    return {
+                        [INJECT_KEY]: {
+                            store,
+                            rebornClient,
+                        }
+                    };
+                }
+            }
         });
     }
 

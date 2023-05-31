@@ -1,6 +1,6 @@
 import type { createGQLQuery, createRestQuery } from '../operations';
 import type { FNModelCreator, Constructor, OriginalModelInstance } from '../model';
-import type { EffectScope } from 'vue';
+import type { EffectScope } from 'vue-demi';
 
 
 export type ModelInfo<T = unknown> = {

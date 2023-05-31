@@ -31,12 +31,12 @@ import { mockAPI } from './mockAPI/index';
             );
 
             const template = await vite.transformIndexHtml(url, htmlTemplate);
-            const { render } = await vite.ssrLoadModule('/examples/client/entry-server.ts');
-            const [appHtml, cache] = await render(url);
-            const html = template
-                .replace(`<!--vue-ssr-outlet-->`, appHtml)
-                .replace(`<!--vue-ssr-state-->`, `<script>window.INIT_STATE = ${cache}</script>`);
-            res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+            // const { render } = await vite.ssrLoadModule('/examples/client/entry-server.ts');
+            // const [appHtml, cache] = await render(url);
+            // const html = template
+            //     .replace(`<!--vue-ssr-outlet-->`, appHtml)
+            //     .replace(`<!--vue-ssr-state-->`, `<script>window.INIT_STATE = ${cache}</script>`);
+            res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
         } catch (e) {
             // If an error is caught, let Vite fix the stack trace so it maps back
             // to your actual source code.

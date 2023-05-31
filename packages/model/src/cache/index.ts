@@ -6,15 +6,15 @@ export { hash } from './hash';
 export function createCache() {
     let cacheData: Record<string, unknown> = {};
     function restore(data: Record<string, unknown>) {
-        cacheData = data;
+        cacheData = data || cacheData;
     }
 
     function put(key: string, value: unknown) {
         cacheData[key] = value;
     }
 
-    function get<T>(key: string): T {
-        return cacheData[key] as T;
+    function get<T>(key: string): T | undefined {
+        return cacheData[key] as T | undefined;
     }
 
     function update(key: string, value: unknown) {

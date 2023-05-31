@@ -8,7 +8,7 @@ import {
     watch,
     h,
     createApp,
-} from 'vue';
+} from 'vue-demi';
 
 import { createClient } from '../../clients';
 import { createModelFromCA } from '../fn-type';
