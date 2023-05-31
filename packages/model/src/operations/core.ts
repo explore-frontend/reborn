@@ -9,7 +9,7 @@ import type {
 import type { InfoDataType } from './status';
 import type { Route } from 'vue-router';
 
-import { reactive, computed, watch } from 'vue-demi';
+import { reactive, computed, watch , type ComputedRef } from 'vue-demi';
 import { fromWatch } from '../utils';
 import { Observable, merge } from 'rxjs';
 
