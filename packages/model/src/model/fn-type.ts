@@ -14,7 +14,7 @@ import {
     createRestMutation,
     createRestQuery,
 } from '../operations';
-import { getCurrentInstance, toRefs } from 'vue-demi';
+import { getCurrentInstance, toRefs, type ComputedRef } from 'vue-demi';
 import { getRootStore } from '../const';
 import { useStatus } from '../operations/status';
 
