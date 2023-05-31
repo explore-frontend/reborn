@@ -3,8 +3,13 @@
     "compilerOptions": {
         "verbatimModuleSyntax": false,
         "paths": {
+            "@vue/composition-api": ["./node_modules/@vue/composition-api/dist/index.d.ts"],
+            "vue/types/vue": ["./node_modules/vue/types/vue.d.ts"],
             "vite/types/hot": ["./node_modules/vite/types/hot.d.ts"] // FIXME: 临时修复 vite 的类型错误
         }
     },
-    "exclude": []
+    "exclude": [],
+    "vueCompilerOptions": {
+        "target": 2
+    }
 }

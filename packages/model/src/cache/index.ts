@@ -13,8 +13,8 @@ export function createCache() {
         cacheData[key] = value;
     }
 
-    function get<T>(key: string): T {
-        return cacheData[key] as T;
+    function get<T>(key: string): T | undefined {
+        return cacheData[key] as T | undefined;
     }
 
     function update(key: string, value: unknown) {

@@ -1,4 +1,4 @@
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
+import type { Route } from 'vue-router';
 import { Observable, type Subscription } from 'rxjs';
 
 import type { RestQueryOptions, RestFetchMoreOption } from './types';
@@ -6,14 +6,14 @@ import type { Client, RestRequestConfig } from '../clients';
 import type { HydrationStatus, Store } from '../store';
 
 import { generateQueryOptions } from './core';
-import { computed, ref, type Ref } from 'vue';
+import { computed, ref, type Ref } from 'vue-demi';
 import { deepMerge } from '../utils';
 import { RequestReason } from './status';
 
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
     model: ModelType,
-    route: RouteLocationNormalizedLoaded,
+    route: Route,
     hydrationStatus: HydrationStatus,
     client?: Client,
 ) {

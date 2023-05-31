@@ -1,9 +1,9 @@
 {
-    "name": "@kwai-explore/model",
-    "version": "0.2.0-alpha3",
-    "main": "dist/index.cjs",
-    "module": "dist/index.mjs",
-    "typings": "dist/index.d.cts",
+    "name": "vue-apollo-model",
+    "version": "0.9.2-alpha1",
+    "main": "dist/model.js",
+    "module": "dist/model.mjs",
+    "typings": "dist/src/index.d.ts",
     "license": "MIT",
     "exports": {
         ".": {
@@ -29,17 +29,20 @@
         "graphql": "^16.6.0"
     },
     "peerDependencies": {
-        "rxjs": "^7.0.0",
-        "vue": "^3.2.31",
-        "vue-router": "^4.0.14"
+        "@vue/composition-api": "^1.1.0",
+        "rxjs": "^7.8.1",
+        "vue": "~2.6.0",
+        "vue-demi": "^0.14.0",
+        "vue-router": "~3.5.1"
     },
     "devDependencies": {
         "@kwai-explore/tsconfig": "^0.0.3",
         "@types/express": "^4.17.17",
         "@types/node": "^18.16.16",
         "@typescript-eslint/parser": "^5.59.8",
-        "@vitejs/plugin-vue": "^4.2.3",
         "@vitest/coverage-c8": "^0.31.1",
+        "@vue/composition-api": "^1.1.0",
+        "@vue/runtime-dom": "^3.2.31",
         "eslint": "^8.41.0",
         "express": "^4.18.2",
         "jsdom": "^22.1.0",
@@ -53,11 +56,15 @@
         "tslib": "^2.5.2",
         "typescript": "^5.0.4",
         "unfetch": "^5.0.0",
+        "unplugin-vue2-script-setup": "^0.11.3",
         "vite": "^4.3.9",
+        "vite-plugin-vue2": "^2.0.3",
         "vitest": "^0.31.1",
         "vitest-fetch-mock": "^0.2.2",
-        "vue": "^3.3.4",
-        "vue-router": "^4.2.2",
+        "vue": "~2.6.0",
+        "vue-demi": "^0.14.0",
+        "vue-router": "~3.5.1",
+        "vue-template-babel-compiler": "^2.0.0",
         "vue-tsc": "^1.7.8",
         "vuepress": "^1.9.9"
     }

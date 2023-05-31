@@ -1,9 +1,19 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
+import { createVuePlugin as vue } from "vite-plugin-vue2";
+import vueTemplateBabelCompiler from 'vue-template-babel-compiler'
+import scriptSetup from 'unplugin-vue2-script-setup/vite'
 
 export default defineConfig({
-    plugins: [vue()],
+    plugins: [
+        vue({
+            jsx: true,
+            vueTemplateOptions: {
+                compiler: vueTemplateBabelCompiler
+            }
+        }),
+        scriptSetup(),
+    ],
     test: {
         coverage: {
             provider: "c8",
