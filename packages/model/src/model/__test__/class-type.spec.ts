@@ -9,7 +9,7 @@ import {
     h,
     createApp,
     ref,
-} from 'vue';
+} from 'vue-demi';
 
 import { createModelFromClass } from '../class-type';
 import { createClient } from '../../clients';
