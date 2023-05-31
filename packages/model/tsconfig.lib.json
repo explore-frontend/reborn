@@ -8,7 +8,7 @@
         "noEmit": true,
         "paths": {
             "@vue/composition-api": ["./node_modules/@vue/composition-api/dist/index.d.ts"],
-            "vue/types/vue": ["./node_modules/vue/types/vue.d.ts"]
+            "vue/types/*": ["./node_modules/vue/types/*.d.ts"]
         }
     },
     "exclude": ["./src/**/__test__/**/*", "./src/**/*.spec.ts"],

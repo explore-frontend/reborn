@@ -17,7 +17,7 @@
         "README.md"
     ],
     "scripts": {
-        "type-check": "tsc --project ./tsconfig.lib.json --skipLibCheck && vue-tsc --project ./tsconfig.test.json && vue-tsc --project ./tsconfig.examples.json",
+        "type-check": "tsc --project ./tsconfig.lib.json --skipLibCheck && vue-tsc --project ./tsconfig.test.json --skipLibCheck && vue-tsc --project ./tsconfig.examples.json",
         "build": "rollup -c ./rollup.config.mjs",
         "serve": "ts-node --project ./tsconfig.examples.json examples/server/index.ts",
         "docs:dev": "vuepress dev docs",
