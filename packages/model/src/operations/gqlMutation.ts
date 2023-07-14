@@ -41,14 +41,14 @@ export function createGQLMutation<ModelType, DataType>(
         info,
         mutate(params: any) {
             info.loading = true;
-            info.error = null;
+            info.error = undefined;
 
             return client.mutate<DataType>({
                 // TODO
                 mutation: '' as unknown as any,
                 variables: variables(params),
             }).then(data => {
-                info.error = null;
+                info.error = undefined;
                 if (data) {
                     info.data = data;
                 }

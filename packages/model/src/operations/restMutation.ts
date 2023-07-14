@@ -39,7 +39,7 @@ export function createRestMutation<ModelType, DataType>(
 
     function mutate<T extends Record<string, any>>(params: T) {
         info.loading = true;
-        info.error = null;
+        info.error = undefined;
         return client!.mutate<DataType>({
             url: url(variables(params)),
             headers: option.headers,
@@ -47,7 +47,7 @@ export function createRestMutation<ModelType, DataType>(
             variables: variables(params),
             timeout: option.timeout,
         }).then(data => {
-            info.error = null;
+            info.error = undefined;
             if (data) {
                 info.data = data;
             }

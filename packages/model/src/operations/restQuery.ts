@@ -53,7 +53,7 @@ export function createRestQuery<ModelType, DataType>(
             );
             subject.subscribe({
                 next: (data) => {
-                    info.error = null;
+                    info.error = undefined;
                     if (data) {
                         info.data = data;
                     }
@@ -112,7 +112,7 @@ export function createRestQuery<ModelType, DataType>(
             );
             observable.subscribe({
                 next: (data) => {
-                    info.error = null;
+                    info.error = undefined;
                     info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
                     info.loading = false;
                     resolve(undefined);
