@@ -3,13 +3,13 @@ import type { CommonResponse } from './interceptor';
 import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
 import type { HydrationStatus } from '../store';
 import { ReplaySubject } from 'rxjs';
+import { IS_SERVER } from '../const';
 
 import { createCache, hash } from '../cache';
 
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
 
-const IS_SERVER = typeof window === 'undefined';
 
 const DEFAULT_OPTIONS: ClientOptions = {
     method: 'GET',
@@ -231,8 +231,7 @@ export function clientFactory(
         fetchPolicy: FetchPolicy = 'network-first',
         hydrationStatus: HydrationStatus = 2,
     ): ReplaySubject<T> {
-        const subject = new ReplaySubject
-        <T>();
+        const subject = new ReplaySubject<T>();
         // 处于Hydration阶段，一律先从缓存里面拿
         if (hydrationStatus !== 2) {
             const data = getDataFromCache<T>(params);

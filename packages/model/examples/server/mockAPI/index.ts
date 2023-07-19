@@ -11,9 +11,9 @@ function multiple() {
 function more() {
 
 }
-
+let d = 4;
 export async function mockAPI (req: Request, res: Response, next: NextFunction) {
-    console.error('Here comes a API call');
+    console.error('Here comes a API call', req.originalUrl);
     if (req.params.action === 'add') {
         res.json({
             a: 1,
@@ -35,7 +35,9 @@ export async function mockAPI (req: Request, res: Response, next: NextFunction) 
         return;
     }
 
+    console.error(d, req.originalUrl);
+
     res.json({
-        d: 4,
+        d: ++d,
     });
 }
