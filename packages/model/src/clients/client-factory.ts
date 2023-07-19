@@ -229,11 +229,11 @@ export function clientFactory(
     function requestWithCache<T>(
         params: Parameters<typeof request>[0],
         fetchPolicy: FetchPolicy = 'network-first',
-        hydrationStatus: HydrationStatus = 2,
+        hydrationStatus: HydrationStatus,
     ): ReplaySubject<T> {
         const subject = new ReplaySubject<T>();
         // 处于Hydration阶段，一律先从缓存里面拿
-        if (hydrationStatus !== 2) {
+        if (hydrationStatus.value !== 2) {
             const data = getDataFromCache<T>(params);
             if (data) {
                 subject.next(data);

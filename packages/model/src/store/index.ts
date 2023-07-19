@@ -1,8 +1,9 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
-import type { createApp } from 'vue';
+import type { createApp, Ref } from 'vue';
 import type { Client, RebornClient } from '../clients';
 
+import { ref } from 'vue';
 import { INJECT_KEY } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
@@ -10,7 +11,7 @@ export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance
 export type Store = ReturnType<typeof storeFactory>;
 
 // 0: 还未开始，1: 已注册，2: hydration完毕
-export type HydrationStatus = 0 | 1 | 2;
+export type HydrationStatus = Ref<0 | 1 | 2>;
 
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
@@ -41,7 +42,7 @@ export function storeFactory() {
         }
     }
 
-    let hydrationStatus = 0 as HydrationStatus;
+    const hydrationStatus: HydrationStatus = ref(0);
 
     return {
         getModelInstance,

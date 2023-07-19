@@ -47,11 +47,11 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     }
 
     // 保证只注册一次
-    if (store.hydrationStatus === 0) {
-        store.hydrationStatus = 1;
+    if (store.hydrationStatus.value === 0) {
+        store.hydrationStatus.value = 1;
         onMounted(() => {
             nextTick(() => {
-                store.hydrationStatus = 2;
+                store.hydrationStatus.value = 2;
             });
         });
     }
