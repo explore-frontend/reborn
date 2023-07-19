@@ -3,7 +3,7 @@ import type { CommonResponse } from './interceptor';
 import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
 import type { HydrationStatus } from '../store';
 import { ReplaySubject } from 'rxjs';
-import { IS_SERVER } from '../const';
+import { IS_SERVER, env } from '../const';
 
 import { createCache, hash } from '../cache';
 

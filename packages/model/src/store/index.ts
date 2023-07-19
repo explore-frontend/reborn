@@ -2,9 +2,10 @@ import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
 import type { createApp, Ref } from 'vue';
 import type { Client, RebornClient } from '../clients';
+import type { ENV as ORIGINAL_ENV } from '../const';
 
 import { ref } from 'vue';
-import { INJECT_KEY } from '../const';
+import { INJECT_KEY, setEnv } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
@@ -12,8 +13,6 @@ export type Store = ReturnType<typeof storeFactory>;
 
 // 0: 还未开始，1: 已注册，2: hydration完毕
 export type HydrationStatus = Ref<0 | 1 | 2>;
-
-export type ENV = Ref<'WEB' | 'MINI_APP'>;
 
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
@@ -45,14 +44,12 @@ export function storeFactory() {
     }
 
     const hydrationStatus: HydrationStatus = ref(0);
-    const env: ENV = ref('WEB');
 
     return {
         getModelInstance,
         addModel,
         removeModel,
         hydrationStatus,
-        env,
     };
 }
 
@@ -86,7 +83,8 @@ export function createStore() {
             store,
             rebornClient,
         });
-        store.env.value = env;
+
+        setEnv(env);
     }
 
     const result = {
