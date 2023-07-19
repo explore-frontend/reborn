@@ -13,6 +13,8 @@ export type Store = ReturnType<typeof storeFactory>;
 // 0: 还未开始，1: 已注册，2: hydration完毕
 export type HydrationStatus = Ref<0 | 1 | 2>;
 
+export type ENV = Ref<'WEB' | 'MINI_APP'>;
+
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
 
@@ -43,12 +45,14 @@ export function storeFactory() {
     }
 
     const hydrationStatus: HydrationStatus = ref(0);
+    const env: ENV = ref('WEB');
 
     return {
         getModelInstance,
         addModel,
         removeModel,
         hydrationStatus,
+        env,
     };
 }
 
@@ -75,13 +79,14 @@ export function createStore() {
     }
 
     // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(app: ReturnType<typeof createApp>) {
+    function install(app: ReturnType<typeof createApp>, env: 'WEB' | 'MINI_APP' = 'WEB') {
         app.config.globalProperties.rebornStore = store;
         app.config.globalProperties.rebornClient = rebornClient;
         app.provide(INJECT_KEY, {
             store,
             rebornClient,
         });
+        store.env.value = env;
     }
 
     const result = {
