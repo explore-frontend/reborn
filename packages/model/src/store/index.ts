@@ -1,9 +1,10 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
-import type { VueConstructor, Ref } from 'vue';
-import Vue from 'vue';
+import type { Ref } from 'vue-demi';
+import type { VueConstructor } from 'vue'
 import type { Client, RebornClient } from '../clients';
 
+import Vue from 'vue';
 import { ref } from 'vue-demi';
 import { INJECT_KEY, setMode } from '../const';
 
