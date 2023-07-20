@@ -1,6 +1,7 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
-import type { VueConstructor, Ref } from 'vue-demi';
+import type { Ref } from 'vue-demi';
+import type { VueConstructor } from 'vue'
 import type { Client, RebornClient } from '../clients';
 
 import { ref } from 'vue';
