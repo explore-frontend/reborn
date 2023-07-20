@@ -2,9 +2,9 @@ name: Gated
 
 on:
   push:
-    branches: [ "vue-2.7" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "vue-2.7" ]
+    branches: [ "master" ]
 
 jobs:
   build:
