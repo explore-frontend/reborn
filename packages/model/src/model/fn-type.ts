@@ -6,7 +6,7 @@ import type {
     RestQueryOptions,
 } from '../operations/types';
 import type { GetModelInstance } from '../store';
-import type { Ref } from 'vue-demi';
+import type { Ref } from '@vue/composition-api';
 
 import {
     createGQLMutation,

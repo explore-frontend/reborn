@@ -17,7 +17,7 @@
         "README.md"
     ],
     "scripts": {
-        "type-check": "tsc --project ./tsconfig.lib.json --skipLibCheck && vue-tsc --project ./tsconfig.test.json --skipLibCheck && vue-tsc --project ./tsconfig.examples.json --skipLibCheck",
+        "type-check": "tsc --project ./tsconfig.lib.json --skipLibCheck && vue-tsc --project ./tsconfig.test.json && vue-tsc --project ./tsconfig.examples.json",
         "build": "rollup -c ./rollup.config.mjs",
         "serve": "ts-node --project ./tsconfig.examples.json examples/server/index.ts",
         "docs:dev": "vuepress dev docs",
@@ -29,11 +29,11 @@
         "graphql": "^16.6.0"
     },
     "peerDependencies": {
-        "@vue/composition-api": "^1.7.1",
+        "@vue/composition-api": "^1.1.0",
         "rxjs": "^7.8.1",
-        "vue": "~2.6.14",
-        "vue-demi": "^0.14.5",
-        "vue-router": "~3.5.4"
+        "vue": "~2.6.0",
+        "vue-demi": "^0.14.0",
+        "vue-router": "~3.5.1"
     },
     "devDependencies": {
         "@kwai-explore/tsconfig": "^0.0.3",
@@ -41,8 +41,8 @@
         "@types/node": "^18.16.16",
         "@typescript-eslint/parser": "^5.59.8",
         "@vitest/coverage-c8": "^0.31.1",
-        "@vue/composition-api": "^1.7.1",
-        "@vue/runtime-dom": "^3.3.4",
+        "@vue/composition-api": "^1.1.0",
+        "@vue/runtime-dom": "^3.2.31",
         "eslint": "^8.41.0",
         "express": "^4.18.2",
         "jsdom": "^22.1.0",
@@ -61,9 +61,9 @@
         "vite-plugin-vue2": "^2.0.3",
         "vitest": "^0.31.1",
         "vitest-fetch-mock": "^0.2.2",
-        "vue": "~2.6.14",
-        "vue-demi": "^0.14.5",
-        "vue-router": "~3.5.4",
+        "vue": "~2.6.0",
+        "vue-demi": "^0.14.0",
+        "vue-router": "~3.5.1",
         "vue-template-babel-compiler": "^2.0.0",
         "vue-template-compiler": "~2.6.0",
         "vue-tsc": "^1.7.8",
