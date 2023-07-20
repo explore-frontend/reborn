@@ -1,6 +1,6 @@
 {
     "name": "vue-apollo-model",
-    "version": "0.10.2-alpha1",
+    "version": "0.10.2-alpha2",
     "main": "dist/model.js",
     "module": "dist/model.mjs",
     "typings": "dist/src/index.d.ts",
