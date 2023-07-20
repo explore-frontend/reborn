@@ -36,6 +36,7 @@ function parseResponse(url: string, res: any) {
                 for (const key in header) {
                     // eslint-disable-next-line no-prototype-builtins
                     if (header.hasOwnProperty(key)) {
+                        // @ts-expect-error
                         all.push([key, header[key]]);
                     }
                 }
@@ -85,7 +86,7 @@ export function createApp() {
 
     store.registerClient('REST', restClient);
 
-    app.use(store, 'MINI_APP');
+    app.use(store);
 
     return {
         app,

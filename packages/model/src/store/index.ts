@@ -2,10 +2,9 @@ import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
 import type { createApp, Ref } from 'vue';
 import type { Client, RebornClient } from '../clients';
-import type { ENV as ORIGINAL_ENV } from '../const';
 
 import { ref } from 'vue';
-import { INJECT_KEY, setEnv } from '../const';
+import { INJECT_KEY, setSSRMode } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
@@ -76,7 +75,7 @@ export function createStore() {
     }
 
     // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(app: ReturnType<typeof createApp>, env: 'WEB' | 'MINI_APP' = 'WEB') {
+    function install(app: ReturnType<typeof createApp>, ssrMode: boolean = false) {
         app.config.globalProperties.rebornStore = store;
         app.config.globalProperties.rebornClient = rebornClient;
         app.provide(INJECT_KEY, {
@@ -84,7 +83,9 @@ export function createStore() {
             rebornClient,
         });
 
-        setEnv(env);
+        if (ssrMode) {
+            setSSRMode();
+        }
     }
 
     const result = {

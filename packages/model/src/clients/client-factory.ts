@@ -3,7 +3,7 @@ import type { CommonResponse } from './interceptor';
 import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
 import type { HydrationStatus } from '../store';
 import { ReplaySubject } from 'rxjs';
-import { IS_SERVER, env } from '../const';
+import { MODE } from '../const';
 
 import { createCache, hash } from '../cache';
 
@@ -84,13 +84,14 @@ export function clientFactory(
         : deepMerge({} as ClientOptions, DEFAULT_OPTIONS);
     if (!opts.fetch) {
         // 避免Node环境下的判断，所以没法简化写=。=，因为window.fetch会触发一次RHS导致报错
-        if (!IS_SERVER) {
-            if (window.fetch) {
+        if (MODE === 'SPA') {
+            // 小程序因为没有window，所以需要这里绕一下
+            if (typeof window !== 'undefined' && window.fetch) {
                 opts.fetch = (resource, options) => window.fetch(resource, options);
             } else {
                 throw new Error('create client need a fetch function to init');
             }
-        } else if (IS_SERVER) {
+        } else if (MODE === 'SSR') {
             if (globalThis.fetch) {
                 opts.fetch = (resource, options) => globalThis.fetch(resource, options);
             } else {
@@ -140,7 +141,7 @@ export function clientFactory(
             const timeoutPromise = new Promise<DOMException | TimeoutError>((resolve) => {
                 setTimeout(
                     () => {
-                        if (IS_SERVER) {
+                        if (MODE ==='SSR') {
                             resolve(new TimeoutError('The request has been timeout'))
                         } else {
                             resolve(new DOMException('The request has been timeout'))
@@ -153,7 +154,7 @@ export function clientFactory(
         }).then((res) => {
             // 浏览器断网情况下有可能会是null
             if (res === null) {
-                res = IS_SERVER
+                res = MODE === 'SSR'
                     ? new TimeoutError('The request has been timeout')
                     : new DOMException('The request has been timeout');
             }

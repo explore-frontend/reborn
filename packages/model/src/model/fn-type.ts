@@ -15,7 +15,7 @@ import {
     createRestQuery,
 } from '../operations';
 import { getCurrentInstance, toRefs } from 'vue';
-import { getRootStore, IS_SERVER, env } from '../const';
+import { getRootStore, MODE } from '../const';
 import { useStatus } from '../operations/status';
 
 
@@ -116,8 +116,7 @@ export function createModelFromCA<T>(
             const { model, queryList } = fn.creator();
 
             // 延迟初始化，保证query间依赖
-            debugger;
-            if (queryList.length && (!IS_SERVER || env === 'MINI_APP')) {
+            if (queryList.length && MODE !== 'SSR') {
                 queryList.forEach(query => query.init());
             }
 
