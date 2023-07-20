@@ -6,7 +6,7 @@ export { hash } from './hash';
 export function createCache() {
     let cacheData: Record<string, unknown> = {};
     function restore(data: Record<string, unknown>) {
-        cacheData = data;
+        cacheData = data || {};
     }
 
     function put(key: string, value: unknown) {

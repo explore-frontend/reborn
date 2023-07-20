@@ -18,18 +18,17 @@ describe(`model should has it's own effect scope`, () => {
         });
 
         client.interceptors.response.use(data => {
-            return data.data;
+            return JSON.parse(data.data);
         });
 
         store.registerClient('REST', client);
 
         const app = createSSRApp(App);
-        app.use(store);
+        app.use(store, true);
 
 
         const html = await renderToString(app, {});
-        console.error(html)
-        expect(1).toBe(1);
+        expect(html).toBe('<div><span>2</span><span>4</span><span>false</span><span>1</span><span>2</span></div>');
     });
 });
 

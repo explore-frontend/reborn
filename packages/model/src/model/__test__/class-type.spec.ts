@@ -8,6 +8,7 @@ import {
     watch,
     h,
     createApp,
+    ref,
 } from 'vue';
 
 import { createModelFromClass } from '../class-type';
@@ -84,6 +85,7 @@ describe('transform model success', () => {
                         removeModel: vi.fn(),
                         restore: vi.fn(),
                         exportStates: vi.fn(),
+                        hydrationStatus: ref(0),
                     },
                     rebornClient: {
                         rest: restClient,
@@ -143,6 +145,7 @@ describe('transform model success', () => {
                         removeModel: vi.fn(),
                         restore: vi.fn(),
                         exportStates: vi.fn(),
+                        hydrationStatus: ref(0),
                     },
                     rebornClient: {
                         rest: restClient,

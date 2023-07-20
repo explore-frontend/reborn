@@ -5,6 +5,12 @@ import { inject } from 'vue';
 
 export const INJECT_KEY = 'REBORN_STORE_KEY';
 
+export let MODE: 'SPA' | 'SSR' = 'SPA';
+
+export function setMode(mode: 'SPA' | 'SSR') {
+    MODE = mode;
+}
+
 export function getRootStore(): {
     store: ReturnType<typeof storeFactory>;
     rebornClient: RebornClient;

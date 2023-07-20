@@ -8,7 +8,8 @@ import {
     createGQLQuery,
     createRestQuery,
 } from '../operations';
-import { getRootStore } from '../const';
+
+import { getRootStore, MODE } from '../const';
 import { computed, reactive, getCurrentInstance } from 'vue';
 import { useStatus } from '../operations/status';
 
@@ -359,7 +360,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
             });
 
             // 延迟初始化，保证query间依赖
-            if (queryList.length && typeof window !== 'undefined') {
+            if (queryList.length && MODE !== 'SSR') {
                 queryList.forEach(query => query.init());
             }
 

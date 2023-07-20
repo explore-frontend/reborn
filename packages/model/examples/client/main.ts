@@ -27,7 +27,7 @@ export function createApp(customFetch?: Fetch) {
         render: () => h(App),
     });
 
-    app.use(store);
+    app.use(store, customFetch && true);
     app.use(router);
 
     return { app, router, cache };

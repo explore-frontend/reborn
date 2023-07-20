@@ -22,13 +22,25 @@ import { mockAPI } from './mockAPI/index';
     app.use(vite.middlewares);
     app.use('*', async (req, res, next) => {
         const url = req.originalUrl;
-        console.error(url)
+        // 没引入CDN的favicon，所以这里绕一下先
+        if (url === '/favicon.ico') {
+            res.end('');
+            next();
+            return;
+        }
         try {
             // serve index.html - we will tackle this next
             const htmlTemplate = readFileSync(
                 resolve(__dirname, '../index.html'),
                 'utf-8',
             );
+            if (req.query.csr) {
+                console.error('CSR', url);
+                res.status(200).set({ 'Content-Type': 'text/html' }).end(htmlTemplate);
+                next();
+                return;
+            }
+            console.error('SSR', url);
 
             const template = await vite.transformIndexHtml(url, htmlTemplate);
             const { render } = await vite.ssrLoadModule('/examples/client/entry-server.ts');

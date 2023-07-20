@@ -9,7 +9,8 @@ defineExpose({
 </script>
 <template>
     <div>
-        <span>{{ data }}</span>
+        <span>{{ data?.a }}</span>
+        <span>{{ data?.b }}</span>
         <span>{{ loading }}</span>
         <span>{{ a }}</span>
         <span>{{ b }}</span>

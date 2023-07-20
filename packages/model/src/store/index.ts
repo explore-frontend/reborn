@@ -1,16 +1,17 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
-import type { createApp } from 'vue';
+import type { createApp, Ref } from 'vue';
 import type { Client, RebornClient } from '../clients';
 
-import { INJECT_KEY } from '../const';
+import { ref } from 'vue';
+import { INJECT_KEY, setMode } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
 export type Store = ReturnType<typeof storeFactory>;
 
 // 0: 还未开始，1: 已注册，2: hydration完毕
-export type HydrationStatus = 0 | 1 | 2;
+export type HydrationStatus = Ref<0 | 1 | 2>;
 
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
@@ -41,7 +42,7 @@ export function storeFactory() {
         }
     }
 
-    let hydrationStatus = 0 as HydrationStatus;
+    const hydrationStatus: HydrationStatus = ref(0);
 
     return {
         getModelInstance,
@@ -74,13 +75,15 @@ export function createStore() {
     }
 
     // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(app: ReturnType<typeof createApp>) {
+    function install(app: ReturnType<typeof createApp>, ssrMode: boolean = false) {
         app.config.globalProperties.rebornStore = store;
         app.config.globalProperties.rebornClient = rebornClient;
         app.provide(INJECT_KEY, {
             store,
             rebornClient,
         });
+
+        setMode(ssrMode ? 'SSR' : 'SPA');
     }
 
     const result = {
