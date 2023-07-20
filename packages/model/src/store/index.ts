@@ -4,7 +4,7 @@ import type { createApp, Ref } from 'vue';
 import type { Client, RebornClient } from '../clients';
 
 import { ref } from 'vue';
-import { INJECT_KEY, setSSRMode } from '../const';
+import { INJECT_KEY, setMode } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
@@ -83,9 +83,7 @@ export function createStore() {
             rebornClient,
         });
 
-        if (ssrMode) {
-            setSSRMode();
-        }
+        setMode(ssrMode ? 'SSR' : 'SPA');
     }
 
     const result = {

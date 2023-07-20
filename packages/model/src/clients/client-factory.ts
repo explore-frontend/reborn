@@ -82,23 +82,6 @@ export function clientFactory(
     const opts = options
         ? deepMerge({} as ClientOptions, DEFAULT_OPTIONS, options)
         : deepMerge({} as ClientOptions, DEFAULT_OPTIONS);
-    if (!opts.fetch) {
-        // 避免Node环境下的判断，所以没法简化写=。=，因为window.fetch会触发一次RHS导致报错
-        if (MODE === 'SPA') {
-            // 小程序因为没有window，所以需要这里绕一下
-            if (typeof window !== 'undefined' && window.fetch) {
-                opts.fetch = (resource, options) => window.fetch(resource, options);
-            } else {
-                throw new Error('create client need a fetch function to init');
-            }
-        } else if (MODE === 'SSR') {
-            if (globalThis.fetch) {
-                opts.fetch = (resource, options) => globalThis.fetch(resource, options);
-            } else {
-                throw new Error('create client need a fetch function to init');
-            }
-        }
-    }
     const requestInterceptor = createInterceptor<Params>('request');
     const responseInterceptor = createInterceptor<CommonResponse>('response');
 
@@ -131,6 +114,24 @@ export function clientFactory(
         return promise.then(params => {
             // TODO这里的
             request = createRequestInfo(type, params);
+
+            if (!opts.fetch) {
+                // 避免Node环境下的判断，所以没法简化写=。=，因为window.fetch会触发一次RHS导致报错
+                if (MODE === 'SPA') {
+                    // 小程序因为没有window，所以需要这里绕一下
+                    if (typeof window !== 'undefined' && window.fetch) {
+                        opts.fetch = (resource, options) => window.fetch(resource, options);
+                    } else {
+                        throw new Error('There is no useful "fetch" function');
+                    }
+                } else if (MODE === 'SSR') {
+                    if (globalThis.fetch) {
+                        opts.fetch = (resource, options) => globalThis.fetch(resource, options);
+                    } else {
+                        throw new Error('There is no useful "fetch" function');
+                    }
+                }
+            }
 
             const {
                 url,

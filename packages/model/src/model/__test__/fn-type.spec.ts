@@ -8,6 +8,7 @@ import {
     watch,
     h,
     createApp,
+    ref,
 } from 'vue';
 
 import { createClient } from '../../clients';
@@ -32,7 +33,7 @@ import 'unfetch/polyfill'
 const restClient = createClient('REST', {
     method: 'post',
     headers: {
-        "content-type": 'application/x-www-form-urlencoded',
+        'content-type': 'application/x-www-form-urlencoded',
     },
     timeout: 10 * 1000,
 });
@@ -156,6 +157,7 @@ describe('transform model success', () => {
                         removeModel: vi.fn(),
                         restore: vi.fn(),
                         exportStates: vi.fn(),
+                        hydrationStatus: ref(2),
                     },
                     rebornClient: {
                         rest: restClient,
@@ -236,6 +238,7 @@ describe('transform model with compose success', () => {
                         removeModel: vi.fn(),
                         restore: vi.fn(),
                         exportStates: vi.fn(),
+                        hydrationStatus: ref(2),
                     },
                     rebornClient: {
                         rest: restClient,

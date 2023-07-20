@@ -7,8 +7,8 @@ export const INJECT_KEY = 'REBORN_STORE_KEY';
 
 export let MODE: 'SPA' | 'SSR' = 'SPA';
 
-export function setSSRMode() {
-    MODE = 'SSR';
+export function setMode(mode: 'SPA' | 'SSR') {
+    MODE = mode;
 }
 
 export function getRootStore(): {
