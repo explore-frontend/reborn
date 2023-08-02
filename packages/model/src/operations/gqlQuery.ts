@@ -5,9 +5,10 @@ import type { Client } from '../clients';
 import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { HydrationStatus } from '../store';
 
-import { computed, nextTick } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { interval } from 'rxjs';
 import { generateQueryOptions } from './core';
+import type { RequestReason } from './status';
 
 export function createGQLQuery<ModelType, DataType>(
     option: GQLQueryOptions<ModelType, DataType>,
@@ -25,6 +26,8 @@ export function createGQLQuery<ModelType, DataType>(
         pollInterval,
         variables,
     } = generateQueryOptions<ModelType, DataType>(option, route, model);
+
+    const requestReason = ref<RequestReason>(0)
 
     const queryOptions = computed(() => {
         return {
@@ -101,6 +104,8 @@ export function createGQLQuery<ModelType, DataType>(
         destroy,
         fetchMore,
         refetch,
+        prefetch: refetch,
         onNext,
+        requestReason
     };
 }

@@ -39,7 +39,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     );
     tempQueryList.push(query);
 
-    const status = useStatus(query.info);
+    const status = useStatus(query.info, query.requestReason);
     const { loading, error, data } = toRefs(query.info);
 
     return {
@@ -51,6 +51,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,
+        requestReason: query.requestReason
     };
 };
 
@@ -66,7 +67,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     const query = createGQLQuery<null, T>(options, null, route, store.hydrationStatus, client.rest);
     tempQueryList.push(query);
 
-    const status = useStatus(query.info);
+    const status = useStatus(query.info, query.requestReason);
     const { loading, error, data } = toRefs(query.info);
 
     return {
@@ -78,6 +79,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,
+        requestReason: query.requestReason
     }
 }
 
@@ -121,7 +123,7 @@ export function createModelFromCA<T>(
             }
 
             function prefetch() {
-                return Promise.all(queryList.map(query => query.refetch()));
+                return Promise.all(queryList.map(query => query.prefetch()));
             }
 
             function destroy() {

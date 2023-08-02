@@ -6,8 +6,9 @@ import type { Client, RestRequestConfig } from '../clients';
 import type { HydrationStatus, Store } from '../store';
 
 import { generateQueryOptions } from './core';
-import { computed } from 'vue';
+import { computed, ref, type Ref } from 'vue';
 import { deepMerge } from '../utils';
+import { RequestReason } from './status';
 
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
@@ -19,13 +20,11 @@ export function createRestQuery<ModelType, DataType>(
     if (!client) {
         throw new Error('No Rest Client has been set');
     }
-    const {
-        info,
-        skip,
-        variables,
-        fetchQuery$,
-        prefetch,
-    } = generateQueryOptions<ModelType, DataType>(option, route, model);
+    const { info, skip, variables, fetchQuery$, prefetch } = generateQueryOptions<ModelType, DataType>(
+        option,
+        route,
+        model,
+    );
 
     const url = computed(() => {
         if (typeof option.url === 'function') {
@@ -34,9 +33,9 @@ export function createRestQuery<ModelType, DataType>(
         return option.url;
     });
 
-    function refetch() {
+    function fetch() {
         info.loading = true;
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             const clientParams = {
                 url: url.value,
                 headers: option.headers,
@@ -46,11 +45,7 @@ export function createRestQuery<ModelType, DataType>(
                 timeout: option.timeout,
             };
             // TODO后面再重写一下
-            const subject = client!.query<DataType>(
-                clientParams,
-                option.fetchPolicy,
-                hydrationStatus,
-            );
+            const subject = client!.query<DataType>(clientParams, option.fetchPolicy, hydrationStatus);
             subject.subscribe({
                 next: (data) => {
                     info.error = null;
@@ -68,19 +63,21 @@ export function createRestQuery<ModelType, DataType>(
                 complete: () => {
                     // TODO先临时搞一下，后面再看怎么串一下Observable
                     subject.unsubscribe();
-                }
+                },
             });
         });
     }
 
     let sub: Subscription | null = null;
 
+    const requestReason = ref<RequestReason>(RequestReason.setVariables);
     function init() {
-        sub = fetchQuery$.subscribe(() => {
+        sub = fetchQuery$.subscribe((reason) => {
             if (skip.value) {
                 return;
             }
-            refetch();
+            requestReason.value = reason;
+            fetch();
         });
     }
 
@@ -92,7 +89,8 @@ export function createRestQuery<ModelType, DataType>(
     }
 
     function fetchMore(variables: RestFetchMoreOption['variables']) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
+            requestReason.value = RequestReason.fetchMore
             info.loading = true;
             const params: RestRequestConfig = {
                 url: url.value,
@@ -105,11 +103,7 @@ export function createRestQuery<ModelType, DataType>(
                 params.headers = deepMerge({}, params.headers || {}, option.headers);
             }
 
-            const observable = client!.query<DataType>(
-                params,
-                option.fetchPolicy,
-                hydrationStatus,
-            );
+            const observable = client!.query<DataType>(params, option.fetchPolicy, hydrationStatus);
             observable.subscribe({
                 next: (data) => {
                     info.error = null;
@@ -126,16 +120,21 @@ export function createRestQuery<ModelType, DataType>(
         });
     }
 
-    function onNext(sub: (params: { data: DataType; loading: boolean, error: any}) => void) {
+    function onNext(sub: (params: { data: DataType; loading: boolean; error: any }) => void) {
         // TODO
     }
 
     return {
         info,
         init,
-        refetch,
+        refetch: () => {
+            requestReason.value = RequestReason.refetch;
+            fetch();
+        },
+        prefetch: fetch,
         fetchMore,
         destroy,
         onNext,
+        requestReason,
     };
 }

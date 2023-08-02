@@ -6,12 +6,12 @@ import type {
     RestMutationOptions,
     GQLMutationOptions,
 } from './types';
-import type { InfoDataType } from './status';
+import { RequestReason, type InfoDataType } from './status';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 import { reactive, computed, watch } from 'vue';
 import { fromWatch } from '../utils';
-import { Observable, merge } from 'rxjs';
+import { Observable, merge, map } from 'rxjs';
 
 export function isDef<T>(v: T): v is NonNullable<T> {
     return v !== undefined && v !== null;
@@ -55,8 +55,9 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
-    const variables$ = fromWatch(() => variables.value, { immediate: true });
-    const pollInterval$ = new Observable<'Interval'>(subscriber => {
+
+    const variables$ = fromWatch(() => variables.value, { immediate: true }).pipe(map(i => RequestReason.setVariables));
+    const pollInterval$ = new Observable<RequestReason.poll>(subscriber => {
         let timeout: ReturnType<typeof setTimeout>;
         watch(() => pollInterval.value, (val, oldVal) => {
             if (val === oldVal) {
@@ -70,7 +71,7 @@ export function generateQueryOptions<ModelType, DataType>(
             poll();
         }, { immediate: true })
         const doInterval = () => {
-            subscriber.next('Interval');
+            subscriber.next(RequestReason.poll);
             poll();
         }
 
