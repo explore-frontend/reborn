@@ -125,7 +125,7 @@ function initRebornDesc<T>(
                 )
             }
 
-            const status = useStatus(query.info);
+            const status = useStatus(query.info, query.requestReason);
 
             const value = {
                 get data() {
@@ -365,7 +365,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
             }
 
             function prefetch() {
-                return Promise.all(queryList.map(query => query.refetch()));
+                return Promise.all(queryList.map(query => query.prefetch()));
             }
 
             return {

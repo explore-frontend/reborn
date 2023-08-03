@@ -1,50 +1,36 @@
-import type { ComputedRef } from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 
 import { computed } from 'vue';
 import { isDef } from './core';
 
 export interface InfoDataType<T> {
-    data: T | undefined
-    loading: boolean
-    error: any
+    data: T | undefined;
+    loading: boolean;
+    error: any;
 }
 
-enum NetworkStatus {
-    /**
-     * The query has never been run before and the query is now currently running. A query will still
-     * have this network status even if a partial data result was returned from the cache, but a
-     * query was dispatched anyway.
-     */
-    loading = 1,
+export enum RequestReason {
     /**
      * If `setVariables` was called and a query was fired because of that then the network status
      * will be `setVariables` until the result of that query comes back.
      */
-    setVariables = 2,
+    setVariables = 0,
     /**
      * Indicates that `fetchMore` was called on this query and that the query created is currently in
      * flight.
      */
-    fetchMore = 3,
+    fetchMore = 1,
     /**
      * Similar to the `setVariables` network status. It means that `refetch` was called on a query
      * and the refetch request is currently in flight.
      */
-    refetch = 4,
+    refetch = 2,
     /**
      * Indicates that a polling query is currently in flight. So for example if you are polling a
      * query every 10 seconds then the network status will switch to `poll` every 10 seconds whenever
      * a poll request has been sent but not resolved.
      */
-    poll = 6,
-    /**
-     * No request is in flight for this query, and no errors happened. Everything is OK.
-     */
-    ready = 7,
-    /**
-     * No request is in flight for this query, but one or more errors were detected.
-     */
-    error = 8,
+    poll = 3,
 }
 
 /**
@@ -84,52 +70,76 @@ export enum StateStatus {
      * 刷新错误状态，出现在刷新数据的请求失败的时候。
      */
     RefreshError = 'RefreshError',
+
+    /**
+     * 请求更多状态，出现在进入页面完成请求后, 调用 fetchMore。
+     */
+    FetchMore = 'FetchMore',
+    /**
+     * 请求更多错误状态，出现在请求更多数据数据的请求失败的时候。
+     */
+    FetchMoreError = 'FetchMoreError',
+
+    Pool = 'Pool',
+
+    PoolError = 'PoolError',
 }
 
-export type DoneLikeStatus =
-    | StateStatus.Done
-    | StateStatus.Refresh
-    | StateStatus.RefreshError;
+export type DoneLikeStatus = StateStatus.Done | StateStatus.Refresh | StateStatus.RefreshError;
 
-export type LoadingLikeStatus =
-    | StateStatus.Loading
-    | StateStatus.Refresh;
+export type LoadingLikeStatus = StateStatus.Loading | StateStatus.Refresh;
 
-export type ErrorLikeStatus =
-    | StateStatus.Error
-    | StateStatus.RefreshError;
+export type ErrorLikeStatus = StateStatus.Error | StateStatus.RefreshError;
 
 export function isEmptyState(v: StateStatus): v is StateStatus.Empty {
-    return v === StateStatus.Empty
+    return v === StateStatus.Empty;
 }
 
 export function isLoadingState(v: StateStatus): v is StateStatus.Loading {
-    return v === StateStatus.Loading
+    return v === StateStatus.Loading;
 }
 
 export function isDoneState(v: StateStatus): v is StateStatus.Done {
-    return v === StateStatus.Done
+    return v === StateStatus.Done;
 }
 
 export function isErrorState(v: StateStatus): v is StateStatus.Error {
-    return v === StateStatus.Error
+    return v === StateStatus.Error;
 }
 
 export function isRefreshState(v: StateStatus): v is StateStatus.Refresh {
-    return v === StateStatus.Refresh
+    return v === StateStatus.Refresh;
 }
 
 export function isRefreshErrorState(v: StateStatus): v is StateStatus.RefreshError {
-    return v === StateStatus.RefreshError
+    return v === StateStatus.RefreshError;
+}
+
+export function isFetchMoreState(v: StateStatus): v is StateStatus.FetchMore {
+    return v === StateStatus.FetchMore;
+}
+
+export function isFetchMoreErrorState(v: StateStatus): v is StateStatus.FetchMoreError {
+    return v === StateStatus.FetchMoreError;
+}
+
+export function isPoolState(v: StateStatus): v is StateStatus.Pool {
+    return v === StateStatus.Pool;
+}
+
+export function isPoolErrorState(v: StateStatus): v is StateStatus.Pool {
+    return v === StateStatus.PoolError;
 }
 
 export function isLoadingLikeState(v: StateStatus): v is LoadingLikeStatus {
     switch (v) {
         case StateStatus.Loading:
         case StateStatus.Refresh:
-            return true
+        case StateStatus.FetchMore:
+        case StateStatus.Pool:
+            return true;
         default:
-            return false
+            return false;
     }
 }
 
@@ -138,9 +148,9 @@ export function isDoneLikeState<T>(v: StateStatus): v is DoneLikeStatus {
         case StateStatus.Done:
         case StateStatus.Refresh:
         case StateStatus.RefreshError:
-            return true
+            return true;
         default:
-            return false
+            return false;
     }
 }
 
@@ -148,6 +158,8 @@ export function isErrorLikeState<T>(v: StateStatus): v is ErrorLikeStatus {
     switch (v) {
         case StateStatus.Error:
         case StateStatus.RefreshError:
+        case StateStatus.FetchMoreError:
+        case StateStatus.PoolError:
             return true;
         default:
             return false;
@@ -156,69 +168,81 @@ export function isErrorLikeState<T>(v: StateStatus): v is ErrorLikeStatus {
 
 export function assertLoadingLikeState<T>(v: StateStatus): asserts v is LoadingLikeStatus {
     if (!isLoadingLikeState(v)) {
-        throw new Error(`Expected LoadingLikeState, but got ${v}`)
+        throw new Error(`Expected LoadingLikeState, but got ${v}`);
     }
 }
 
 export function assertDoneLikeState<T>(v: StateStatus): asserts v is DoneLikeStatus {
     if (!isDoneLikeState(v)) {
-        throw new Error(`Expected DoneLikeState, but got ${v}`)
+        throw new Error(`Expected DoneLikeState, but got ${v}`);
     }
 }
 
 export function assertErrorLikeState<T>(v: StateStatus): asserts v is ErrorLikeStatus {
     if (!isErrorLikeState(v)) {
-        throw new Error(`Expected ErrorLikeState, but got ${v}`)
+        throw new Error(`Expected ErrorLikeState, but got ${v}`);
     }
 }
 
 export function assertEmptyState<T>(v: StateStatus): asserts v is StateStatus.Empty {
     if (!isEmptyState(v)) {
-        throw new Error(`Expected EmptyState, but got ${v}`)
+        throw new Error(`Expected EmptyState, but got ${v}`);
     }
 }
 
 export function assertLoadingState<T>(v: StateStatus): asserts v is StateStatus.Loading {
     if (!isLoadingState(v)) {
-        throw new Error(`Expected LoadingState, but got ${v}`)
+        throw new Error(`Expected LoadingState, but got ${v}`);
     }
 }
 
 export function assertDoneState<T>(v: StateStatus): asserts v is StateStatus.Done {
     if (!isDoneState(v)) {
-        throw new Error(`Expected DoneState, but got ${v}`)
+        throw new Error(`Expected DoneState, but got ${v}`);
     }
 }
 
 export function assertErrorState<T>(v: StateStatus): asserts v is StateStatus.Error {
     if (!isErrorState(v)) {
-        throw new Error(`Expected ErrorState, but got ${v}`)
+        throw new Error(`Expected ErrorState, but got ${v}`);
     }
 }
 
 export function assertRefreshState<T>(v: StateStatus): asserts v is StateStatus.Refresh {
     if (!isRefreshState(v)) {
-        throw new Error(`Expected RefreshState, but got ${v}`)
+        throw new Error(`Expected RefreshState, but got ${v}`);
     }
 }
 
 export function assertRefreshErrorState<T>(v: StateStatus): asserts v is StateStatus.RefreshError {
     if (!isRefreshErrorState(v)) {
-        throw new Error(`Expected RefreshErrorState, but got ${v}`)
+        throw new Error(`Expected RefreshErrorState, but got ${v}`);
     }
 }
 
-export function useStatus<T>(info: InfoDataType<T>): ComputedRef<StateStatus> {
+export function useStatus<T>(info: InfoDataType<T>, requestReason: Ref<RequestReason>): ComputedRef<StateStatus> {
     return computed(() => {
         if (info.loading) {
             if (!isDef(info.data)) {
                 return StateStatus.Loading;
+            }
+            if (requestReason.value === RequestReason.fetchMore) {
+                return StateStatus.FetchMore;
+            }
+            if (requestReason.value === RequestReason.poll) {
+                return StateStatus.Pool;
             }
             return StateStatus.Refresh;
         }
         if (isDef(info.error)) {
             if (!isDef(info.data)) {
                 return StateStatus.Error;
+            }
+            if (requestReason.value === RequestReason.fetchMore) {
+                return StateStatus.FetchMoreError;
+            }
+            if (requestReason.value === RequestReason.poll) {
+                return StateStatus.PoolError;
             }
             return StateStatus.RefreshError;
         }
