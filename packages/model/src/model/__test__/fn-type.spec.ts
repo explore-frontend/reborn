@@ -16,11 +16,9 @@ import { createModelFromCA } from '../fn-type';
 import { INJECT_KEY } from '../../const';
 
 import {
-    // isEmptyState,
     isLoadingState,
     isDoneState,
-    // isErrorState,
-    isRefreshState,
+    isFetchMoreState,
     isRefreshErrorState,
     isLoadingLikeState,
     isDoneLikeState,
@@ -140,7 +138,7 @@ describe('transform model success', () => {
                         model.fetchMore({
                             mockData: '12',
                         });
-                        expect(isRefreshState(model.status.value)).toBe(true);
+                        expect(isFetchMoreState(model.status.value)).toBe(true);
                     }, 300);
                 })
                 return () => null;
