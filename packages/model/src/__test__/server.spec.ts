@@ -21,7 +21,7 @@ describe(`model should has it's own effect scope`, () => {
             return JSON.parse(data.data);
         });
 
-        store.registerClient('REST', client);
+        store.registerClient(client);
 
         const app = createSSRApp(App);
         app.use(store, true);

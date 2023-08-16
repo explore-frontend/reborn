@@ -84,7 +84,7 @@ export function createApp() {
         return data.data;
     });
 
-    store.registerClient('REST', restClient);
+    store.registerClient(restClient);
 
     app.use(store);
 

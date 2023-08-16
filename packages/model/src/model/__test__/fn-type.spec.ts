@@ -29,6 +29,7 @@ import {
 
 import { MockModel, MockComposeModel } from './mock-models/fn-type';
 import 'unfetch/polyfill'
+import { isFetchMoreState } from '../../operations';
 
 const restClient = createClient('REST', {
     method: 'post',
@@ -140,7 +141,7 @@ describe('transform model success', () => {
                         model.fetchMore({
                             mockData: '12',
                         });
-                        expect(isRefreshState(model.status.value)).toBe(true);
+                        expect(isFetchMoreState(model.status.value)).toBe(true);
                     }, 300);
                 })
                 return () => null;
