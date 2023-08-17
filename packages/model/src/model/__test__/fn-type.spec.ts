@@ -27,6 +27,7 @@ import {
 
 import { MockModel, MockComposeModel } from './mock-models/fn-type';
 import 'unfetch/polyfill'
+import { isFetchMoreState } from '../../operations';
 
 const restClient = createClient('REST', {
     method: 'post',

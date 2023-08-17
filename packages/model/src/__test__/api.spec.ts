@@ -16,7 +16,7 @@ describe(`model should has it's own effect scope`, () => {
         const store = createStore();
         const client = createClient('REST');
 
-        store.registerClient('REST', client);
+        store.registerClient(client);
 
         const app = createApp({
             // @ts-expect-error

@@ -23,7 +23,7 @@ export function createApp(customFetch?: Fetch) {
         return res.data;
     });
 
-    store.registerClient('REST', restClient);
+    store.registerClient(restClient);
     const app = createSSRApp({
         router,
         // @ts-expect-error

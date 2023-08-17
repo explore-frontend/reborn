@@ -311,5 +311,6 @@ export function clientFactory(
         interceptors,
         query: requestWithCache,
         mutate: request,
+        type
     };
 }

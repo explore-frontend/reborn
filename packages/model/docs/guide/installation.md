@@ -20,7 +20,7 @@ import CompositionAPI, { createApp, h } from '@vue/composition-api';
 
 Vue.use(CompositionAPI);
 
-const restClient = createClient('rest', {
+const restClient = createClient('REST', {
     method: 'post',
     timeout: 10 * 1000,
 });
@@ -46,7 +46,7 @@ restClient.interceptors.response.use(({ data }) => {
 const store = createStore();
 
 // 注册对应的Client
-store.registerClient('REST', restClient);
+store.registerClient(restClient);
 
 // 绑定Store与app实例的关系
 app.use(store);

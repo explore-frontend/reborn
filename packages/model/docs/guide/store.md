@@ -16,7 +16,9 @@ app.use(store);
 注册对应client，**注意** client为单例模式
 ```typescript
 // 注册Rest Client
-store.registerClient('REST', restClient);
+const restClient = createClient('REST')
+store.registerClient(restClient);
 // 注册GQL Client，暂不可用
-store.registerClient('GQL', restClient);
+const gqlClient = createClient('GQL')
+store.registerClient(gqlClient);
 ```
