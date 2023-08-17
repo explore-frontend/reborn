@@ -58,8 +58,8 @@ export function createStore() {
 
     const rebornClient: RebornClient = {};
 
-    function registerClient(type: 'REST' | 'GQL', client: Client): void {
-        if (type === 'REST') {
+    function registerClient(client: Client): void {
+        if (client.type === 'REST') {
             if (rebornClient.rest) {
                 console.warn('You have already registered a restClient yet');
                 return;
