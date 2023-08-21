@@ -1,8 +1,6 @@
 name: Release
 
 on:
-  push:
-    branches: [ "vue-2.7" ]
   workflow_dispatch:
     inputs:
       logLevel:
@@ -26,7 +24,3 @@ jobs:
         pnpm --version
     - run: pnpm i --no-frozen-lockfile
     - run: pnpm run --filter vue-apollo-model build
-    - uses: JS-DevTools/npm-publish@v1
-      with:
-        package: ./packages/model/package.json
-        token: ${{ secrets.NPM_TOKEN }}
