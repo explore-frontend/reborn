@@ -13,8 +13,10 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 16
-    - run: npm install -g pnpm@7.2.1
-    - run: pnpm i
+    - run: |
+        corepack enable
+        pnpm --version
+    - run: pnpm i --no-frozen-lockfile
     - run: pnpm run --filter vue-apollo-model build
     - uses: JS-DevTools/npm-publish@v1
       with:
