@@ -5,6 +5,7 @@ import type {
     GQLQueryOptions,
     RestMutationOptions,
     GQLMutationOptions,
+    CommonQueryOptions,
 } from './types';
 import { RequestReason, type InfoDataType } from './status';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
@@ -30,7 +31,7 @@ export function initDataType<DataType>() {
 }
 
 export function generateQueryOptions<ModelType, DataType>(
-    option: RestQueryOptions<ModelType, DataType> | GQLQueryOptions<ModelType, DataType>,
+    option: CommonQueryOptions<ModelType, DataType>,
     route: RouteLocationNormalizedLoaded,
     model: ModelType,
 ) {

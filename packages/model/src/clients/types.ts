@@ -13,6 +13,7 @@ export type Client = ReturnType<typeof createClient>;
 export type RebornClient = {
     gql?: Client,
     rest?: Client,
+    [key: string]: Client | undefined
 };
 
 type MethodType<T extends string> = Lowercase<T> | Uppercase<T>;
@@ -72,7 +73,7 @@ export type GQLMutationParams = {
 export type RestParams = {
     url: string;
     method?: Method;
-
+    credentials?: RequestCredentials;
     headers?: HTTPHeaders;
     variables?: Record<string, unknown>;
     timeout?: number;
