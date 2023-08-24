@@ -217,7 +217,7 @@ export function createRestQuery<ModelType, DataType>(
         init,
         refetch: () => {
             requestReason.value = RequestReason.refetch;
-            fetch();
+            return fetch();
         },
         prefetch: fetch,
         fetchMore,
