@@ -220,36 +220,38 @@ export function assertRefreshErrorState<T>(v: StateStatus): asserts v is StateSt
     }
 }
 
-export function useStatus<T>(info: InfoDataType<T>, requestReason: Ref<RequestReason>): ComputedRef<StateStatus> {
-    return computed(() => {
-        if (info.loading) {
-            if (!isDef(info.data)) {
-                return StateStatus.Loading;
-            }
-            if (requestReason.value === RequestReason.fetchMore) {
-                return StateStatus.FetchMore;
-            }
-            if (requestReason.value === RequestReason.poll) {
-                return StateStatus.Pool;
-            }
-            return StateStatus.Refresh;
-        }
-        if (isDef(info.error)) {
-            if (!isDef(info.data)) {
-                return StateStatus.Error;
-            }
-            if (requestReason.value === RequestReason.fetchMore) {
-                return StateStatus.FetchMoreError;
-            }
-            if (requestReason.value === RequestReason.poll) {
-                return StateStatus.PoolError;
-            }
-            return StateStatus.RefreshError;
-        }
-
+export function getStatus<T>(info: InfoDataType<T>, requestReason: RequestReason): StateStatus {
+    if (info.loading) {
         if (!isDef(info.data)) {
-            return StateStatus.Empty;
+            return StateStatus.Loading;
         }
-        return StateStatus.Done;
-    });
+        if (requestReason === RequestReason.fetchMore) {
+            return StateStatus.FetchMore;
+        }
+        if (requestReason === RequestReason.poll) {
+            return StateStatus.Pool;
+        }
+        return StateStatus.Refresh;
+    }
+    if (isDef(info.error)) {
+        if (!isDef(info.data)) {
+            return StateStatus.Error;
+        }
+        if (requestReason === RequestReason.fetchMore) {
+            return StateStatus.FetchMoreError;
+        }
+        if (requestReason === RequestReason.poll) {
+            return StateStatus.PoolError;
+        }
+        return StateStatus.RefreshError;
+    }
+
+    if (!isDef(info.data)) {
+        return StateStatus.Empty;
+    }
+    return StateStatus.Done;
+}
+
+export function useStatus<T>(info: InfoDataType<T>, requestReason: Ref<RequestReason>): ComputedRef<StateStatus> {
+    return computed(() => getStatus(info, requestReason.value));
 }

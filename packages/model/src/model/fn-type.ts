@@ -37,7 +37,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
         store.hydrationStatus,
         client.rest
     );
-    tempQueryList.push(query);
+    tempQueryList.push(query as ReturnType<typeof createRestQuery>);
 
     const status = useStatus(query.info, query.requestReason);
     const { loading, error, data } = toRefs(query.info);
@@ -51,7 +51,8 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,
-        requestReason: query.requestReason
+        requestReason: query.requestReason,
+        stream$: query.stream$
     };
 };
 

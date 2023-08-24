@@ -1,5 +1,5 @@
 import type { Route } from 'vue-router';
-import { Observable, type Subscription } from 'rxjs';
+import { Observable, Subject, type Subscription } from 'rxjs';
 
 import type { RestQueryOptions, RestFetchMoreOption } from './types';
 import type { Client, RestRequestConfig } from '../clients';
@@ -8,7 +8,7 @@ import type { HydrationStatus, Store } from '../store';
 import { generateQueryOptions } from './core';
 import { computed, ref, type Ref } from 'vue-demi';
 import { deepMerge } from '../utils';
-import { RequestReason } from './status';
+import { type InfoDataType, RequestReason, StateStatus, getStatus } from './status';
 
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
@@ -33,9 +33,16 @@ export function createRestQuery<ModelType, DataType>(
         return option.url;
     });
 
+
     function fetch() {
-        info.loading = true;
         return new Promise((resolve) => {
+            // 这里记录一下请求开始时的 info 信息，避免并发请求 status 错乱
+            const singleInfo = {
+                ...info
+            }
+            const id = ++requestId
+            const reason = requestReason.value
+            singleInfo.loading = info.loading = true;
             const clientParams = {
                 url: url.value,
                 headers: option.headers,
@@ -44,20 +51,55 @@ export function createRestQuery<ModelType, DataType>(
                 variables: variables.value,
                 timeout: option.timeout,
             };
+
+            stream$.next({
+                id,
+                url: clientParams.url,
+                variables: clientParams.variables,
+                requestReason: requestReason.value,
+                status: getStatus(singleInfo, reason),
+                data: undefined,
+                loading: true,
+                error: undefined,
+            })
             // TODO后面再重写一下
             const subject = client!.query<DataType>(clientParams, option.fetchPolicy, hydrationStatus);
             subject.subscribe({
                 next: (data) => {
-                    info.error = undefined;
+                    singleInfo.error = info.error = undefined;
                     if (data) {
-                        info.data = data;
+                        singleInfo.data = info.data = data;
                     }
-                    info.loading = false;
+                    singleInfo.loading = info.loading = false;
+
+                    stream$.next({
+                        id,
+                        url: clientParams.url,
+                        variables: clientParams.variables,
+                        requestReason: requestReason.value,
+                        status: getStatus(singleInfo, reason),
+                        data: info.data,
+                        loading: false,
+                        error: undefined,
+                    })
+
                     resolve(undefined);
                 },
                 error: (e) => {
-                    info.error = e;
-                    info.loading = false;
+                    singleInfo.error = info.error = e;
+                    singleInfo.loading = info.loading = false;
+
+                    stream$.next({
+                        id,
+                        url: clientParams.url,
+                        variables: clientParams.variables,
+                        requestReason: requestReason.value,
+                        status: getStatus(singleInfo, reason),
+                        data: undefined,
+                        loading: false,
+                        error: info.error,
+                    })
+
                     resolve(undefined);
                 },
                 complete: () => {
@@ -69,7 +111,14 @@ export function createRestQuery<ModelType, DataType>(
     }
 
     let sub: Subscription | null = null;
-
+    let requestId = 0
+    const stream$ = new Subject<InfoDataType<DataType> & {
+        id: number
+        url: string
+        variables?: Record<string, unknown>
+        requestReason: RequestReason
+        status: StateStatus,
+    }>()
     const requestReason = ref<RequestReason>(RequestReason.setVariables);
     function init() {
         sub = fetchQuery$.subscribe((reason) => {
@@ -85,13 +134,19 @@ export function createRestQuery<ModelType, DataType>(
         if (sub) {
             sub.unsubscribe();
             sub = null;
+            stream$.complete()
         }
     }
 
     function fetchMore(variables: RestFetchMoreOption['variables']) {
         return new Promise((resolve) => {
-            requestReason.value = RequestReason.fetchMore
-            info.loading = true;
+            // 这里记录一下请求开始时的 info 信息，避免并发请求 status 错乱
+            const singleInfo = {
+                ...info
+            }
+            const id = ++requestId
+            const reason = requestReason.value = RequestReason.fetchMore
+            singleInfo.loading = info.loading = true;
             const params: RestRequestConfig = {
                 url: url.value,
                 method: option.method,
@@ -103,17 +158,50 @@ export function createRestQuery<ModelType, DataType>(
                 params.headers = deepMerge({}, params.headers || {}, option.headers);
             }
 
+            stream$.next({
+                id,
+                url: params.url,
+                variables: params.variables,
+                requestReason: requestReason.value,
+                status: getStatus(singleInfo, reason),
+                data: undefined,
+                loading: true,
+                error: undefined,
+            })
+
             const observable = client!.query<DataType>(params, option.fetchPolicy, hydrationStatus);
             observable.subscribe({
                 next: (data) => {
-                    info.error = undefined;
-                    info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
-                    info.loading = false;
+                    singleInfo.error = info.error = undefined;
+                    singleInfo.data = info.data = data && option.updateQuery ? option.updateQuery(info.data, data) : data;
+                    singleInfo.loading = info.loading = false;
+
+                    stream$.next({
+                        id,
+                        url: params.url,
+                        variables: params.variables,
+                        requestReason: requestReason.value,
+                        status: getStatus(singleInfo, reason),
+                        data: info.data,
+                        loading: false,
+                        error: undefined,
+                    })
                     resolve(undefined);
                 },
                 error: (e) => {
-                    info.error = e;
-                    info.loading = false;
+                    singleInfo.error = info.error = e;
+                    singleInfo.loading = info.loading = false;
+
+                    stream$.next({
+                        id,
+                        url: params.url,
+                        variables: params.variables,
+                        requestReason: requestReason.value,
+                        status: getStatus(singleInfo, reason),
+                        data: undefined,
+                        loading: false,
+                        error: info.error,
+                    })
                     resolve(undefined);
                 },
             });
@@ -136,5 +224,6 @@ export function createRestQuery<ModelType, DataType>(
         destroy,
         onNext,
         requestReason,
+        stream$
     };
 }
