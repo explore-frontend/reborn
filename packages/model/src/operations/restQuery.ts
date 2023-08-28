@@ -20,19 +20,11 @@ export function createRestQuery<ModelType, DataType>(
     if (!client) {
         throw new Error('No Rest Client has been set');
     }
-    const { info, skip, variables, fetchQuery$, prefetch } = generateQueryOptions<ModelType, DataType>(
+    const { info, skip, variables, fetchQuery$, url, prefetch } = generateQueryOptions<ModelType, DataType>(
         option,
         route,
         model,
     );
-
-    const url = computed(() => {
-        if (typeof option.url === 'function') {
-            return option.url.call(model, route, variables.value);
-        }
-        return option.url;
-    });
-
 
     function fetch() {
         return new Promise((resolve) => {

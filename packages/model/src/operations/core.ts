@@ -56,8 +56,17 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
+    const url = computed<string>(() => {
+        if (typeof option.url === 'function') {
+            return option.url.call(model, route, variables.value);
+        }
+        return option.url;
+    });
 
-    const variables$ = fromWatch(() => variables.value, { immediate: true }).pipe(map(i => RequestReason.setVariables));
+    const variables$ = fromWatch(() => ({
+        variables: variables.value,
+        url: url.value
+    }), { immediate: true }).pipe(map(i => RequestReason.setVariables));
     const pollInterval$ = new Observable<RequestReason.poll>(subscriber => {
         let timeout: ReturnType<typeof setTimeout>;
 
@@ -94,6 +103,7 @@ export function generateQueryOptions<ModelType, DataType>(
         skip,
         pollInterval,
         variables,
+        url,
         fetchQuery$,
         prefetch: option.prefetch || true,
     };
