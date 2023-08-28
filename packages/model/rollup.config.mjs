@@ -20,10 +20,16 @@ const config = [
             {
                 file: exports['.'].require,
                 format: 'cjs',
+                paths: {
+                    'vue-demi': '@vue/composition-api',
+                },
             },
             {
                 file: exports['.'].import,
                 format: 'es',
+                paths: {
+                    'vue-demi': '@vue/composition-api',
+                },
             },
         ],
     },
