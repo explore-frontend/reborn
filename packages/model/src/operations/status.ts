@@ -1,7 +1,7 @@
 import type { ComputedRef, Ref } from 'vue';
 
 import { computed } from 'vue';
-import { isDef } from './core';
+import { isDef } from '../utils';
 
 export interface InfoDataType<T> {
     data: T | undefined;
