@@ -20,7 +20,13 @@ import { useStatus } from '../operations/status';
 
 
 let creatingModelCount = 0;
-const tempQueryList: Array<ReturnType<typeof createRestQuery> | ReturnType<typeof createGQLQuery>> = [];
+
+interface Hook {
+    init?(): void
+    prefetch?(): Promise<unknown> | unknown
+    destroy?(): void
+}
+const tempQueryList: Array<Hook> = [];
 
 export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     const vm = getCurrentInstance();
@@ -92,7 +98,15 @@ export const useRestMutation = <T>(options: RestMutationOptions) => {
     const route = vm.proxy!.$route;
     const { rebornClient: client } = getRootStore();
 
-    return createRestMutation<null, T>(options, null, route, client.rest);
+    const mutation = createRestMutation<null, T>(options, null, route, client.rest);
+    tempQueryList.push(mutation);
+
+
+    return {
+        info: mutation.info,
+        mutate: mutation.mutate,
+        stream$: mutation.stream$
+    }
 }
 export const useGQLMutation = <T>(options: GQLMutationOptions) => {
     const vm = getCurrentInstance();
@@ -107,7 +121,7 @@ export const useGQLMutation = <T>(options: GQLMutationOptions) => {
 
 export type FNModelCreator<T> = {
     type: string,
-    creator: () => { model: T, queryList: Array<ReturnType<typeof createRestQuery> | ReturnType<typeof createGQLQuery>>};
+    creator: () => { model: T, queryList: Array<Hook>};
 }
 
 export function createModelFromCA<T>(
@@ -120,16 +134,16 @@ export function createModelFromCA<T>(
 
             // 延迟初始化，保证query间依赖
             if (queryList.length && MODE !== 'SSR') {
-                queryList.forEach(query => query.init());
+                queryList.forEach(query => query.init?.());
             }
 
             function prefetch() {
-                return Promise.all(queryList.map(query => query.prefetch()));
+                return Promise.all(queryList.map(query => query.prefetch?.()));
             }
 
             function destroy() {
                 if (queryList) {
-                    queryList.forEach(i => i.destroy());
+                    queryList.forEach(i => i.destroy?.());
                     queryList.length = 0
                 }
             }

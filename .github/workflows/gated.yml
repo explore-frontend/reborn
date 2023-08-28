@@ -19,4 +19,5 @@ jobs:
         corepack enable
         pnpm --version
     - run: pnpm i --no-frozen-lockfile
+    - run: pnpm run --filter @kwai-explore/model coverage
     - run: pnpm run --filter @kwai-explore/model build

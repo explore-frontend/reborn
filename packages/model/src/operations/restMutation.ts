@@ -3,13 +3,15 @@ import type { Client } from '../clients';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 import { initDataType } from './core';
+import { Observable, Subject, mergeAll, switchAll } from 'rxjs';
+import { type InfoDataType } from './status';
 
 export function createRestMutation<ModelType, DataType>(
     option: RestMutationOptions<ModelType>,
     model: ModelType,
     route: RouteLocationNormalizedLoaded,
     client?: Client,
-){
+) {
 
     if (!client) {
         throw new Error('No Rest Client has been set');
@@ -37,29 +39,87 @@ export function createRestMutation<ModelType, DataType>(
         return option.url;
     }
 
-    function mutate<T extends Record<string, any>>(params: T) {
-        info.loading = true;
-        info.error = undefined;
-        return client!.mutate<DataType>({
+    const requestStream$ = new Subject<Observable<InfoDataType<DataType> & {
+        id: number
+        url: string
+        variables?: Record<string, unknown>
+    }>>()
+
+    const stream$ = requestStream$.pipe(mergeAll())
+
+    requestStream$.pipe(switchAll()).subscribe(value => {
+        info.loading = value.loading
+        if (!info.loading) {
+            info.error = value.error
+            if (value.data) {
+                info.data = value.data
+            }
+        }
+    })
+
+    function destroy() {
+        requestStream$.complete()
+    }
+
+
+    let requestId = 0
+    function mutate<T extends Record<string, any>>(params: T, context?: any) {
+        const id = ++requestId
+        const mutateParams = {
             url: url(variables(params)),
             headers: option.headers,
             method: option.method,
             variables: variables(params),
             timeout: option.timeout,
-        }).then(data => {
-            info.error = undefined;
-            if (data) {
-                info.data = data;
-            }
-            info.loading = false;
+        }
+        const mutation$ = new Subject<InfoDataType<DataType> & {
+            id: number
+            url: string
+            variables?: Record<string, unknown>
+            context: any
+        }>()
+
+        requestStream$.next(mutation$)
+
+        mutation$.next({
+            id,
+            url: mutateParams.url,
+            variables: mutateParams.variables,
+            loading: true,
+            data: undefined,
+            error: undefined,
+            context
+        })
+
+        return client!.mutate<DataType>(mutateParams).then(data => {
+            mutation$.next({
+                id,
+                url: mutateParams.url,
+                variables: mutateParams.variables,
+                loading: false,
+                data,
+                error: undefined,
+                context
+            })
         }).catch(e => {
-            info.error = e;
-            info.loading = false;
-        });
+            mutation$.next({
+                id,
+                url: mutateParams.url,
+                variables: mutateParams.variables,
+                loading: false,
+                data: undefined,
+                error: e,
+                context
+            })
+        }).finally(() => {
+            mutation$.complete()
+        })
     }
 
     return {
         info,
         mutate,
+        stream$,
+        destroy
     };
 }
