@@ -6,15 +6,13 @@ import type {
     RestQueryOptions,
 } from '../operations/types';
 import type { GetModelInstance } from '../store';
-import type { Ref } from '@vue/composition-api';
-
 import {
     createGQLMutation,
     createGQLQuery,
     createRestMutation,
     createRestQuery,
 } from '../operations';
-import { getCurrentInstance, toRefs } from 'vue-demi';
+import { getCurrentInstance, toRefs, type Ref, type ComputedRef } from 'vue-demi';
 import { getRootStore, MODE } from '../const';
 import { useStatus } from '../operations/status';
 
