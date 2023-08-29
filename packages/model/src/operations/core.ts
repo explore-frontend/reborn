@@ -14,9 +14,7 @@ import { fromWatch } from '../utils';
 import { Observable, merge, map } from 'rxjs';
 import { MODE } from '../const';
 
-export function isDef<T>(v: T): v is NonNullable<T> {
-    return v !== undefined && v !== null;
-}
+export { isDef } from '../utils';
 
 export function initDataType<DataType>() {
     const data: InfoDataType<DataType> = {
