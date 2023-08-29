@@ -1,4 +1,4 @@
-import { createSSRApp, h } from 'vue';
+import { createSSRApp, h } from 'vue-demi';
 
 import { createStore, createClient, createCache } from '../../src/index';
 import App from './App.vue';

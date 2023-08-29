@@ -6,7 +6,7 @@ store是用于全局存储Model实例的集合，后续会在Model中提供跨Mo
 创建一个Store，并绑定app使用
 ```typescript
 import { createStore } from 'vue-apollo-model';
-import Vue from 'Vue';
+import Vue from 'vue';
 
 const store = createStore();
 
