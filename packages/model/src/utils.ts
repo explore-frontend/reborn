@@ -104,3 +104,7 @@ export function fromWatch<T>(fn: WatchSource<T>, watchOptions?: WatchOptions) {
         }, watchOptions);
     });
 }
+
+export function isDef<T>(v: T): v is NonNullable<T> {
+    return v !== undefined && v !== null;
+}
