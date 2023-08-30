@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect } from 'vitest';
-import { createApp, h, nextTick } from 'vue-demi';
+import { createApp, h, nextTick } from 'vue';
 
 import { createClient, createStore } from '../index';
 

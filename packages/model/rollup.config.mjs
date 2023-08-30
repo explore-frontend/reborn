@@ -7,31 +7,23 @@ import ts from 'rollup-plugin-typescript2';
 const { peerDependencies, dependencies, exports } = JSON.parse(
     fs.readFileSync('./package.json', { encoding: 'utf-8' }),
 );
-const pathAlias = {
-    'vue-demi': 'vue',
-};
-const external = [
-    ...Object.keys(peerDependencies ?? {}),
-    ...Object.keys(dependencies ?? {}),
-    ...Object.keys(pathAlias),
-];
+
+const external = [...Object.keys(peerDependencies ?? {}), ...Object.keys(dependencies ?? {})];
 
 /** @type { Array<import('rollup').RollupOptions> } */
 const config = [
     {
-        plugins: [ts({ tsconfig: './tsconfig.lib.json' })],
+        plugins: [ts()],
         external,
         input: './src/index.ts',
         output: [
             {
                 file: exports['.'].require,
                 format: 'cjs',
-                paths: pathAlias,
             },
             {
                 file: exports['.'].import,
                 format: 'es',
-                paths: pathAlias,
             },
         ],
     },
@@ -49,14 +41,8 @@ const config = [
         external,
         input: './src/index.ts',
         output: [
-            {
-                file: exports['.'].require.replace('.cjs', '.d.cts'),
-                paths: pathAlias,
-            },
-            {
-                file: exports['.'].import.replace('.mjs', '.d.mts'),
-                paths: pathAlias,
-            },
+            { file: exports['.'].require.replace('.cjs', '.d.cts') },
+            { file: exports['.'].import.replace('.mjs', '.d.mts') },
         ],
     },
 ];

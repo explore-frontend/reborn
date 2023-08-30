@@ -5,7 +5,7 @@ import type { Client } from '../clients';
 import type { GQLQueryOptions, GQLFetchMoreOptions } from './types';
 import type { HydrationStatus } from '../store';
 
-import { computed, nextTick, ref, type Ref } from 'vue-demi';
+import { computed, nextTick, ref } from 'vue';
 import { interval } from 'rxjs';
 import { generateQueryOptions } from './core';
 import type { RequestReason } from './status';

@@ -1,27 +1,8 @@
-import type { WatchOptions, WatchSource } from 'vue-demi';
+import type { WatchOptions, WatchSource } from 'vue';
 
-import { watch } from 'vue-demi';
+import { watch } from 'vue';
 import { Observable } from 'rxjs';
-
-export function hash(params: any): string {
-    if (params === null) {
-        return encode('null-null');
-    }
-
-    if (Array.isArray(params)) {
-        return encode(`array-${params.map(hash).join('-')}`);
-    }
-
-    if (typeof params === 'function') {
-        throw new Error('Function hash is not support');
-    }
-
-    if (typeof params === 'object') {
-        return encode(`object-${Object.keys(params).sort().map(key => `${key}-${hash(params[key])}`).join('-')}`);
-    }
-
-    return encode(`${typeof params}-${params}`);
-}
+import { hash } from './cache';
 
 export function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {

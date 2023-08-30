@@ -5,10 +5,7 @@
         "rootDir": "./src",
         "useDefineForClassFields": false,
         "experimentalDecorators": true,
-        "noEmit": true,
-        "paths": {
-            "vue-demi": ["./node_modules/vue"]
-        }
+        "noEmit": true
     },
     "exclude": ["./src/**/__test__/**/*", "./src/**/*.spec.ts"],
     "include": ["./src/**/*"]

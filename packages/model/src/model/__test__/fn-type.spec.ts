@@ -9,7 +9,7 @@ import {
     h,
     createApp,
     ref,
-} from 'vue-demi';
+} from 'vue';
 
 import { createClient } from '../../clients';
 import { createModelFromCA } from '../fn-type';

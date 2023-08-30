@@ -8,7 +8,7 @@ import {
     effectScope,
     onMounted,
     nextTick,
-} from 'vue-demi';
+} from 'vue';
 
 import { createModelFromCA } from './fn-type'
 import { createModelFromClass } from './class-type';

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue-demi';
+import { ref } from 'vue';
 
 import ComponentA from './ComponentA.vue';
 import ComponentB from './ComponentB.vue';

@@ -1,9 +1,9 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
-import type { createApp, Ref } from 'vue-demi';
+import type { createApp, Ref } from 'vue';
 import type { Client, RebornClient } from '../clients';
 
-import { ref } from 'vue-demi';
+import { ref } from 'vue';
 import { INJECT_KEY, setMode } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];

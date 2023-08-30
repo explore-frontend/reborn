@@ -1,4 +1,4 @@
-import { ref } from 'vue-demi';
+import { ref } from 'vue';
 import { useRestQuery, createModel, createModelFromCA } from '../../fn-type';
 
 export const MockModel = createModel(() => {
