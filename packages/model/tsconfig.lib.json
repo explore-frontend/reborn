@@ -2,7 +2,6 @@
     "extends": "@kwai-explore/tsconfig",
     "compilerOptions": {
         "lib": ["esnext", "dom"],
-        "rootDir": "./src",
         "useDefineForClassFields": false,
         "experimentalDecorators": true,
         "noEmit": true
