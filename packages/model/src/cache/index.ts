@@ -1,7 +1,5 @@
 import { deepMerge } from '../utils';
 
-export { hash } from './hash';
-
 // TODO 暂时不需要考虑normalize的情况，等到后续有复杂需求以后再考虑。
 export function createCache() {
     let cacheData: Record<string, unknown> = {};

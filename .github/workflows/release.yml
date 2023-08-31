@@ -16,8 +16,9 @@ jobs:
     - run: |
         corepack enable
         pnpm --version
-    - run: pnpm i --no-frozen-lockfile
-    - run: pnpm run --filter @kwai-explore/model build
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm --filter ./packages/model run coverage
+    - run: pnpm --filter ./packages/model run build
     - uses: JS-DevTools/npm-publish@v1
       with:
         package: ./packages/model/package.json

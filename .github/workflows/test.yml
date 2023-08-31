@@ -22,5 +22,6 @@ jobs:
     - run: |
         corepack enable
         pnpm --version
-    - run: pnpm i --no-frozen-lockfile
-    - run: pnpm run --filter vue-apollo-model build
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm --filter ./packages/model run coverage
+    - run: pnpm --filter ./packages/model run build
