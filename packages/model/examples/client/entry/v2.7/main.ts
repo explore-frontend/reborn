@@ -1,7 +1,7 @@
-import { createSSRApp, h } from 'vue-demi';
+import { Vue, createApp as createSSRApp, h } from 'vue-demi';
 
-import { createStore, createClient, createCache } from '../../src/index';
-import App from './App.vue';
+import { createStore, createClient, createCache } from '../../../../src/index';
+import App from '../../app/App.vue';
 import { createRouter } from './router';
 
 type Fetch = typeof fetch
@@ -23,12 +23,14 @@ export function createApp(customFetch?: Fetch) {
     });
 
     store.registerClient(restClient);
-    const app = createSSRApp({
+    Vue.use(store);
+    const app = new Vue({
+        router,
         render: () => h(App),
     });
 
-    app.use(store, customFetch && true);
-    app.use(router);
+
+    console.log(app)
 
     return { app, router, cache };
 }

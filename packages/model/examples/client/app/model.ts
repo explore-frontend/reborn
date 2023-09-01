@@ -1,7 +1,8 @@
-import { createModel, useRestQuery } from '../../src';
-import { ref, computed } from 'vue-demi';
+import { createModel, useRestQuery } from '../../../src';
+import { ref, computed, version } from 'vue-demi';
 
 export const TestModel = createModel(() => {
+    console.log('vue version', version)
     const a = ref(1);
     const b = computed(() => a.value * 2);
     const c = ref(1);
@@ -11,7 +12,7 @@ export const TestModel = createModel(() => {
         variables() {
             console.error('啦啦啦啦啦');
             return {
-                params: b.value
+                params: c.value
             };
         },
     });

@@ -1,6 +1,6 @@
 import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
-import type { createApp, Ref } from 'vue-demi';
+import type { Ref } from 'vue-demi';
 import type { Client, RebornClient } from '../clients';
 
 import { ref } from 'vue-demi';
@@ -16,7 +16,7 @@ export type HydrationStatus = Ref<0 | 1 | 2>;
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
 
-    function getModelInstance<T>(constructor: ModelInfo<T>['constructor']): RebornInstanceType<typeof constructor> | null{
+    function getModelInstance<T>(constructor: ModelInfo<T>['constructor']): RebornInstanceType<typeof constructor> | null {
         return modelMap.get(constructor)?.instance?.model as unknown as RebornInstanceType<typeof constructor>;
     }
 
@@ -74,14 +74,31 @@ export function createStore() {
         }
     }
 
-    // TODO 这里在Vue2和Vue3里的实现需要不同
-    function install(app: ReturnType<typeof createApp>, ssrMode: boolean = false) {
-        app.config.globalProperties.rebornStore = store;
-        app.config.globalProperties.rebornClient = rebornClient;
-        app.provide(INJECT_KEY, {
-            store,
-            rebornClient,
-        });
+    // 为了适配 vue 不同版本这里只能用 any 了
+    function install(app: any, ssrMode: boolean = false) {
+        // vue3
+        if (app.config && typeof app.config.globalProperties === 'object') {
+            app.config.globalProperties.rebornStore = store;
+            app.config.globalProperties.rebornClient = rebornClient;
+            app.provide(INJECT_KEY, {
+                store,
+                rebornClient,
+            });
+        // vue2.7
+        } else {
+            app.mixin({
+                provide(this) {
+                    if (this === this.$root) {
+                        return {
+                            [INJECT_KEY]: {
+                                store,
+                                rebornClient,
+                            }
+                        };
+                    }
+                }
+            });
+        }
 
         setMode(ssrMode ? 'SSR' : 'SPA');
     }

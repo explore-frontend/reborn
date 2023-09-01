@@ -1,11 +1,4 @@
 {
-    "extends": "@kwai-explore/tsconfig",
-    "compilerOptions": {
-        "lib": ["esnext", "dom"],
-        "useDefineForClassFields": false,
-        "experimentalDecorators": true,
-        "noEmit": true
-    },
-    "exclude": ["./src/**/__test__/**/*", "./src/**/*.spec.ts"],
-    "include": ["./src/**/*"]
+    // "extends": "./tsconfig.lib.vue3.json",
+    "extends": "./tsconfig.lib.vue2.7.json",
 }

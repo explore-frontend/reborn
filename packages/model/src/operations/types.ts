@@ -1,12 +1,16 @@
 import type { DocumentNode } from 'graphql';
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import type { Method, HTTPHeaders, RestParams, GQLQueryParams, FetchPolicy } from '../clients';
+import type { getCurrentInstance } from 'vue-demi';
 
-export type VariablesFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => Record<string, any>;
-export type MutationVariablesFn<T> = (this: T, params: any, route: RouteLocationNormalizedLoaded) => Record<string, any>
-export type BooleanFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => boolean;
-export type NumberFn<T> = (this: T, route: RouteLocationNormalizedLoaded) => number;
-export type UrlFn<T> = (this: T, route: RouteLocationNormalizedLoaded, variables: Record<string, any> | undefined) => string;
+
+type InstanceProxy = Exclude<Exclude<ReturnType<typeof getCurrentInstance>, null>['proxy'], null>
+export type Route = InstanceProxy extends {'$route': infer R} ? R : unknown
+
+export type VariablesFn<T> = (this: T, route: Route) => Record<string, any>;
+export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Record<string, any>
+export type BooleanFn<T> = (this: T, route: Route) => boolean;
+export type NumberFn<T> = (this: T, route: Route) => number;
+export type UrlFn<T> = (this: T, route: Route, variables: Record<string, any> | undefined) => string;
 
 // 和CreateQuery有关的参数部分
 type CommonQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {

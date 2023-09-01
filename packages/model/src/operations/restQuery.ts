@@ -1,7 +1,6 @@
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import { mergeAll, Observable, Subject, switchAll, type Subscription } from 'rxjs';
 
-import type { RestQueryOptions, RestFetchMoreOption } from './types';
+import type { RestQueryOptions, RestFetchMoreOption, Route } from './types';
 import type { Client, RestRequestConfig } from '../clients';
 import type { HydrationStatus, Store } from '../store';
 
@@ -13,7 +12,7 @@ import { type InfoDataType, RequestReason, StateStatus, getStatus } from './stat
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
     model: ModelType,
-    route: RouteLocationNormalizedLoaded,
+    route: Route,
     hydrationStatus: HydrationStatus,
     client?: Client,
 ) {

@@ -1,10 +1,11 @@
 import { readFileSync } from 'fs';
 import express from 'express';
-import { resolve} from 'path';
+import { resolve } from 'path';
 import { createServer } from 'vite';
 import { mockAPI } from './mockAPI/index';
 
-
+const vueVersion = process.env.VUE_VERSION === '2.7' ? '2.7' : '3';
+const port = vueVersion === '2.7' ? 5173 : 5174;
 (async () => {
     const app = express()
     // Create Vite server in middleware mode and configure the app type as
@@ -33,7 +34,7 @@ import { mockAPI } from './mockAPI/index';
             const htmlTemplate = readFileSync(
                 resolve(__dirname, '../index.html'),
                 'utf-8',
-            );
+            ).replace('%version%', vueVersion);
             if (req.query.csr) {
                 console.error('CSR', url);
                 res.status(200).set({ 'Content-Type': 'text/html' }).end(htmlTemplate);
@@ -43,8 +44,10 @@ import { mockAPI } from './mockAPI/index';
             console.error('SSR', url);
 
             const template = await vite.transformIndexHtml(url, htmlTemplate);
-            const { render } = await vite.ssrLoadModule('/examples/client/entry-server.ts');
+
+            const { render } = await vite.ssrLoadModule(`/examples/client/entry/v${vueVersion}/entry-server.ts`);
             const [appHtml, cache] = await render(url);
+
             const html = template
                 .replace(`<!--vue-ssr-outlet-->`, appHtml)
                 .replace(`<!--vue-ssr-state-->`, `<script>window.INIT_STATE = ${cache}</script>`);
@@ -54,9 +57,9 @@ import { mockAPI } from './mockAPI/index';
             // to your actual source code.
             vite.ssrFixStacktrace(e as Error)
             next(e)
-          }
+        }
     });
 
-    app.listen(5173);
-    console.log('server start at 5173, use link http://localhost:5173')
+    app.listen(port);
+    console.log(`server start at ${port}, use link http://localhost:${port}`)
 })();

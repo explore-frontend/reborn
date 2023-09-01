@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.lib.common.json",
+    "compilerOptions": {
+        "paths": {
+            "vue": ["./node_modules/vue3"],
+            "vue/*": ["./node_modules/vue3/*"],
+            "vue-demi": ["./node_modules/vue-demi/lib/v3"],
+            "vite/types/hot": ["./node_modules/vite/types/hot.d.ts"]
+        },
+        "types": ["vue-router4"]
+    }
+}

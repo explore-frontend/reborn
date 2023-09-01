@@ -1,0 +1,19 @@
+{
+    "extends": "@kwai-explore/tsconfig",
+    "compilerOptions": {
+        "lib": ["esnext", "dom"],
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "noEmit": true,
+        "verbatimModuleSyntax": false,
+        "paths": {
+            "vue": ["../../../../node_modules/vue3"],
+            "vue/*": ["../../../../node_modules/vue3/*"],
+            "vue-demi": ["../../../../node_modules/vue-demi/lib/v3"]
+        }
+    },
+    "include": ["./**/*"],
+    "vueCompilerOptions": {
+        "target": 3.3
+    }
+}
