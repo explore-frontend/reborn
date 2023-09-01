@@ -12,7 +12,7 @@
             "vue-demi": ["../../../../node_modules/vue-demi/lib/v3"]
         }
     },
-    "include": ["./**/*"],
+    "include": ["./**/*", "../../app/**/*"],
     "vueCompilerOptions": {
         "target": 3.3
     }

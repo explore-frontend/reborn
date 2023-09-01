@@ -1,5 +1,4 @@
 {
     "extends": "../entry/v3/tsconfig.json",
-    // TODO
     // "extends": "../entry/v2.7/tsconfig.json",
 }

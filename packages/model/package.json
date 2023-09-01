@@ -29,17 +29,12 @@
         "test-vue3": "VUE_VERSION=3 vitest",
         "coverage": "VUE_VERSION=2.7 vitest run --coverage && VUE_VERSION=3 vitest run --coverage"
     },
-    "dependencies": {
-        "graphql": "^16.6.0"
-    },
-    "peerDependencies": {
-        "rxjs": "^7.0.0"
-    },
     "publishConfig": {
         "peerDependencies": {
             "vue": "^2.7.0 || ^3.2.0",
             "vue-demi": "^0.14.0",
-            "vue-router": "~3.6.0 || ^4.0.14"
+            "vue-router": "~3.6.0 || ^4.0.14",
+            "rxjs": "^7.0.0"
         }
     },
     "devDependencies": {

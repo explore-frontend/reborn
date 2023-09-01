@@ -1,5 +1,4 @@
-import type { DocumentNode } from 'graphql';
-import type { Method, HTTPHeaders, RestParams, GQLQueryParams, FetchPolicy } from '../clients';
+import type { Method, HTTPHeaders, RestParams, GQLQueryParams, FetchPolicy, DocumentNode } from '../clients';
 import type { getCurrentInstance } from 'vue-demi';
 
 

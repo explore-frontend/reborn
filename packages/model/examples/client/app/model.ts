@@ -9,7 +9,9 @@ export const TestModel = createModel(() => {
     const { data, stream$ } = useRestQuery<{result: 1, data: number}>({
         url: '/api',
         method: 'post',
-        variables() {
+        variables(route) {
+            // 这行检查route 的类型
+            route.fullPath
             console.error('啦啦啦啦啦');
             return {
                 params: c.value

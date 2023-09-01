@@ -1,7 +1,7 @@
-import type { DocumentNode } from 'graphql';
-
 import type { createClient } from './index';
 import type { createCache } from '../cache';
+
+export type DocumentNode = unknown;
 
 export type RequestInfo = {
     url: string;
