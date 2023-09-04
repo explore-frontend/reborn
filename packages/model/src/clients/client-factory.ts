@@ -5,8 +5,8 @@ import type { HydrationStatus } from '../store';
 import { ReplaySubject } from 'rxjs';
 import { MODE } from '../const';
 
-import { createCache, hash } from '../cache';
-
+import { createCache } from '../cache';
+import { hash } from '../cache/hash';
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
 

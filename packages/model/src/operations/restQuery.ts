@@ -6,7 +6,7 @@ import type { Client, RestRequestConfig } from '../clients';
 import type { HydrationStatus, Store } from '../store';
 
 import { generateQueryOptions } from './core';
-import { computed, ref, type Ref } from 'vue';
+import { computed, ref, type Ref } from 'vue-demi';
 import { deepMerge } from '../utils';
 import { type InfoDataType, RequestReason, StateStatus, getStatus } from './status';
 

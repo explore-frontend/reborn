@@ -1,8 +1,8 @@
-import type { WatchOptions, WatchSource } from 'vue';
+import type { WatchOptions, WatchSource } from 'vue-demi';
 
-import { watch } from 'vue';
+import { watch } from 'vue-demi';
 import { Observable } from 'rxjs';
-import { hash } from './cache';
+import { hash } from './cache/hash';
 
 export function stringifyPrimitive(v: string | boolean | number) {
     switch (typeof v) {
@@ -103,4 +103,8 @@ export function fromWatch<T>(fn: WatchSource<T>, watchOptions?: WatchOptions) {
             }
         }, watchOptions);
     });
+}
+
+export function isDef<T>(v: T): v is NonNullable<T> {
+    return v !== undefined && v !== null;
 }

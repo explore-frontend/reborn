@@ -1,7 +1,7 @@
 import type { RebornClient } from './clients';
 import type { storeFactory } from './store';
 
-import { inject } from 'vue';
+import { inject } from 'vue-demi';
 
 export const INJECT_KEY = 'REBORN_STORE_KEY';
 

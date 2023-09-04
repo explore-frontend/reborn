@@ -9,14 +9,12 @@ import type {
 import { RequestReason, type InfoDataType } from './status';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
-import { reactive, computed, watch } from 'vue';
+import { reactive, computed, watch } from 'vue-demi';
 import { fromWatch } from '../utils';
 import { Observable, merge, map } from 'rxjs';
 import { MODE } from '../const';
 
-export function isDef<T>(v: T): v is NonNullable<T> {
-    return v !== undefined && v !== null;
-}
+export { isDef } from '../utils';
 
 export function initDataType<DataType>() {
     const data: InfoDataType<DataType> = {
@@ -56,11 +54,11 @@ export function generateQueryOptions<ModelType, DataType>(
         return option.variables;
     });
 
-    const url = computed<string>(() => {
+    const url = computed((): string => {
         if (typeof option.url === 'function') {
             return option.url.call(model, route, variables.value);
         }
-        return option.url;
+        return option.url!;
     });
 
     const variables$ = fromWatch(() => ({

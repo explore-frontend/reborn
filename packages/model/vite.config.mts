@@ -11,4 +11,9 @@ export default defineConfig({
         setupFiles: ["./src/__test__/setup.ts"],
         include: ["**/*.spec.ts"],
     },
+    resolve: {
+        alias: {
+            'vue-demi': 'vue',
+        }
+    }
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createSSRApp } from 'vue';
+import { createSSRApp } from 'vue-demi';
 import { createCache, createStore, createClient } from '../index';
 import App from './demo.vue';
 import { renderToString } from 'vue/server-renderer'

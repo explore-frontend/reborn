@@ -10,7 +10,7 @@ import {
 } from '../operations';
 
 import { getRootStore, MODE } from '../const';
-import { computed, reactive, getCurrentInstance } from 'vue';
+import { computed, reactive, getCurrentInstance } from 'vue-demi';
 import { useStatus } from '../operations/status';
 
 function registerProperty(obj: any, key: string, value: any) {
