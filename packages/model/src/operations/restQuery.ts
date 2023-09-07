@@ -162,7 +162,9 @@ export function createRestQuery<ModelType, DataType>(
             return fetch(RequestReason.refetch, variables.value);
         },
         prefetch: () => {
-            return fetch(RequestReason.setVariables, variables.value);
+            if (!skip.value) {
+                return fetch(RequestReason.setVariables, variables.value);
+            }
         },
         fetchMore,
         destroy,

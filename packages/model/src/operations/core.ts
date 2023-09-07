@@ -63,7 +63,8 @@ export function generateQueryOptions<ModelType, DataType>(
 
     const variables$ = fromWatch(() => ({
         variables: variables.value,
-        url: url.value
+        url: url.value,
+        skip: skip.value,
     }), { immediate: true }).pipe(map(i => RequestReason.setVariables));
     const pollInterval$ = new Observable<RequestReason.poll>(subscriber => {
         let timeout: ReturnType<typeof setTimeout>;
