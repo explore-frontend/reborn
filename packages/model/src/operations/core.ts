@@ -9,7 +9,7 @@ import type {
 } from './types';
 import { RequestReason, type InfoDataType } from './status';
 
-import { reactive, computed, watch } from 'vue-demi';
+import { reactive, computed, watch, type ComputedRef } from 'vue-demi';
 import { fromWatch } from '../utils';
 import { Observable, merge, map } from 'rxjs';
 import { MODE } from '../const';

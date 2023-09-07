@@ -1,4 +1,5 @@
 {
+    "extends": "./tsconfig.lib.vue2.6.json",
+    // "extends": "./tsconfig.lib.vue2.7.json",
     // "extends": "./tsconfig.lib.vue3.json",
-    "extends": "./tsconfig.lib.vue2.7.json",
 }

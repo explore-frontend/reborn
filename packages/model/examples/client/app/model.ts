@@ -11,7 +11,7 @@ export const TestModel = createModel(() => {
         method: 'post',
         variables(route) {
             // 这行检查route 的类型
-            route.fullPath
+            route.fullPath satisfies string;
             console.error('啦啦啦啦啦');
             return {
                 params: c.value

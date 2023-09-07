@@ -8,7 +8,13 @@ const { peerDependencies, dependencies, exports } = JSON.parse(
     fs.readFileSync('./package.json', { encoding: 'utf-8' }),
 );
 
-const genConfig = (pathAlias, exportMap) => {
+/**
+ * 
+ * @param {import('rollup').OptionsPaths} pathAlias 
+ * @param {{ import: string, require: string }} exportMap 
+ * @returns 
+ */
+function genConfig (pathAlias, exportMap)  {
     const external = [
         ...Object.keys(peerDependencies ?? {}),
         ...Object.keys(dependencies ?? {}),

@@ -16,5 +16,13 @@
     },
     "gitHooks": {
         "commit-msg": "commitlint -E GIT_PARAMS"
+    },
+    "pnpm": {
+        "neverBuiltDependencies": [
+            "vue-demi"
+        ],
+        "patchedDependencies": {
+            "vue-template-compiler@2.6.14": "patches/vue-template-compiler@2.6.14.patch"
+        }
     }
 }
