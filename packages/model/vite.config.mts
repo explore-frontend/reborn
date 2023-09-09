@@ -20,12 +20,14 @@ export default defineConfig({
     ],
     test: {
         coverage: {
-            provider: "c8",
+            provider: "v8",
         },
         setupFiles: ["./src/__test__/setup.ts"],
         include: ["./src/**/*.spec.ts"],
-        deps: {
-            inline: ["vue-demi"],
+        server: {
+            deps: {
+                inline: ["vue-demi"],
+            },
         },
         exclude: vueVersions.filter((x) => x !== vueVersion).map((x) => `**/*.vue${x}.spec.ts`),
     },

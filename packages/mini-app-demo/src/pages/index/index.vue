@@ -1,19 +1,6 @@
-<template>
-    <view class="content">
-        <image class="logo" src="/static/logo.png" />
-        <view class="text-area">
-            <text class="title">{{ title }}</text>
-        </view>
-        <view>
-            {{ a }}, {{ b }}, {{ c }}, {{ data }}
-            <button type="button" @click="c++">点，C变一次，理应重新发请求一次</button>
-        </view>
-  </view>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useModel } from '../../../../model/src';
+import { useModel } from '@kwai-explore/model';
 import { TestModel } from './model';
 const title = ref('Hello');
 
@@ -23,7 +10,18 @@ setInterval(() => {
     a.value++;
 }, 1000)
 </script>
-
+<template>
+  <view class="content">
+      <image class="logo" src="/static/logo.png" />
+      <view class="text-area">
+          <text class="title">{{ title }}</text>
+      </view>
+      <view>
+          {{ a }}, {{ b }}, {{ c }}, {{ data }}
+          <button type="button" @click="c++">点, C变一次, 理应重新发请求一次</button>
+      </view>
+</view>
+</template>
 <style>
 .content {
   display: flex;

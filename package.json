@@ -1,7 +1,7 @@
 {
     "name": "reborn",
     "private": true,
-    "packageManager": "pnpm@8.6.0",
+    "packageManager": "pnpm@8.7.4",
     "npmClient": "pnpm",
     "scripts": {
         "format-check": "prettier --check .",
@@ -19,6 +19,7 @@
     },
     "pnpm": {
         "neverBuiltDependencies": [
+            "core-js",
             "vue-demi"
         ],
         "patchedDependencies": {
