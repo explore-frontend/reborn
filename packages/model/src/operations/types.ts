@@ -1,69 +1,86 @@
 import type { Method, HTTPHeaders, RestParams, GQLQueryParams, FetchPolicy, DocumentNode } from '../clients';
 import type { getCurrentInstance } from 'vue-demi';
 
+type InstanceProxy = Exclude<Exclude<ReturnType<typeof getCurrentInstance>, null>['proxy'], null>;
+export type Route = InstanceProxy extends { $route: infer R } ? R : unknown;
 
-type InstanceProxy = Exclude<Exclude<ReturnType<typeof getCurrentInstance>, null>['proxy'], null>
-export type Route = InstanceProxy extends {'$route': infer R} ? R : unknown
-
-export type VariablesFn<T> = (this: T, route: Route) => Record<string, any>;
-export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Record<string, any>
+export type VariablesFn<T, VariablesType = Record<string, any>> = (this: T, route: Route) => VariablesType;
+export type MutationVariablesFn<T, VariablesType = Record<string, any>, ParamsType = any> = (
+    this: T,
+    params: ParamsType,
+    route: Route,
+) => VariablesType;
 export type BooleanFn<T> = (this: T, route: Route) => boolean;
 export type NumberFn<T> = (this: T, route: Route) => number;
-export type UrlFn<T> = (this: T, route: Route, variables: Record<string, any> | undefined) => string;
-export type MutationUrlFn<T> = (this: T,route: Route, variables: Record<string, any> | undefined, params:  Record<string, any>) => string;
+export type UrlFn<T, VariablesType = Record<string, any>> = (
+    this: T,
+    route: Route,
+    variables: VariablesType | undefined,
+) => string;
+export type MutationUrlFn<T, VariablesType = Record<string, any>, ParamsType = Record<string, any>> = (
+    this: T,
+    route: Route,
+    variables: VariablesType | undefined,
+    params: ParamsType,
+) => string;
 
 // 和CreateQuery有关的参数部分
-type CommonQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {
+type CommonQueryOptions<ModelType extends unknown = unknown, DataType = unknown, VariablesType = unknown> = {
     prefetch?: boolean;
     fetchPolicy?: FetchPolicy;
     credentials?: RequestCredentials;
     headers?: HTTPHeaders;
-    variables?: VariablesFn<ModelType> | Record<string, any>;
+    variables?: VariablesFn<ModelType, VariablesType> | VariablesType;
     skip?: BooleanFn<ModelType> | boolean;
     pollInterval?: NumberFn<ModelType> | number;
     updateQuery?(prev?: DataType, next?: DataType): DataType;
     timeout?: number;
-}
+};
 
-export type GQLQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {
-    url?: UrlFn<ModelType> | string;
+export type GQLQueryOptions<
+    ModelType extends unknown = unknown,
+    DataType = unknown,
+    VariablesType = Record<string, any>,
+> = {
+    url?: UrlFn<ModelType, VariablesType> | string;
     query: DocumentNode;
-} & CommonQueryOptions<ModelType, DataType>
+} & CommonQueryOptions<ModelType, DataType, VariablesType>;
 
-export type RestQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {
-    url: UrlFn<ModelType> | string;
+export type RestQueryOptions<
+    ModelType extends unknown = unknown,
+    DataType = unknown,
+    VariablesType = Record<string, any>,
+> = {
+    url: UrlFn<ModelType, VariablesType> | string;
     method?: Method;
     /**
      * 发起请求前钩子，可以修改发送的 url 以及 variables
      * @param params
      */
-    beforeQuery?(
-        params: {
-            url: string;
-            variables: Record<string, any> | undefined;
-        }
-    ): undefined | { url?: string; variables?: Record<string, any> };
-} & CommonQueryOptions<ModelType, DataType>
+    beforeQuery?(params: {
+        url: string;
+        variables: VariablesType | undefined;
+    }): undefined | { url?: string; variables?: VariablesType };
+} & CommonQueryOptions<ModelType, DataType, VariablesType>;
 
 export type GQLFetchMoreOptions = Pick<GQLQueryParams, 'variables'>;
 export type RestFetchMoreOption = Pick<RestParams, 'variables'>;
 
-
 // 和createMutation有关的参数部分
-type CommonMutationOptions<ModelType extends unknown = unknown> = {
+type CommonMutationOptions<ModelType extends unknown = unknown, VariablesType = unknown, ParamsType = unknown> = {
     credentials?: RequestCredentials;
     headers?: HTTPHeaders;
-    variables?: MutationVariablesFn<ModelType> | Record<string, any>;
+    variables?: MutationVariablesFn<ModelType, VariablesType, ParamsType> | VariablesType;
     timeout?: number;
-}
+};
 
-export type GQLMutationOptions<ModelType extends unknown = unknown> = {
-    url?: MutationUrlFn<ModelType> | string;
+export type GQLMutationOptions<ModelType extends unknown = unknown, VariablesType = unknown, ParamsType = unknown> = {
+    url?: MutationUrlFn<ModelType, VariablesType, ParamsType> | string;
     mutation: DocumentNode;
 } & CommonMutationOptions<ModelType>;
 
-export type RestMutationOptions<ModelType extends unknown = unknown> = {
-    url: MutationUrlFn<ModelType> | string;
+export type RestMutationOptions<ModelType extends unknown = unknown, VariablesType = unknown, ParamsType = unknown> = {
+    url: MutationUrlFn<ModelType, VariablesType, ParamsType> | string;
     method?: Method;
 } & CommonMutationOptions<ModelType>;
 
@@ -73,11 +90,11 @@ export type QueryResult<T = any> = {
     loading: boolean;
     fetchMore(options: GQLFetchMoreOptions): Promise<void>;
     error: any;
-}
+};
 
 export type MutationResult<T, P> = {
     loading: boolean;
     data?: P;
     mutate(args0: T, args1?: any): Promise<void>;
     error: any;
-}
+};

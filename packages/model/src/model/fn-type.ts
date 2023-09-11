@@ -37,7 +37,7 @@ const useRoute = (vm: Exclude<ReturnType<typeof getCurrentInstance>, null>) => {
     return route as Route
 }
 
-export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
+export const useRestQuery =  <DataType, VariablesType extends Record<string, any> = Record<string, any>>(options: RestQueryOptions<null, DataType, VariablesType>) => {
     const vm = getCurrentInstance();
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestQuery with createModel context `);
@@ -45,7 +45,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     const route = useRoute(vm);
     const { rebornClient: client, store } = getRootStore();
 
-    const query = createRestQuery<null, T>(
+    const query = createRestQuery<null, DataType, VariablesType>(
         options,
         null,
         route,
@@ -62,7 +62,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
         status,
         loading,
         error,
-        data: data as Ref<T | undefined>,
+        data: data as Ref<DataType | undefined>,
         refetch: query.refetch,
         fetchMore: query.fetchMore,
         onNext: query.onNext,
@@ -99,7 +99,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     }
 }
 
-export const useRestMutation = <T>(options: RestMutationOptions) => {
+export const useRestMutation = <DataType, VariablesType extends Record<string, any> = Record<string, any>, ParamsType = VariablesType, ContextType = any>(options: RestMutationOptions) => {
     const vm = getCurrentInstance();
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestMutation with createModel context `);
@@ -107,7 +107,7 @@ export const useRestMutation = <T>(options: RestMutationOptions) => {
     const route = useRoute(vm);
     const { rebornClient: client } = getRootStore();
 
-    const mutation = createRestMutation<null, T>(options, null, route, client.rest);
+    const mutation = createRestMutation<null, DataType, VariablesType, ParamsType, ContextType>(options, null, route, client.rest);
     tempQueryList.push(mutation);
 
 

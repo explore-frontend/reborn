@@ -6,7 +6,7 @@ export const TestModel = createModel(() => {
     const a = ref(1);
     const b = computed(() => a.value * 2);
     const c = ref(1);
-    const { data, stream$ } = useRestQuery<{result: 1, data: number}>({
+    const { data, stream$ } = useRestQuery<{result: 1, data: number}, {params: number}>({
         url: '/api',
         method: 'post',
         variables(route) {

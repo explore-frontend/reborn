@@ -27,8 +27,8 @@ export function initDataType<DataType>() {
     return reactive(data) as typeof data;
 }
 
-export function generateQueryOptions<ModelType, DataType>(
-    option: RestQueryOptions<ModelType, DataType> | GQLQueryOptions<ModelType, DataType>,
+export function generateQueryOptions<ModelType, DataType, VariablesType>(
+    option: RestQueryOptions<ModelType, DataType, VariablesType> | GQLQueryOptions<ModelType, DataType, VariablesType>,
     route: Route,
     model: ModelType,
 ) {
@@ -49,7 +49,7 @@ export function generateQueryOptions<ModelType, DataType>(
 
     const variables = computed(() => {
         if (typeof option.variables === 'function') {
-            return (option.variables as VariablesFn<ModelType>).call(model, route);
+            return (option.variables as VariablesFn<ModelType, VariablesType>).call(model, route);
         }
         return option.variables;
     });

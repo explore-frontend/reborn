@@ -116,7 +116,7 @@ function initRebornDesc<T>(
                     rebornClient.gql,
                 );
             } else if (meta.type === 'restQuery') {
-                query = createRestQuery<T, any>(
+                query = createRestQuery<T, any, any>(
                     meta.detail,
                     instance as unknown as T,
                     vm.proxy!.$route,
