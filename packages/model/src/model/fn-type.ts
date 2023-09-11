@@ -137,8 +137,13 @@ export function createModelFromCA<T>(
                 queryList.forEach(query => query.init?.());
             }
 
+            // prefetch 只触发一次
+            let prefetchPromise: undefined | Promise<unknown[]>
             function prefetch() {
-                return Promise.all(queryList.map(query => query.prefetch?.()));
+                if(!prefetchPromise) {
+                    prefetchPromise = Promise.all(queryList.map(query => query.prefetch?.()));
+                }
+                return prefetchPromise
             }
 
             function destroy() {
