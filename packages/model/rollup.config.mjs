@@ -8,89 +8,52 @@ const { peerDependencies, dependencies, exports } = JSON.parse(
     fs.readFileSync('./package.json', { encoding: 'utf-8' }),
 );
 
-/**
- * 
- * @param {import('rollup').OptionsPaths} pathAlias 
- * @param {{ import: string, require: string }} exportMap 
- * @returns 
- */
-function genConfig (pathAlias, exportMap)  {
-    const external = [
-        ...Object.keys(peerDependencies ?? {}),
-        ...Object.keys(dependencies ?? {}),
-        ...Object.keys(pathAlias),
-    ];
-    /** @type { Array<import('rollup').RollupOptions> } */
-    const config = [
-        {
-            plugins: [ts({ tsconfig: './tsconfig.lib.json' })],
-            external,
-            input: './src/index.ts',
-            output: [
-                {
-                    file: exportMap.require,
-                    format: 'cjs',
-                    paths: pathAlias,
-                },
-                {
-                    file: exportMap.import,
-                    format: 'es',
-                    paths: pathAlias,
-                },
-            ],
-        },
-        {
-            plugins: [
-                dts({
-                    respectExternal: true,
-                    tsconfig: './tsconfig.lib.json',
-                    compilerOptions: {
-                        // see https://github.com/unjs/unbuild/pull/57/files
-                        preserveSymlinks: false,
-                    },
-                }),
-            ],
-            external,
-            input: './src/index.ts',
-            output: [
-                {
-                    file: exportMap.require.replace('.cjs', '.d.cts'),
-                    paths: pathAlias,
-                },
-                {
-                    file: exportMap.import.replace('.mjs', '.d.mts'),
-                    paths: pathAlias,
-                },
-            ],
-        },
-    ];
-
-    return config;
-};
-
-export default [
-    ...genConfig(
-        {
-            'vue-demi': 'vue-demi',
-        },
-        exports['.'],
-    ),
-    ...genConfig(
-        {
-            'vue-demi': 'vue-demi',
-        },
-        {
-            "import": "./dist/v2.7/index.mjs",
-            "require": "./dist/v2.7/index.cjs"
-        },
-    ),
-    ...genConfig(
-        {
-            'vue-demi': 'vue',
-        },
-        {
-            "import": "./dist/v3/index.mjs",
-            "require": "./dist/v3/index.cjs"
-        },
-    ),
+const external = [
+    ...Object.keys(peerDependencies ?? {}),
+    ...Object.keys(dependencies ?? {}),
 ];
+
+// 因为 vue 2.6 与 vue 2.7 和 vue 3 的 tsconfig 只有一丢丢 paths 和 types 不同，不影响产出物，所以这里直接用 vue 3 的 tsconfig
+const tsconfigPath = './tsconfig.lib.vue3.json'; 
+/** @type { Array<import('rollup').RollupOptions> } */
+const config = [
+    {
+        plugins: [ts({ tsconfig: tsconfigPath })],
+        external,
+        input: './src/index.ts',
+        output: [
+            {
+                file: exports['.'].require,
+                format: 'cjs',
+            },
+            {
+                file: exports['.'].import,
+                format: 'es',
+            },
+        ],
+    },
+    {
+        plugins: [
+            dts({
+                respectExternal: true,
+                tsconfig: tsconfigPath,
+                compilerOptions: {
+                    // see https://github.com/unjs/unbuild/pull/57/files
+                    preserveSymlinks: false,
+                },
+            }),
+        ],
+        external,
+        input: './src/index.ts',
+        output: [
+            {
+                file: exports['.'].require.replace(/\.cjs$/, '.d.cts'),
+            },
+            {
+                file: exports['.'].import.replace(/\.mjs$/, '.d.mts'),
+            },
+        ],
+    },
+];
+
+export default config;
