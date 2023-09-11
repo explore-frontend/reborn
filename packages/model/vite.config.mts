@@ -1,13 +1,19 @@
-/// <reference types="vitest" />
-import { defineConfig } from "vite";
+import * as path from "node:path";
+import * as url from "node:url";
+
+import { defineConfig } from "vitest/config";
 import { createVuePlugin as vue26 } from "vite-plugin-vue2";
 import vue27 from "@vitejs/plugin-vue2";
 import vue from "@vitejs/plugin-vue";
-import path from "path";
 import * as compilerV27 from "vue2.7/compiler-sfc";
+import * as tsconfck from 'tsconfck'
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const vueVersion = process.env.VUE_VERSION === "2.6" ? "2.6" : process.env.VUE_VERSION === "2.7" ? "2.7" : "3";
 const vueVersions = ["2.6", "2.7", "3"] as const;
+
 export default defineConfig({
     plugins: [
         vueVersion === "2.6"
@@ -30,6 +36,9 @@ export default defineConfig({
             },
         },
         exclude: vueVersions.filter((x) => x !== vueVersion).map((x) => `**/*.vue${x}.spec.ts`),
+    },
+    esbuild: {
+        tsconfigRaw: (await tsconfck.parseNative(`./tsconfig.lib.vue${vueVersion}.json`)).tsconfig,
     },
     resolve: {
         alias:
