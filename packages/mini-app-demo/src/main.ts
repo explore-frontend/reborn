@@ -1,5 +1,5 @@
 import { createSSRApp } from 'vue';
-import { createStore, createClient } from '../../model/src';
+import { createStore, createClient } from '@kwai-explore/model';
 
 import App from './App.vue';
 
@@ -36,7 +36,6 @@ function parseResponse(url: string, res: any) {
                 for (const key in header) {
                     // eslint-disable-next-line no-prototype-builtins
                     if (header.hasOwnProperty(key)) {
-                        // @ts-expect-error
                         all.push([key, header[key]]);
                     }
                 }

@@ -6,7 +6,7 @@ import type {
     RestQueryOptions,
 } from '../operations/types';
 import type { GetModelInstance } from '../store';
-import type { Ref, ComputedRef } from 'vue-demi';
+import type { ComputedRef, Ref } from 'vue-demi';
 
 import {
     createGQLMutation,
@@ -16,7 +16,7 @@ import {
 } from '../operations';
 import { getCurrentInstance, toRefs } from 'vue-demi';
 import { getRootStore, MODE } from '../const';
-import { useStatus } from '../operations/status';
+import { StateStatus, useStatus } from '../operations/status';
 
 
 let creatingModelCount = 0;
@@ -45,7 +45,7 @@ export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     );
     tempQueryList.push(query as ReturnType<typeof createRestQuery>);
 
-    const status = useStatus(query.info, query.requestReason);
+    const status: ComputedRef<StateStatus> = useStatus(query.info, query.requestReason);
     const { loading, error, data } = toRefs(query.info);
 
     return {
@@ -74,7 +74,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
     const query = createGQLQuery<null, T>(options, null, route, store.hydrationStatus, client.rest);
     tempQueryList.push(query);
 
-    const status = useStatus(query.info, query.requestReason);
+    const status: ComputedRef<StateStatus> = useStatus(query.info, query.requestReason);
     const { loading, error, data } = toRefs(query.info);
 
     return {

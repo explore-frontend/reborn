@@ -7,55 +7,53 @@ import ts from 'rollup-plugin-typescript2';
 const { peerDependencies, dependencies, exports } = JSON.parse(
     fs.readFileSync('./package.json', { encoding: 'utf-8' }),
 );
-const pathAlias = {
-    'vue-demi': 'vue',
+
+// 因为 vue 2.6 与 vue 2.7 和 vue 3 的 tsconfig 只有一丢丢 paths 和 types 不同，不影响产出物，所以这里直接用 vue 3 的 tsconfig
+const tsconfigPath = './tsconfig.lib.vue3.json';
+
+/** @type { import('rollup').RollupOptions } */
+const configCommon = {
+    external: [...Object.keys(peerDependencies ?? {}), ...Object.keys(dependencies ?? {})],
+    input: './src/index.ts',
+    onwarn: (warning) => {
+        throw new Error(warning.message);
+    },
 };
-const external = [
-    ...Object.keys(peerDependencies ?? {}),
-    ...Object.keys(dependencies ?? {}),
-    ...Object.keys(pathAlias),
-];
 
 /** @type { Array<import('rollup').RollupOptions> } */
 const config = [
     {
-        plugins: [ts({ tsconfig: './tsconfig.lib.json' })],
-        external,
-        input: './src/index.ts',
+        ...configCommon,
+        plugins: [ts({ tsconfig: tsconfigPath })],
         output: [
             {
                 file: exports['.'].require,
                 format: 'cjs',
-                paths: pathAlias,
             },
             {
                 file: exports['.'].import,
                 format: 'es',
-                paths: pathAlias,
             },
         ],
     },
     {
+        ...configCommon,
         plugins: [
             dts({
                 respectExternal: true,
-                tsconfig: './tsconfig.lib.json',
+                tsconfig: tsconfigPath,
                 compilerOptions: {
                     // see https://github.com/unjs/unbuild/pull/57/files
                     preserveSymlinks: false,
                 },
             }),
         ],
-        external,
-        input: './src/index.ts',
         output: [
             {
-                file: exports['.'].require.replace('.cjs', '.d.cts'),
-                paths: pathAlias,
+                file: exports['.'].require.replace(/\.cjs$/, '.d.cts'),
             },
             {
-                file: exports['.'].import.replace('.mjs', '.d.mts'),
-                paths: pathAlias,
+                file: exports['.'].import.replace(/\.mjs$/, '.d.mts'),
             },
         ],
     },

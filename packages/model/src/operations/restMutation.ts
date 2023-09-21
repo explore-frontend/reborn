@@ -1,6 +1,5 @@
-import type { RestMutationOptions, MutationVariablesFn } from './types';
+import type { RestMutationOptions, MutationVariablesFn, Route } from './types';
 import type { Client } from '../clients';
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 import { initDataType } from './core';
 import { Observable, Subject, mergeAll, switchAll } from 'rxjs';
@@ -9,7 +8,7 @@ import { type InfoDataType } from './status';
 export function createRestMutation<ModelType, DataType>(
     option: RestMutationOptions<ModelType>,
     model: ModelType,
-    route: RouteLocationNormalizedLoaded,
+    route: Route,
     client?: Client,
 ) {
 

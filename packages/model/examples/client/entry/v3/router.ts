@@ -3,11 +3,11 @@ import {
     createMemoryHistory,
     createWebHistory,
     type RouteRecordRaw
-} from 'vue-router'
+} from 'vue-router4'
 
 const routes: RouteRecordRaw[]  = [{
     path: '/:pathMatch(.*)*',
-    component: () => import('./pages/index.vue'),
+    component: () => import('../../app/pages/index.vue'),
 }];
 
 export function createRouter() {

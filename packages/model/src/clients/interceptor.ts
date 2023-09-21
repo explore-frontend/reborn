@@ -1,6 +1,6 @@
 import type { RequestInfo } from './types';
 
-type Interceptor<T, P> = {
+export type Interceptor<T, P> = {
     list: Array<{
         onResolve: (x: T) => any | null;
         onReject: (x: P) => any | null;

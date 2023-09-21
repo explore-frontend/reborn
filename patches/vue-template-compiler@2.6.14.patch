@@ -1,0 +1,13 @@
+diff --git a/index.js b/index.js
+index dcc7e6cbe9c045048b5aa04b2b17c2c8bb06b362..a0621ab434ece166552dfe166112ec12376714dc 100644
+--- a/index.js
++++ b/index.js
+@@ -7,7 +7,7 @@ var packageVersion = require('./package.json').version
+ if (vueVersion && vueVersion !== packageVersion) {
+   var vuePath = require.resolve('vue')
+   var packagePath = require.resolve('./package.json')
+-  throw new Error(
++  new Error(
+     '\n\nVue packages version mismatch:\n\n' +
+     '- vue@' + vueVersion + ' (' + vuePath + ')\n' +
+     '- ' + packageName + '@' + packageVersion + ' (' + packagePath + ')\n\n' +

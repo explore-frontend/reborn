@@ -1,5 +1,5 @@
 // TODO后面再改一下Model的开发模式
-import { createModel, useRestQuery } from '../../../../model/src';
+import { createModel, useRestQuery } from '@kwai-explore/model';
 import { ref, computed } from 'vue';
 
 export const TestModel = createModel(() => {

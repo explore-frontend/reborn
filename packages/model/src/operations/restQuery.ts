@@ -1,19 +1,18 @@
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import { mergeAll, Observable, Subject, switchAll, type Subscription } from 'rxjs';
 
-import type { RestQueryOptions, RestFetchMoreOption } from './types';
+import type { RestQueryOptions, RestFetchMoreOption, Route } from './types';
 import type { Client, RestRequestConfig } from '../clients';
 import type { HydrationStatus, Store } from '../store';
 
 import { generateQueryOptions } from './core';
-import { computed, ref, type Ref } from 'vue-demi';
+import { ref, type Ref } from 'vue-demi';
 import { deepMerge } from '../utils';
 import { type InfoDataType, RequestReason, StateStatus, getStatus } from './status';
 
 export function createRestQuery<ModelType, DataType>(
     option: RestQueryOptions<ModelType, DataType>,
     model: ModelType,
-    route: RouteLocationNormalizedLoaded,
+    route: Route,
     hydrationStatus: HydrationStatus,
     client?: Client,
 ) {
@@ -35,7 +34,7 @@ export function createRestQuery<ModelType, DataType>(
     }>>()
 
     const stream$ = requestStream$.pipe(mergeAll())
-    const requestReason = ref<RequestReason>(RequestReason.setVariables);
+    const requestReason: Ref<RequestReason>= ref<RequestReason>(RequestReason.setVariables);
 
     requestStream$.pipe(switchAll()).subscribe(value => {
         info.loading = value.loading
@@ -129,7 +128,6 @@ export function createRestQuery<ModelType, DataType>(
 
 
     let sub: Subscription | null = null;
-
     function init() {
         sub = fetchQuery$.subscribe((reason) => {
             if (skip.value) {

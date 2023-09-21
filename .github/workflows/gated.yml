@@ -19,5 +19,10 @@ jobs:
         corepack enable
         pnpm --version
     - run: pnpm install --frozen-lockfile
+    - run: pnpm --filter ./packages/model run type-check
     - run: pnpm --filter ./packages/model run coverage
     - run: pnpm --filter ./packages/model run build
+    # - run: pnpm --filter ./packages/model run docs:build
+    # - run: pnpm --filter ./packages/docs run build
+    - run: pnpm --filter ./packages/mini-app-demo run type-check
+    - run: pnpm --filter ./packages/mini-app-demo run build:mp-weixin

@@ -10,8 +10,8 @@ import {
 } from '../operations';
 
 import { getRootStore, MODE } from '../const';
-import { computed, reactive, getCurrentInstance } from 'vue-demi';
-import { useStatus } from '../operations/status';
+import { computed, reactive, getCurrentInstance, type ComputedRef } from 'vue-demi';
+import { type StateStatus, useStatus } from '../operations/status';
 
 function registerProperty(obj: any, key: string, value: any) {
     Object.defineProperty(obj, key, {
@@ -125,7 +125,7 @@ function initRebornDesc<T>(
                 )
             }
 
-            const status = useStatus(query.info, query.requestReason);
+            const status: ComputedRef<StateStatus> = useStatus(query.info, query.requestReason);
 
             const value = {
                 get data() {

@@ -1,7 +1,7 @@
 {
     "name": "reborn",
     "private": true,
-    "packageManager": "pnpm@8.6.0",
+    "packageManager": "pnpm@8.7.4",
     "npmClient": "pnpm",
     "scripts": {
         "format-check": "prettier --check .",
@@ -16,5 +16,14 @@
     },
     "gitHooks": {
         "commit-msg": "commitlint -E GIT_PARAMS"
+    },
+    "pnpm": {
+        "neverBuiltDependencies": [
+            "core-js",
+            "vue-demi"
+        ],
+        "patchedDependencies": {
+            "vue-template-compiler@2.6.14": "patches/vue-template-compiler@2.6.14.patch"
+        }
     }
 }
