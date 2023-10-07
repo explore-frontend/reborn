@@ -4,6 +4,7 @@ import type {
     GQLQueryOptions,
     RestMutationOptions,
     RestQueryOptions,
+    Route,
 } from '../operations/types';
 import type { GetModelInstance } from '../store';
 import type { ComputedRef, Ref } from 'vue-demi';
@@ -14,7 +15,7 @@ import {
     createRestMutation,
     createRestQuery,
 } from '../operations';
-import { getCurrentInstance, toRefs } from 'vue-demi';
+import { getCurrentInstance, shallowReactive, toRefs, watch } from 'vue-demi';
 import { getRootStore, MODE } from '../const';
 import { StateStatus, useStatus } from '../operations/status';
 
@@ -28,12 +29,20 @@ interface Hook {
 }
 const tempQueryList: Array<Hook> = [];
 
+const useRoute = (vm: Exclude<ReturnType<typeof getCurrentInstance>, null>) => {
+    const route = shallowReactive(Object.assign({}, vm.proxy!.$route))
+    watch(() => vm.proxy!.$route, ($route) => {
+        Object.assign(route, $route)
+    })
+    return route as Route
+}
+
 export const useRestQuery = <T>(options: RestQueryOptions<null, T>) => {
     const vm = getCurrentInstance();
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestQuery with createModel context `);
     }
-    const route = vm.proxy!.$route;
+    const route = useRoute(vm);
     const { rebornClient: client, store } = getRootStore();
 
     const query = createRestQuery<null, T>(
@@ -68,7 +77,7 @@ export const useGQLQuery = <T>(options: GQLQueryOptions<null, T>) => {
         throw new Error(`You should use useGQLQuery with createModel context `);
     }
 
-    const route = vm.proxy!.$route;
+    const route = useRoute(vm);
     const { rebornClient: client, store } = getRootStore();
 
     const query = createGQLQuery<null, T>(options, null, route, store.hydrationStatus, client.rest);
@@ -95,7 +104,7 @@ export const useRestMutation = <T>(options: RestMutationOptions) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useRestMutation with createModel context `);
     }
-    const route = vm.proxy!.$route;
+    const route = useRoute(vm);
     const { rebornClient: client } = getRootStore();
 
     const mutation = createRestMutation<null, T>(options, null, route, client.rest);
@@ -113,7 +122,7 @@ export const useGQLMutation = <T>(options: GQLMutationOptions) => {
     if (creatingModelCount <= 0 || !vm) {
         throw new Error(`You should use useGQLMutation with createModel context `);
     }
-    const route = vm.proxy!.$route;
+    const route = useRoute(vm);
     const { rebornClient: client } = getRootStore();
 
     return createGQLMutation<null, T>(options, null, route, client.rest);
@@ -121,7 +130,7 @@ export const useGQLMutation = <T>(options: GQLMutationOptions) => {
 
 export type FNModelCreator<T> = {
     type: string,
-    creator: () => { model: T, queryList: Array<Hook>};
+    creator: () => { model: T, queryList: Array<Hook> };
 }
 
 export function createModelFromCA<T>(
@@ -140,7 +149,7 @@ export function createModelFromCA<T>(
             // prefetch 只触发一次
             let prefetchPromise: undefined | Promise<unknown[]>
             function prefetch() {
-                if(!prefetchPromise) {
+                if (!prefetchPromise) {
                     prefetchPromise = Promise.all(queryList.map(query => query.prefetch?.()));
                 }
                 return prefetchPromise
