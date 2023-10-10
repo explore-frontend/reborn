@@ -10,6 +10,7 @@ export type MutationVariablesFn<T> = (this: T, params: any, route: Route) => Rec
 export type BooleanFn<T> = (this: T, route: Route) => boolean;
 export type NumberFn<T> = (this: T, route: Route) => number;
 export type UrlFn<T> = (this: T, route: Route, variables: Record<string, any> | undefined) => string;
+export type MutationUrlFn<T> = (this: T,route: Route, variables: Record<string, any> | undefined, params:  Record<string, any>) => string;
 
 // 和CreateQuery有关的参数部分
 type CommonQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {
@@ -47,12 +48,12 @@ type CommonMutationOptions<ModelType extends unknown = unknown> = {
 }
 
 export type GQLMutationOptions<ModelType extends unknown = unknown> = {
-    url?: UrlFn<ModelType> | string;
+    url?: MutationUrlFn<ModelType> | string;
     mutation: DocumentNode;
 } & CommonMutationOptions<ModelType>;
 
 export type RestMutationOptions<ModelType extends unknown = unknown> = {
-    url: UrlFn<ModelType> | string;
+    url: MutationUrlFn<ModelType> | string;
     method?: Method;
 } & CommonMutationOptions<ModelType>;
 

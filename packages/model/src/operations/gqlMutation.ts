@@ -25,11 +25,12 @@ export function createGQLMutation<ModelType, DataType>(
         return params;
     }
 
-    function url<T extends Record<string, any>>(params: T) {
+    function url<T extends Record<string, any>>(variables: T, params: T) {
         if (option.url && typeof option.url === 'function') {
             return option.url.call(
                 model,
                 route,
+                variables,
                 params,
             );
         }

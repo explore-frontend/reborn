@@ -27,11 +27,12 @@ export function createRestMutation<ModelType, DataType>(
         return params;
     }
 
-    function url<T extends Record<string, any>>(params: T) {
+    function url<T extends Record<string, any>>(variables: T, params: Record<string, any>) {
         if (option.url && typeof option.url === 'function') {
             return option.url.call(
                 model,
                 route,
+                variables,
                 params,
             );
         }
@@ -65,7 +66,7 @@ export function createRestMutation<ModelType, DataType>(
     function mutate<T extends Record<string, any>>(params: T, context?: any) {
         const id = ++requestId
         const mutateParams = {
-            url: url(variables(params)),
+            url: url(variables(params), params),
             headers: option.headers,
             method: option.method,
             variables: variables(params),
