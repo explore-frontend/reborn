@@ -11,6 +11,13 @@ import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
 
 
+class TimeoutError extends Error {
+    constructor(msg: string) {
+        super(msg)
+        this.message = msg;
+    }
+}
+
 const DEFAULT_OPTIONS: ClientOptions = {
     method: 'GET',
     headers: {
@@ -67,12 +74,6 @@ function mergeClientOptionsAndParams(options: ClientOptions, params: Params): Re
     return commonConfig;
 }
 
-class TimeoutError extends Error {
-    constructor(msg: string) {
-        super(msg)
-        this.message = msg;
-    }
-}
 
 export function clientFactory(
     type: 'GQL' | 'REST',
@@ -142,10 +143,10 @@ export function clientFactory(
             const timeoutPromise = new Promise<DOMException | TimeoutError>((resolve) => {
                 setTimeout(
                     () => {
-                        if (MODE ==='SSR') {
-                            resolve(new TimeoutError('The request has been timeout'))
-                        } else {
+                        if (MODE !== 'SSR' && typeof DOMException !== 'undefined') {
                             resolve(new DOMException('The request has been timeout'))
+                        } else {
+                            resolve(new TimeoutError('The request has been timeout'))
                         }
                     },
                     config.timeout,
@@ -155,9 +156,9 @@ export function clientFactory(
         }).then((res) => {
             // 浏览器断网情况下有可能会是null
             if (res === null) {
-                res = MODE === 'SSR'
-                    ? new TimeoutError('The request has been timeout')
-                    : new DOMException('The request has been timeout');
+                res = MODE !== 'SSR' && typeof DOMException !== 'undefined'
+                    ? new DOMException('The request has been timeout')
+                    : new TimeoutError('The request has been timeout');
             }
 
             const list = [...responseInterceptor.list];
