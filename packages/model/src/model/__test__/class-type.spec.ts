@@ -25,7 +25,7 @@ const restClient = createClient('REST', {
 
 restClient.interceptors.response.use((params) => {
     // 改在这里mock了= =，原因：找不到靠谱的mock Response Header的方式
-    if (params.config.url === '/query') {
+    if (params.config.url.startsWith('/query')) {
         return {
             a: 1,
             b: 1,
