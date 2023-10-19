@@ -1,6 +1,6 @@
 {
     "name": "@kwai-explore/model",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "main": "dist/index.cjs",
     "module": "dist/index.mjs",
     "typings": "dist/index.d.cts",
