@@ -4,7 +4,7 @@ import type { Ref } from 'vue-demi';
 import type { Client, RebornClient } from '../clients';
 
 import { ref } from 'vue-demi';
-import { INJECT_KEY, setMode } from '../const';
+import { INJECT_KEY, ROOT_STORE_MAP, setMode } from '../const';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
@@ -80,6 +80,7 @@ export function createStore() {
         if (app.config && typeof app.config.globalProperties === 'object') {
             app.config.globalProperties.rebornStore = store;
             app.config.globalProperties.rebornClient = rebornClient;
+            // vue3 的 provide 根组件也能用
             app.provide(INJECT_KEY, {
                 store,
                 rebornClient,
@@ -95,6 +96,15 @@ export function createStore() {
                                 rebornClient,
                             }
                         };
+                    }
+                },
+                // 解决 vue2 根组件不能直接使用 model
+                beforeCreate() {
+                    if (this === this.$root) {
+                        ROOT_STORE_MAP.set(this, {
+                            store,
+                            rebornClient,
+                        })
                     }
                 }
             });
