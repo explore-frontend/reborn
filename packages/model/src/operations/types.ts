@@ -33,6 +33,16 @@ export type GQLQueryOptions<ModelType extends unknown = unknown, DataType = unkn
 export type RestQueryOptions<ModelType extends unknown = unknown, DataType = unknown> = {
     url: UrlFn<ModelType> | string;
     method?: Method;
+    /**
+     * 发起请求前钩子，可以修改发送的 url 以及 variables
+     * @param params
+     */
+    beforeQuery?(
+        params: {
+            url: string;
+            variables: Record<string, any> | undefined;
+        }
+    ): undefined | { url?: string; variables?: Record<string, any> };
 } & CommonQueryOptions<ModelType, DataType>
 
 export type GQLFetchMoreOptions = Pick<GQLQueryParams, 'variables'>;

@@ -56,13 +56,19 @@ export function createRestQuery<ModelType, DataType>(
         }
         requestReason.value = reason
         const id = ++requestId
-        const clientParams = {
+
+        const beforeQueryParams = {
             url: url.value,
+            variables
+        }
+
+        const clientParams = {
             headers: option.headers,
             method: option.method,
             fetchPolicy: option.fetchPolicy,
-            variables: variables,
             timeout: option.timeout,
+            ...beforeQueryParams,
+            ...(option.beforeQuery?.(beforeQueryParams) ?? {}),
         };
 
         const query$ = new Subject<InfoDataType<DataType> & {
