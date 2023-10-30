@@ -16,6 +16,7 @@ import { createModelFromClass } from './class-type';
 import { getRootStore } from '../const';
 
 export type * from './types';
+import { createModel, type FNModelConstructor } from './fn-type';
 
 export {
     createModel,
@@ -96,6 +97,11 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     });
 
     return storeModelInstance.instance!.model as RebornInstanceType<T>;
+}
+
+export function createUseModel<T>(fn: FNModelConstructor<T>) {
+    const model = createModel(fn);
+    return () => useModel(model);
 }
 
 export {
