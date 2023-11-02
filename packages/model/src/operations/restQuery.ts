@@ -101,7 +101,7 @@ export function createRestQuery<ModelType, DataType>(
                         url: clientParams.url,
                         variables: clientParams.variables,
                         requestReason: reason,
-                        status: getStatus({ ...prevInfo, data: infoData, loading: false }, reason),
+                        status: getStatus({ error: undefined, data: infoData, loading: false }, reason),
                         data: infoData,
                         loading: false,
                         error: undefined,
