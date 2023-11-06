@@ -1,6 +1,6 @@
 import type { generateRequestInfo } from './request-transform';
 import type { CommonResponse } from './interceptor';
-import type { ClientOptions, Params, FetchPolicy, RequestConfig } from './types';
+import type { ClientOptions, Params, FetchPolicy, RequestConfig, RestParams } from './types';
 import type { HydrationStatus } from '../store';
 import { ReplaySubject } from 'rxjs';
 import { MODE } from '../const';
@@ -75,15 +75,15 @@ function mergeClientOptionsAndParams(options: ClientOptions, params: Params): Re
 }
 
 
-export function clientFactory(
-    type: 'GQL' | 'REST',
+export function clientFactory<ClientType extends 'GQL'| 'REST'>(
+    type: ClientType,
     createRequestInfo: typeof generateRequestInfo,
     options?: ClientOptions,
 ) {
     const opts = options
         ? deepMerge({} as ClientOptions, DEFAULT_OPTIONS, options)
         : deepMerge({} as ClientOptions, DEFAULT_OPTIONS);
-    const requestInterceptor = createInterceptor<Params>('request');
+    const requestInterceptor = createInterceptor<ClientType extends 'GQL' ? Params : RestParams>('request');
     const responseInterceptor = createInterceptor<CommonResponse>('response');
 
     const interceptors = {
@@ -100,7 +100,7 @@ export function clientFactory(
 
         const list = [...requestInterceptor.list];
 
-        const config = mergeClientOptionsAndParams(opts, params);
+        const config = mergeClientOptionsAndParams(opts, params) as ClientType extends 'GQL' ? Params : RestParams;
 
         // 后面再做benchmark看看一个tick会差出来多少性能
         let promise = Promise.resolve(config);

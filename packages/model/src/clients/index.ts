@@ -5,6 +5,6 @@ import { generateRequestInfo  } from './request-transform';
 
 export type * from './types';
 
-export function createClient(type: 'GQL' | 'REST', options?: ClientOptions) {
+export function createClient<ClientType extends 'GQL' | 'REST'>(type: ClientType, options?: ClientOptions) {
     return clientFactory(type, generateRequestInfo, options)
 }
