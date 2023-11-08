@@ -21,7 +21,7 @@ class TimeoutError extends Error {
 const DEFAULT_OPTIONS: ClientOptions = {
     method: 'GET',
     headers: {
-        'content-type': 'application/json',
+        "content-type": 'application/x-www-form-urlencoded'
     },
     timeout: 60 * 1000,
     credentials: 'include',
