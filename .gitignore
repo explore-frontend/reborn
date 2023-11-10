@@ -99,4 +99,5 @@ jspm_packages/
 .idea
 
 dist
+dist-*
 .rollup.cache

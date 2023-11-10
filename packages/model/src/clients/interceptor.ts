@@ -1,4 +1,4 @@
-import type { RequestInfo } from './types';
+import type { RequestInfo, Response } from './types';
 
 export type Interceptor<T, P> = {
     list: Array<{
