@@ -24,7 +24,7 @@ export function createGQLQuery<ModelType, DataType>(
         skip,
         pollInterval,
         variables,
-    } = generateQueryOptions<ModelType, DataType>(option, route, model);
+    } = generateQueryOptions<ModelType, DataType, any>(option, route, model);
 
     const requestReason: Ref<RequestReason> = ref<RequestReason>(0)
 
