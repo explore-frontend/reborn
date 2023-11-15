@@ -66,12 +66,17 @@ function generateRestRequestInfo(params: RestRequestConfig): RequestInfo {
 
     let { variables, url } = params;
 
-    // get 请求 content-type 默认设置为 'application/x-www-form-urlencoded'
+    // get 请求 content-type 只能设置为 'application/x-www-form-urlencoded'
     if (requestInit.method?.toLowerCase() === 'get' && variables) {
         if(headers['content-type'] && headers['content-type'] !== 'application/x-www-form-urlencoded') {
             console.error('get 请求请指定 content-type 为 `application/x-www-form-urlencoded` 传参，当前为：', headers['content-type'])
         }
         headers['content-type'] = 'application/x-www-form-urlencoded'
+    }
+
+     // post 请求 content-type 默认设置为 'application/json'
+    if(requestInit.method?.toLowerCase() === 'post' && !headers['content-type']) {
+        headers['content-type'] = 'application/json'
     }
 
     let body = variables
