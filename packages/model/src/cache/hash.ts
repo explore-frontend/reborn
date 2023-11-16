@@ -1,7 +1,19 @@
+/**
+ * 将hash字符串中的 '<' 和 '>' 转义
+ * @link https://github.com/yahoo/serialize-javascript/blob/main/index.js
+ */
+const ESCAPED_CHARS: Record<string, string> = {
+    '<': '\\u003C',
+    '>': '\\u003E',
+    '/': '\\u002F',
+    '\u2028': '\\u2028',
+    '\u2029': '\\u2029'
+}
 export function encode(str: string) {
     let result = '';
     for (let i = 0; i < str.length; i++) {
-        result += String.fromCharCode(str.charCodeAt(i) + 1);
+        const hashChar = String.fromCharCode(str.charCodeAt(i) + 1);
+        result += ESCAPED_CHARS[hashChar] ?? hashChar
     }
     return result;
 }
