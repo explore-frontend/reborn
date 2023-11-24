@@ -3,7 +3,7 @@ import type { CommonResponse } from './interceptor';
 import type { ClientOptions, Params, FetchPolicy, RequestConfig, RestParams } from './types';
 import type { HydrationStatus } from '../store';
 import { ReplaySubject } from 'rxjs';
-import { MODE } from '../const';
+import { RENDER_MODE } from '../const';
 
 import { createCache } from '../cache';
 import { hash } from '../cache/hash';
@@ -117,14 +117,14 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
 
             if (!opts.fetch) {
                 // 避免Node环境下的判断，所以没法简化写=。=，因为window.fetch会触发一次RHS导致报错
-                if (MODE === 'SPA') {
+                if (RENDER_MODE === 'SPA') {
                     // 小程序因为没有window，所以需要这里绕一下
                     if (typeof window !== 'undefined' && window.fetch) {
                         opts.fetch = (resource, options) => window.fetch(resource, options);
                     } else {
                         throw new Error('There is no useful "fetch" function');
                     }
-                } else if (MODE === 'SSR') {
+                } else {
                     if (globalThis.fetch) {
                         opts.fetch = (resource, options) => globalThis.fetch(resource, options);
                     } else {
@@ -142,7 +142,7 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
             const timeoutPromise = new Promise<DOMException | TimeoutError>((resolve) => {
                 setTimeout(
                     () => {
-                        if (MODE !== 'SSR' && typeof DOMException !== 'undefined') {
+                        if (RENDER_MODE === 'SPA' && typeof DOMException !== 'undefined') {
                             resolve(new DOMException('The request has been timeout'))
                         } else {
                             resolve(new TimeoutError('The request has been timeout'))
@@ -155,7 +155,7 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
         }).then((res) => {
             // 浏览器断网情况下有可能会是null
             if (res === null) {
-                res = MODE !== 'SSR' && typeof DOMException !== 'undefined'
+                res = RENDER_MODE === 'SPA' && typeof DOMException !== 'undefined'
                     ? new DOMException('The request has been timeout')
                     : new TimeoutError('The request has been timeout');
             }

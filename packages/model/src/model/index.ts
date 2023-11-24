@@ -13,7 +13,7 @@ import {
 import { createModelFromCA } from './fn-type'
 import { createModelFromClass } from './class-type';
 
-import { getRootStore } from '../const';
+import { getRootStore, RENDER_MODE } from '../const';
 
 export type * from './types';
 import { createModel, type FNModelConstructor } from './fn-type';
@@ -84,7 +84,10 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         }
     });
     onServerPrefetch(async () => {
-        await storeModelInstance.instance?.prefetch();
+        // SSG 不进行请求
+        if(RENDER_MODE !== 'SSG') {
+            await storeModelInstance.instance?.prefetch();
+        }
         storeModelInstance.count--;
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
             storeModelInstance.instance.destroy();

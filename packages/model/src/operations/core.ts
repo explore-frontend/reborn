@@ -12,7 +12,7 @@ import { RequestReason, type InfoDataType } from './status';
 import { reactive, computed, watch, type ComputedRef } from 'vue-demi';
 import { fromWatch } from '../utils';
 import { Observable, merge, map } from 'rxjs';
-import { MODE } from '../const';
+import { RENDER_MODE } from '../const';
 
 export { isDef } from '../utils';
 
@@ -70,7 +70,7 @@ export function generateQueryOptions<ModelType, DataType, VariablesType>(
         let timeout: ReturnType<typeof setTimeout>;
 
         const poll = () => {
-            if(MODE === 'SSR') {
+            if(RENDER_MODE !== 'SPA') {
                 return
             }
             clearTimeout(timeout);
