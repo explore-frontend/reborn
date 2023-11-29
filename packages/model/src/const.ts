@@ -1,5 +1,5 @@
 import type { RebornClient } from './clients';
-import type { storeFactory } from './store';
+import type { RenderMode, storeFactory } from './store';
 
 import { getCurrentInstance, inject } from 'vue-demi';
 
@@ -15,10 +15,10 @@ export const ROOT_STORE_MAP = new WeakMap<
     RootStore
 >();
 
-export let MODE: 'SPA' | 'SSR' = 'SPA';
+export let RENDER_MODE: RenderMode = 'SPA';
 
-export function setMode(mode: 'SPA' | 'SSR') {
-    MODE = mode;
+export function setRenderMode(mode: RenderMode) {
+    RENDER_MODE = mode;
 }
 
 export function getRootStore(): RootStore {

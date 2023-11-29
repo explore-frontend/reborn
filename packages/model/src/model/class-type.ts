@@ -9,7 +9,7 @@ import {
     createRestQuery,
 } from '../operations';
 
-import { getRootStore, MODE } from '../const';
+import { getRootStore, RENDER_MODE } from '../const';
 import { computed, reactive, getCurrentInstance, type ComputedRef } from 'vue-demi';
 import { type StateStatus, useStatus } from '../operations/status';
 
@@ -360,7 +360,7 @@ export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> 
             });
 
             // 延迟初始化，保证query间依赖
-            if (queryList.length && MODE !== 'SSR') {
+            if (queryList.length && RENDER_MODE === 'SPA') {
                 queryList.forEach(query => query.init());
             }
 

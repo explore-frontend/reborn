@@ -4,7 +4,9 @@ import type { Ref } from 'vue-demi';
 import type { Client, RebornClient } from '../clients';
 
 import { ref } from 'vue-demi';
-import { INJECT_KEY, ROOT_STORE_MAP, setMode } from '../const';
+import { INJECT_KEY, ROOT_STORE_MAP, setRenderMode } from '../const';
+
+export type RenderMode = 'SPA' | 'SSR' | 'SSG';
 
 export type GetModelInstance = ReturnType<typeof storeFactory>['getModelInstance'];
 
@@ -16,7 +18,9 @@ export type HydrationStatus = Ref<0 | 1 | 2>;
 export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
 
-    function getModelInstance<T>(constructor: ModelInfo<T>['constructor']): RebornInstanceType<typeof constructor> | null {
+    function getModelInstance<T>(
+        constructor: ModelInfo<T>['constructor'],
+    ): RebornInstanceType<typeof constructor> | null {
         return modelMap.get(constructor)?.instance?.model as unknown as RebornInstanceType<typeof constructor>;
     }
 
@@ -75,7 +79,7 @@ export function createStore() {
     }
 
     // 为了适配 vue 不同版本这里只能用 any 了
-    function install(app: any, ssrMode: boolean = false) {
+    function install(app: any, renderMode: boolean | RenderMode = false) {
         // vue3
         if (app.config && typeof app.config.globalProperties === 'object') {
             app.config.globalProperties.rebornStore = store;
@@ -85,7 +89,7 @@ export function createStore() {
                 store,
                 rebornClient,
             });
-        // vue2.7
+            // vue2.7
         } else {
             app.mixin({
                 provide(this) {
@@ -94,7 +98,7 @@ export function createStore() {
                             [INJECT_KEY]: {
                                 store,
                                 rebornClient,
-                            }
+                            },
                         };
                     }
                 },
@@ -104,13 +108,13 @@ export function createStore() {
                         ROOT_STORE_MAP.set(this, {
                             store,
                             rebornClient,
-                        })
+                        });
                     }
-                }
+                },
             });
         }
 
-        setMode(ssrMode ? 'SSR' : 'SPA');
+        setRenderMode(typeof renderMode === 'string' ? renderMode : renderMode ? 'SSR' : 'SPA');
     }
 
     const result = {

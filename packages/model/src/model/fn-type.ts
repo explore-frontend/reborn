@@ -16,7 +16,7 @@ import {
     createRestQuery,
 } from '../operations';
 import { getCurrentInstance, shallowReactive, toRefs, watch } from 'vue-demi';
-import { getRootStore, MODE } from '../const';
+import { getRootStore, RENDER_MODE } from '../const';
 import { StateStatus, useStatus } from '../operations/status';
 
 
@@ -142,7 +142,7 @@ export function createModelFromCA<T>(
             const { model, queryList } = fn.creator();
 
             // 延迟初始化，保证query间依赖
-            if (queryList.length && MODE !== 'SSR') {
+            if (queryList.length && RENDER_MODE === 'SPA') {
                 queryList.forEach(query => query.init?.());
             }
 
