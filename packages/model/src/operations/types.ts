@@ -1,4 +1,4 @@
-import type { Method, HTTPHeaders, RestParams, GQLQueryParams, FetchPolicy, DocumentNode } from '../clients';
+import type { Method, HTTPHeaders, RestParams, GQLQueryParams, FetchPolicy, DocumentNode, RequestCredentials } from '../clients';
 import type { getCurrentInstance } from 'vue-demi';
 
 type InstanceProxy = Exclude<Exclude<ReturnType<typeof getCurrentInstance>, null>['proxy'], null>;

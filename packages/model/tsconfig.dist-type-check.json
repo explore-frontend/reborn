@@ -1,0 +1,13 @@
+{
+    // 检查产物中是否依赖 dom 或者 node 环境
+    "extends": "@kwai-explore/tsconfig",
+    "compilerOptions": {
+        "lib": ["esnext"],
+        "useDefineForClassFields": false,
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        "verbatimModuleSyntax": false
+    },
+    "include": ["./dist-type-check/**/*"],
+}

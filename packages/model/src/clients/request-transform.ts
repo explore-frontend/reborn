@@ -1,4 +1,4 @@
-import type { HTTPHeaders, RequestInfo, RequestConfig, GQLQueryRequestConfig, GQLMutationRequestConfig, RestRequestConfig } from './types';
+import type { HTTPHeaders, RequestInfo, RequestConfig, GQLQueryRequestConfig, GQLMutationRequestConfig, RestRequestConfig, RequestInit } from './types';
 
 import { shimStringify, appendQueryStringToUrl } from '../utils';
 
