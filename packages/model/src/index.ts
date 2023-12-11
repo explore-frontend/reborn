@@ -1,6 +1,6 @@
 export { createStore } from './store';
 
-export { createClient } from './clients';
+export { createClient, TimeoutError, FetchError } from './clients';
 
 export { createCache } from './cache';
 
