@@ -11,12 +11,23 @@ import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
 
 
-class TimeoutError extends Error {
+class _TimeoutError extends Error {
+    override name =  'ModelTimeoutError'
     constructor(msg: string) {
         super(msg)
         this.message = msg;
     }
 }
+
+export class FetchError extends Error {
+    override name =  'ModelFetchError'
+    constructor(msg: string) {
+        super(msg)
+        this.message = msg;
+    }
+}
+
+export const TimeoutError = (typeof DOMException !== 'undefined' ? DOMException: _TimeoutError) as typeof _TimeoutError
 
 const DEFAULT_OPTIONS: ClientOptions = {
     method: 'GET',
@@ -137,16 +148,12 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
                 url,
                 requestInit,
             } = request;
-            const fetchPromise = opts.fetch!(url, requestInit);
+            const fetchPromise = opts.fetch!(url, requestInit).catch((e: Error) => new FetchError(e.message));
 
-            const timeoutPromise = new Promise<DOMException | TimeoutError>((resolve) => {
+            const timeoutPromise = new Promise<InstanceType<typeof TimeoutError>>((resolve) => {
                 setTimeout(
                     () => {
-                        if (MODE !== 'SSR' && typeof DOMException !== 'undefined') {
-                            resolve(new DOMException('The request has been timeout'))
-                        } else {
-                            resolve(new TimeoutError('The request has been timeout'))
-                        }
+                        resolve(new TimeoutError('The request has been timeout'))
                     },
                     config.timeout,
                 );
@@ -155,9 +162,7 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
         }).then((res) => {
             // 浏览器断网情况下有可能会是null
             if (res === null) {
-                res = MODE !== 'SSR' && typeof DOMException !== 'undefined'
-                    ? new DOMException('The request has been timeout')
-                    : new TimeoutError('The request has been timeout');
+                res = new TimeoutError('The request has been timeout');
             }
 
             const list = [...responseInterceptor.list];

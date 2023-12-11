@@ -147,8 +147,8 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
         if (sub) {
             sub.unsubscribe();
             sub = null;
-            requestStream$.complete()
         }
+        requestStream$.complete()
     }
 
     function fetchMore(variables: VariablesType) {
