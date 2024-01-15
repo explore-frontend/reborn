@@ -1,6 +1,6 @@
 {
     "name": "@kwai-explore/model",
-    "version": "0.3.11",
+    "version": "0.4.0",
     "main": "dist/index.cjs",
     "module": "dist/index.mjs",
     "typings": "dist/index.d.cts",
@@ -18,6 +18,7 @@
     ],
     "scripts": {
         "release:patch": "changelog -p -x build && NEW_VERSION=$(npm version patch) && git add CHANGELOG.md package.json && git commit -m 'updated CHANGELOG.md' && git tag $NEW_VERSION",
+        "release:minor": "changelog -m -x build && NEW_VERSION=$(npm version minor) && git add CHANGELOG.md package.json && git commit -m 'updated CHANGELOG.md' && git tag $NEW_VERSION",
         "type-check-vue2.6": "tsc --skipLibCheck --project ./tsconfig.lib.vue2.6.json",
         "type-check-vue2.7": "tsc --skipLibCheck --project ./tsconfig.lib.vue2.7.json && vue-tsc --skipLibCheck --project ./examples/client/entry/v2.7/tsconfig.json",
         "type-check-vue3": "tsc --skipLibCheck --project ./tsconfig.lib.vue3.json && vue-tsc --skipLibCheck --project ./examples/client/entry/v3/tsconfig.json",
