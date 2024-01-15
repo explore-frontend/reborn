@@ -10,7 +10,7 @@ import {
     nextTick,
 } from 'vue-demi';
 
-import { createModelFromCA } from './fn-type'
+import { createModelFromCA } from './fn-type';
 import { createModelFromClass } from './class-type';
 
 import { getRootStore } from '../const';
@@ -18,21 +18,15 @@ import { getRootStore } from '../const';
 export type * from './types';
 import { createModel, type FNModelConstructor } from './fn-type';
 
-export {
-    createModel,
-    useGQLMutation,
-    useGQLQuery,
-    useRestMutation,
-    useRestQuery,
-} from './fn-type';
+export { createModel, useGQLMutation, useGQLQuery, useRestMutation, useRestQuery } from './fn-type';
 
 export { type FNModelCreator } from './fn-type';
 
 export { BaseModel } from './class-type';
 
-
 export type MyCon<T> = FNModelCreator<T> | Constructor<T>;
 export type RebornInstanceType<T extends MyCon<any>> = T extends MyCon<infer U> ? U : never;
+
 
 export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInstanceType<T> {
     const instance = getCurrentInstance();
@@ -60,21 +54,29 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
     const storeModelInstance = store.addModel<T>(ctor);
 
     if (!storeModelInstance.count) {
-        const creator = 'type' in ctor
-            ? createModelFromCA(ctor)
-            : createModelFromClass(ctor);
+        store.getCurrentModelInstance()?.subModels.add(ctor)
+        const creator = 'type' in ctor ? createModelFromCA(ctor) : createModelFromClass(ctor);
         storeModelInstance.scope = effectScope(true);
         const scope = storeModelInstance.scope;
 
         scope?.run(() => {
+            const prevModelInstance = store.getCurrentModelInstance();
+            store.setCurrentModelInstance(storeModelInstance)
             const instance = creator.cotr(client) as OriginalModelInstance<T>;
             storeModelInstance.instance = instance;
+            store.setCurrentModelInstance(prevModelInstance)
         });
+    } else {
+        // 收集子 model，重新 useModel
+        storeModelInstance.subModels.forEach(ctor => {
+            useModel(ctor)
+        })
     }
     storeModelInstance.count++;
 
     onBeforeUnmount(() => {
         storeModelInstance.count--;
+        // TODO 父 model 不 销毁子 model 不能销毁
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
@@ -104,9 +106,4 @@ export function createUseModel<T>(fn: FNModelConstructor<T>) {
     return () => useModel(model);
 }
 
-export {
-    gqlQuery,
-    gqlMutation,
-    restQuery,
-    restMutation,
-} from './decorators';
+export { gqlQuery, gqlMutation, restQuery, restMutation } from './decorators';

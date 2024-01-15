@@ -1,5 +1,5 @@
 import type { createGQLQuery, createRestQuery } from '../operations';
-import type { FNModelCreator, Constructor, OriginalModelInstance } from '../model';
+import type { FNModelCreator, Constructor, OriginalModelInstance, MyCon } from '../model';
 import type { EffectScope } from 'vue-demi';
 
 
@@ -9,6 +9,7 @@ export type ModelInfo<T = unknown> = {
     count: number;
     queryList: Array<ReturnType<typeof createRestQuery | typeof createGQLQuery>>;
     scope: EffectScope | null;
+    subModels: Set<MyCon<T>>
 }
 
 export type ModelMap = Record<string, ModelInfo>

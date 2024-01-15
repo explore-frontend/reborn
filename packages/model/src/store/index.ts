@@ -31,6 +31,7 @@ export function storeFactory() {
             count: 0,
             queryList: [],
             scope: null,
+            subModels: new Set()
         };
         modelMap.set(constructor, storeModelInstance);
         return storeModelInstance as ModelInfo<T>;
@@ -44,11 +45,22 @@ export function storeFactory() {
 
     const hydrationStatus: HydrationStatus = ref(0);
 
+    let currentModelInstance: null | ModelInfo<any> = null
+    function setCurrentModelInstance<T>(modelInstance: null | ModelInfo<T>) {
+        currentModelInstance = modelInstance
+    }
+
+    function getCurrentModelInstance<T>() {
+        return currentModelInstance
+    }
+
     return {
         getModelInstance,
         addModel,
         removeModel,
         hydrationStatus,
+        setCurrentModelInstance,
+        getCurrentModelInstance
     };
 }
 
