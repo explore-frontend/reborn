@@ -53,8 +53,8 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
 
     const storeModelInstance = store.addModel<T>(ctor);
 
+    store.getCurrentModelInstance()?.subModels.add(ctor)
     if (!storeModelInstance.count) {
-        store.getCurrentModelInstance()?.subModels.add(ctor)
         const creator = 'type' in ctor ? createModelFromCA(ctor) : createModelFromClass(ctor);
         storeModelInstance.scope = effectScope(true);
         const scope = storeModelInstance.scope;
