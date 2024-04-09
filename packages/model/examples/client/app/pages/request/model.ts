@@ -1,4 +1,4 @@
-import { createModel, useRestQuery } from '../../../src';
+import { createModel, useRestQuery } from '../../../../../src';
 import { ref, computed, version } from 'vue-demi';
 
 export const TestModel = createModel(() => {

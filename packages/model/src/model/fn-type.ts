@@ -1,4 +1,4 @@
-import type { ModelCotrInfo } from './types';
+import type { ModelCtorInfo } from './types';
 import type {
     GQLMutationOptions,
     GQLQueryOptions,
@@ -130,16 +130,32 @@ export const useGQLMutation = <T>(options: GQLMutationOptions) => {
 
 export type FNModelCreator<T> = {
     type: string,
-    creator: () => { model: T, queryList: Array<Hook> };
+    fn: FNModelConstructor<T>
 }
 
 export function createModelFromCA<T>(
-    fn: FNModelCreator<T>,
-): ModelCotrInfo<T> {
+    modelCreator: FNModelCreator<T>,
+): ModelCtorInfo<T> {
     return {
         type: 'FunctionalModel',
-        cotr: () => {
-            const { model, queryList } = fn.creator();
+        ctor: () => {
+            const creator = () => {
+                creatingModelCount++;
+                const { store } = getRootStore();
+
+                const model = modelCreator.fn({
+                    getModelInstance: store.getModelInstance,
+                });
+                const queryList = [...tempQueryList];
+                creatingModelCount--;
+                tempQueryList.length = 0;
+
+                return {
+                    queryList,
+                    model,
+                };
+            }
+            const { model, queryList } = creator();
 
             // 延迟初始化，保证query间依赖
             if (queryList.length && MODE !== 'SSR') {
@@ -176,21 +192,6 @@ export type FNModelConstructor<T> = (ctx: { getModelInstance: GetModelInstance }
 export function createModel<T>(fn: FNModelConstructor<T>) {
     return {
         type: 'FN',
-        creator: () => {
-            creatingModelCount++;
-            const { store } = getRootStore();
-
-            const model = fn({
-                getModelInstance: store.getModelInstance,
-            });
-            const queryList = [...tempQueryList];
-            creatingModelCount--;
-            tempQueryList.length = 0;
-
-            return {
-                queryList,
-                model,
-            };
-        }
+        fn
     } as FNModelCreator<T>;
 }

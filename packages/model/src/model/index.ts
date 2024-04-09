@@ -8,6 +8,7 @@ import {
     effectScope,
     onMounted,
     nextTick,
+    onScopeDispose,
 } from 'vue-demi';
 
 import { createModelFromCA } from './fn-type';
@@ -26,7 +27,6 @@ export { BaseModel } from './class-type';
 
 export type MyCon<T> = FNModelCreator<T> | Constructor<T>;
 export type RebornInstanceType<T extends MyCon<any>> = T extends MyCon<infer U> ? U : never;
-
 
 export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInstanceType<T> {
     const instance = getCurrentInstance();
@@ -53,7 +53,7 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
 
     const storeModelInstance = store.addModel<T>(ctor);
 
-    store.getCurrentModelInstance()?.subModels.add(ctor)
+    store.getCurrentModelInstance()?.subModels.add(ctor);
     if (!storeModelInstance.count) {
         const creator = 'type' in ctor ? createModelFromCA(ctor) : createModelFromClass(ctor);
         storeModelInstance.scope = effectScope(true);
@@ -61,22 +61,21 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
 
         scope?.run(() => {
             const prevModelInstance = store.getCurrentModelInstance();
-            store.setCurrentModelInstance(storeModelInstance)
-            const instance = creator.cotr(client) as OriginalModelInstance<T>;
+            store.setCurrentModelInstance(storeModelInstance);
+            const instance = creator.ctor(client) as OriginalModelInstance<T>;
             storeModelInstance.instance = instance;
-            store.setCurrentModelInstance(prevModelInstance)
+            store.setCurrentModelInstance(prevModelInstance);
         });
     } else {
         // 收集子 model，重新 useModel
-        storeModelInstance.subModels.forEach(ctor => {
-            useModel(ctor)
-        })
+        storeModelInstance.subModels.forEach((ctor) => {
+            useModel(ctor);
+        });
     }
     storeModelInstance.count++;
 
-    onBeforeUnmount(() => {
+    const handleUnmount = () => {
         storeModelInstance.count--;
-        // TODO 父 model 不 销毁子 model 不能销毁
         if (storeModelInstance.count === 0 && storeModelInstance.instance) {
             storeModelInstance.instance.destroy();
             storeModelInstance.instance = null;
@@ -84,21 +83,49 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
             storeModelInstance.scope = null;
             store.removeModel<T>(ctor);
         }
+    };
+
+    onBeforeUnmount(() => {
+        // TODO 父 model 不 销毁子 model 不能销毁
+        handleUnmount();
     });
     onServerPrefetch(async () => {
         await storeModelInstance.instance?.prefetch();
-        storeModelInstance.count--;
-        if (storeModelInstance.count === 0 && storeModelInstance.instance) {
-            storeModelInstance.instance.destroy();
-            storeModelInstance.instance = null;
-            storeModelInstance.scope?.stop();
-            storeModelInstance.scope = null;
-            store.removeModel<T>(ctor);
-        }
+        handleUnmount();
         return;
     });
 
     return storeModelInstance.instance!.model as RebornInstanceType<T>;
+}
+
+/**
+ *
+ * @experimental
+ * @param fn
+ * @returns
+ */
+export function createModelFamily<T, P>(
+    fnFactory: (params: P) => FNModelConstructor<T>,
+): (params: P) => FNModelCreator<T> {
+    const map = new Map();
+    const wrapper = (params: P) => {
+        const fn: FNModelConstructor<T> = (ctx) => {
+            onScopeDispose(() => {
+                map.delete(params);
+            });
+            const modelInstance = fnFactory(params)(ctx);
+            return modelInstance;
+        };
+        return fn;
+    };
+    return (params: P) => {
+        if (map.has(params)) {
+            return map.get(params);
+        }
+        const model = createModel(wrapper(params));
+        map.set(params, model);
+        return model;
+    };
 }
 
 export function createUseModel<T>(fn: FNModelConstructor<T>) {

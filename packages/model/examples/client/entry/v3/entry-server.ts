@@ -8,7 +8,7 @@ export async function render(url: string) {
     const { app, router, cache } = createApp(fetch);
 
     // set the router to the desired URL before rendering
-    await router.push(url)
+    await router.push(url.replace('/test/', ''))
     await router.isReady();
 
     // passing SSR context object which will be available via useSSRContext()

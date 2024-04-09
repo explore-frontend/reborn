@@ -6,9 +6,9 @@ import type {
     RestMutationOptions,
 } from '../operations/types';
 
-export type ModelCotrInfo<T> = {
+export type ModelCtorInfo<T> = {
     type: 'FunctionalModel' | 'ClassModel';
-    cotr: (client?: RebornClient) => OriginalModelInstance<T>;
+    ctor: (client?: RebornClient) => OriginalModelInstance<T>;
 };
 
 export type OriginalModelInstance<T> = {

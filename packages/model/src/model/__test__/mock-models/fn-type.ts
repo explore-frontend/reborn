@@ -51,7 +51,7 @@ export const MockModel = createModel(() => {
 });
 
 export const MockComposeModel = createModel(() => {
-    const { model } = createModelFromCA(MockModel).cotr();
+    const { model } = createModelFromCA(MockModel).ctor();
 
     const query = useRestQuery<{
         test: string,
