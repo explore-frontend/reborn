@@ -40,7 +40,7 @@ describe('transform model success', () => {
         const App = defineComponent({
             setup() {
                 const modelDesc = createModelFromClass(CustomModel);
-                const { model } = modelDesc.cotr({
+                const { model } = modelDesc.ctor({
                     rest: restClient,
                 });
 
@@ -102,7 +102,7 @@ describe('transform model success', () => {
         const App = defineComponent({
             setup() {
                 const modelDesc = createModelFromClass(CustomClassWithExtends);
-                const { model } = modelDesc.cotr({
+                const { model } = modelDesc.ctor({
                     rest: restClient,
                 });
 

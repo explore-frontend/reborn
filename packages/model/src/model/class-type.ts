@@ -1,4 +1,4 @@
-import type { Constructor, ModelCotrInfo, ModelMetadata } from './types';
+import type { Constructor, ModelCtorInfo, ModelMetadata } from './types';
 import type { RebornClient } from '../clients';
 import type { GetModelInstance, Store } from '../store';
 
@@ -41,13 +41,13 @@ type RebornDecorators = {
 function getDecoratorList<T extends RebornDecorators>(instance: T) {
     const result: DecoratorInfoList = [];
 
-    let cotr: RebornConstructor | Object = instance.constructor;
-    while (cotr !== Object) {
-        const rebornDecorators = (cotr as RebornConstructor).rebornDecorators;
+    let ctor: RebornConstructor | Object = instance.constructor;
+    while (ctor !== Object) {
+        const rebornDecorators = (ctor as RebornConstructor).rebornDecorators;
         if (rebornDecorators) {
             result.push(...rebornDecorators);
         }
-        cotr = Object.getPrototypeOf((cotr as RebornConstructor).prototype).constructor;
+        ctor = Object.getPrototypeOf((ctor as RebornConstructor).prototype).constructor;
     }
 
     return result;
@@ -305,13 +305,13 @@ export abstract class BaseModel {
     protected getModelInstance!: GetModelInstance;
 }
 
-export function createModelFromClass<T>(ctor: Constructor<T>): ModelCotrInfo<T> {
+export function createModelFromClass<T>(ctor: Constructor<T>): ModelCtorInfo<T> {
     const data = getDataFactory<T>(ctor);
     const protoData = generateProtoData<T>(ctor);
 
     return {
         type: 'ClassModel',
-        cotr: (client?: RebornClient) => {
+        ctor: (client?: RebornClient) => {
             if (!client) {
                 throw new Error('no client has been set before you use class mode model')
             }

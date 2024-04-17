@@ -85,7 +85,7 @@ describe('transform model success', () => {
                 // TODO就是简单意思一下，实际mock在上头写的
                 fetchMock.mockResponse(JSON.stringify({}));
 
-                const { model } = params.cotr();
+                const { model } = params.ctor();
 
                 expect(isLoadingLikeState(model.status.value)).toBe(true);
                 expect(isLoadingState(model.status.value)).toBe(true);
@@ -179,7 +179,7 @@ describe('transform model with compose success', () => {
                 // TODO就是简单意思一下，实际mock在上头写的
                 fetchMock.mockResponse(JSON.stringify({}));
 
-                const { model } = params.cotr();
+                const { model } = params.ctor();
 
                 watch(() => `${model.model.info.data?.b}-${model.info.data?.test}`, () => {
                     if (model.info.data?.test) {

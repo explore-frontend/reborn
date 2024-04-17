@@ -20,6 +20,7 @@ export {
     useRestQuery,
     useModel,
     createUseModel,
+    createModelFamily,
 } from './model';
 
 export * from './operations';

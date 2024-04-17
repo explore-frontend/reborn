@@ -1,12 +1,8 @@
 
-import type { RouteConfig } from 'vue-router3';
 import VueRouter from 'vue-router3';
 import Vue from 'vue2.7';
+import {routes} from '../../app/routes'
 Vue.use(VueRouter);
-const routes: RouteConfig[]  = [{
-    path: '/*',
-    component: () => import('../../app/pages/index.vue'),
-}];
 
 
 export function createRouter() {

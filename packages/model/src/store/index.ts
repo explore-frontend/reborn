@@ -2,7 +2,6 @@ import type { ModelInfo } from './types';
 import type { RebornInstanceType } from '../model';
 import type { Ref } from 'vue-demi';
 import type { Client, RebornClient } from '../clients';
-
 import { ref } from 'vue-demi';
 import { INJECT_KEY, ROOT_STORE_MAP, setMode } from '../const';
 
@@ -17,6 +16,7 @@ export function storeFactory() {
     const modelMap = new Map<ModelInfo<any>['constructor'], ModelInfo<any>>();
 
     function getModelInstance<T>(constructor: ModelInfo<T>['constructor']): RebornInstanceType<typeof constructor> | null {
+
         return modelMap.get(constructor)?.instance?.model as unknown as RebornInstanceType<typeof constructor>;
     }
 
@@ -60,7 +60,7 @@ export function storeFactory() {
         removeModel,
         hydrationStatus,
         setCurrentModelInstance,
-        getCurrentModelInstance
+        getCurrentModelInstance,
     };
 }
 
