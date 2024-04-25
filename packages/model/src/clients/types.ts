@@ -82,8 +82,8 @@ export type GQLMutationParams = {
 export type RestParams = {
     url: string;
     method?: Method;
-
     headers?: HTTPHeaders;
+    credentials?: RequestCredentials;
     variables?: Record<string, unknown>;
     timeout?: number;
     fetchPolicy?: FetchPolicy;
