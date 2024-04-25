@@ -58,6 +58,10 @@ function mergeClientOptionsAndParams(options: ClientOptions, params: Params): Re
         variables: params.variables,
     };
 
+    if('credentials' in params) {
+        commonConfig.credentials = params.credentials ?? credentials
+    }
+
     if ('method' in params) {
         return {
             ...commonConfig,

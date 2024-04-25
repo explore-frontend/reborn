@@ -66,6 +66,7 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
             headers: option.headers,
             method: option.method,
             fetchPolicy: option.fetchPolicy,
+            credentials: option.credentials,
             timeout: option.timeout,
             ...beforeQueryParams,
             ...(option.beforeQuery?.(beforeQueryParams) ?? {}),

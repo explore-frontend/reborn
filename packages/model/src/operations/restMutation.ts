@@ -66,6 +66,7 @@ export function createRestMutation<ModelType, DataType, VariablesType extends Re
         const mutateParams = {
             url: url(variables(params as any as ParamsType), params as any as ParamsType),
             headers: option.headers,
+            credentials: option.credentials,
             method: option.method,
             variables: variables(params as any as ParamsType),
             timeout: option.timeout,
