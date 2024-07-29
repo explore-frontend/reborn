@@ -19,48 +19,50 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
     if (!client) {
         throw new Error('No Rest Client has been set');
     }
-    const { info, skip, variables, fetchQuery$, url, prefetch } = generateQueryOptions<ModelType, DataType, VariablesType>(
-        option,
-        route,
-        model,
-    );
+    const { info, skip, variables, fetchQuery$, url, prefetch } = generateQueryOptions<
+        ModelType,
+        DataType,
+        VariablesType
+    >(option, route, model);
 
-    const requestStream$ = new Subject<Observable<InfoDataType<DataType> & {
-        id: number
-        url: string
-        variables?: VariablesType
-        requestReason: RequestReason
-        status: StateStatus,
-    }>>()
+    const requestStream$ = new Subject<
+        Observable<
+            InfoDataType<DataType> & {
+                id: number;
+                url: string;
+                variables?: VariablesType;
+                requestReason: RequestReason;
+                status: StateStatus;
+            }
+        >
+    >();
 
-    const stream$ = requestStream$.pipe(mergeAll())
-    const requestReason: Ref<RequestReason>= ref<RequestReason>(RequestReason.setVariables);
+    const stream$ = requestStream$.pipe(mergeAll());
+    const requestReason: Ref<RequestReason> = ref<RequestReason>(RequestReason.setVariables);
 
-    requestStream$.pipe(switchAll()).subscribe(value => {
-        info.loading = value.loading
-        if(!value.loading) {
-            info.error = value.error
+    requestStream$.pipe(switchAll()).subscribe((value) => {
+        info.loading = value.loading;
+        if (!value.loading) {
+            info.error = value.error;
             if (value.data) {
-                info.data = value.data
+                info.data = value.data;
             }
         }
-    })
+    });
 
-
-
-    let requestId = 0
+    let requestId = 0;
     function fetch(reason: RequestReason, variables: undefined | VariablesType) {
         // 这里记录一下请求开始时的 info 信息，避免并发请求 status 错乱
         const prevInfo = {
-            ...info
-        }
-        requestReason.value = reason
-        const id = ++requestId
+            ...info,
+        };
+        requestReason.value = reason;
+        const id = ++requestId;
 
         const beforeQueryParams = {
             url: url.value,
-            variables
-        }
+            variables,
+        };
 
         const clientParams = {
             headers: option.headers,
@@ -72,14 +74,16 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
             ...(option.beforeQuery?.(beforeQueryParams) ?? {}),
         };
 
-        const query$ = new Subject<InfoDataType<DataType> & {
-            id: number
-            url: string
-            variables?: VariablesType
-            requestReason: RequestReason
-            status: StateStatus,
-        }>()
-        requestStream$.next(query$)
+        const query$ = new Subject<
+            InfoDataType<DataType> & {
+                id: number;
+                url: string;
+                variables?: VariablesType;
+                requestReason: RequestReason;
+                status: StateStatus;
+            }
+        >();
+        requestStream$.next(query$);
 
         return new Promise((resolve) => {
             query$.next({
@@ -91,12 +95,16 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
                 data: undefined,
                 loading: true,
                 error: undefined,
-            })
+            });
+
             // TODO后面再重写一下
             const subject = client!.query<DataType>(clientParams, option.fetchPolicy, hydrationStatus);
             subject.subscribe({
                 next: (data) => {
-                    const infoData = data && option.updateQuery && reason === RequestReason.fetchMore ? option.updateQuery(prevInfo.data, data) : data;
+                    const infoData =
+                        data && option.updateQuery && reason === RequestReason.fetchMore
+                            ? option.updateQuery(prevInfo.data, data)
+                            : data;
                     query$.next({
                         id,
                         url: clientParams.url,
@@ -106,7 +114,7 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
                         data: infoData,
                         loading: false,
                         error: undefined,
-                    })
+                    });
                     resolve(undefined);
                 },
                 error: (e) => {
@@ -119,7 +127,7 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
                         data: undefined,
                         loading: false,
                         error: e,
-                    })
+                    });
                     // error 之后不会触发 complete
                     query$.complete();
                     resolve(undefined);
@@ -132,7 +140,6 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
             });
         });
     }
-
 
     let sub: Subscription | null = null;
     function init() {
@@ -149,11 +156,11 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
             sub.unsubscribe();
             sub = null;
         }
-        requestStream$.complete()
+        requestStream$.complete();
     }
 
     function fetchMore(variables: VariablesType) {
-        return fetch(RequestReason.fetchMore, variables)
+        return fetch(RequestReason.fetchMore, variables);
     }
 
     function onNext(sub: (params: { data: DataType; loading: boolean; error: any }) => void) {
@@ -175,6 +182,6 @@ export function createRestQuery<ModelType, DataType, VariablesType extends Recor
         destroy,
         onNext,
         requestReason,
-        stream$
+        stream$,
     };
 }

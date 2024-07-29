@@ -1,18 +1,12 @@
 import type { Request, Response, NextFunction } from 'express';
 
-function add() {
+function add() {}
 
-}
+function multiple() {}
 
-function multiple() {
-
-}
-
-function more() {
-
-}
+function more() {}
 let d = 4;
-export async function mockAPI (req: Request, res: Response, next: NextFunction) {
+export async function mockAPI(req: Request, res: Response, next: NextFunction) {
     console.error('Here comes a API call', req.originalUrl);
     if (req.params.action === 'add') {
         res.json({
@@ -37,7 +31,9 @@ export async function mockAPI (req: Request, res: Response, next: NextFunction) 
 
     console.error(d, req.originalUrl);
 
-    res.json({
-        d: ++d,
-    });
+    setTimeout(() => {
+        res.json({
+            d: ++d,
+        });
+    }, 500);
 }

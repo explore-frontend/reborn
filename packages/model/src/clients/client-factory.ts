@@ -9,6 +9,7 @@ import { createCache } from '../cache';
 import { hash } from '../cache/hash';
 import { deepMerge } from '../utils';
 import { createInterceptor } from './interceptor';
+import { nextTick } from 'vue-demi';
 
 
 class _TimeoutError extends Error {
@@ -247,8 +248,10 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
         if (hydrationStatus.value !== 2) {
             const data = getDataFromCache<T>(params);
             if (data) {
-                subject.next(data);
-                subject.complete();
+                nextTick(() => {
+                    subject.next(data);
+                    subject.complete();
+                })
                 return subject;
             }
         }

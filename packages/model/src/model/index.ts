@@ -9,6 +9,9 @@ import {
     onMounted,
     nextTick,
     onScopeDispose,
+    useSSRContext,
+    inject,
+    provide,
 } from 'vue-demi';
 
 import { createModelFromCA } from './fn-type';
@@ -89,11 +92,32 @@ export function useModel<T extends MyCon<any> = MyCon<any>>(ctor: T): RebornInst
         // TODO 父 model 不 销毁子 model 不能销毁
         handleUnmount();
     });
-    onServerPrefetch(async () => {
-        await storeModelInstance.instance?.prefetch();
-        handleUnmount();
-        return;
-    });
+
+    const ssrContext = useSSRContext() ?? {};
+    const progress: any[] | undefined = inject('ssr-render');
+    const component = getCurrentInstance()?.type;
+    provide('model-tag', new Set().add(storeModelInstance))
+    // 父元素被收集过了，就不收集子元素，之后只需要重新渲染父节点就可以
+    const modelTag = inject('model-tag', new Set())
+    if(!modelTag.has(storeModelInstance)) {
+        component && progress?.push(component);
+    }
+
+    if(progress) {
+        // storeModelInstance.instance?.prefetch();
+    } else {
+
+        onServerPrefetch(async () => {
+            const prefetch = storeModelInstance.instance?.prefetch();
+            ssrContext.prefetch = ssrContext.prefetch ?? [];
+            ssrContext.prefetch.push(prefetch);
+            if (!progress) {
+                await prefetch;
+            }
+            handleUnmount();
+            return;
+        });
+    }
 
     return storeModelInstance.instance!.model as RebornInstanceType<T>;
 }
