@@ -227,13 +227,13 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
 
     const cache = options?.cache || createCache();
 
-    function getDataFromCache<T>(params: Parameters<typeof request>[0]) {
-        const data = cache.get<T>(`${hash(params.url)}-${hash(params.variables || {})}`);
+    function getDataFromCache<T>(params: Parameters<typeof request>[0], type: 'error' | 'data' = 'data') {
+        const data = cache.get<T>(`${hash(params.url)}-${hash(params.variables || {})}-${type}`);
         return data;
     }
 
-    function setDataToCache<T>(params: Parameters<typeof request>[0], data: T) {
-        const key = `${hash(params.url)}-${hash(params.variables || {})}`;
+    function setDataToCache<T>(params: Parameters<typeof request>[0], data: T, type: 'error' | 'data' = 'data') {
+        const key = `${hash(params.url)}-${hash(params.variables || {})}-${type}`;
         cache.put(key, data);
     }
 
@@ -246,8 +246,13 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
         // 处于Hydration阶段，一律先从缓存里面拿
         if (hydrationStatus.value !== 2) {
             const data = getDataFromCache<T>(params);
+            const error = getDataFromCache<T>(params, 'error');
             if (data) {
                 subject.next(data);
+                subject.complete();
+                return subject;
+            } else if (error) {
+                subject.error(error);
                 subject.complete();
                 return subject;
             }
@@ -264,6 +269,7 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
                     subject.next(data);
                     subject.complete();
                 }).catch(e => {
+                    setDataToCache(params, e, 'error');
                     subject.error(e);
                     subject.complete();
                 });
@@ -277,7 +283,11 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
                         setDataToCache(params, data);
                         subject.next(data);
                         subject.complete();
-                    }).catch(e => subject.error(e));
+                    }).catch((e) => {
+                        setDataToCache(params, e, 'error');
+                        subject.error(e);
+                        subject.complete();
+                    });
                 }
                 break;
             case 'network-first':
@@ -286,6 +296,7 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
                     subject.next(data);
                     subject.complete();
                 }).catch(e => {
+                    setDataToCache(params, e, 'error');
                     subject.error(e);
                     subject.complete();
                 });
@@ -295,7 +306,9 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
                     subject.next(data);
                     subject.complete();
                 } else {
-                    subject.error('No data in cache');
+                    const e = 'No data in cache';
+                    setDataToCache(params, e, 'error');
+                    subject.error(e);
                     subject.complete();
                 }
                 break;
@@ -306,8 +319,9 @@ export function clientFactory<ClientType extends 'GQL'| 'REST'>(
                         subject.complete();
                     })
                     .catch(e => {
-                        subject.complete();
+                        setDataToCache(params, e, 'error');
                         subject.error(e);
+                        subject.complete();
                     });
             default:
                 throw new Error(`There is a wrong fetchPolicy: ${fetchPolicy}`);
